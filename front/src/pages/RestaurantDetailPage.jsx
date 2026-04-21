@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MichelinFlower } from '../components/MichelinIcon'
+import { MichelinFlower } from '../components/common/MichelinIcon'
 import styles from './RestaurantDetailPage.module.css'
 
 const ACTION_TILES = [
