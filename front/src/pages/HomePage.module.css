@@ -1,0 +1,192 @@
+.page { min-height: 100vh; background: var(--bg); }
+
+/* ── Mobile ── */
+.mobileOnly { display: block; }
+.desktopOnly { display: none; }
+
+.pageHead {
+  background: var(--white);
+  padding: 16px 16px 12px;
+}
+.pageTitle {
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 12px;
+}
+
+/* Map */
+.mapSection { padding: 20px 0 8px; background: var(--white); margin-top: 8px; }
+.sectionHead {
+  padding: 0 16px 12px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.sectionTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--black);
+  line-height: 1.2;
+}
+.sectionSub {
+  font-size: 12px;
+  color: var(--grey-text);
+  margin-top: 2px;
+}
+.seeAll {
+  font-size: 13px;
+  color: var(--grey-text);
+  text-decoration: underline;
+  flex-shrink: 0;
+}
+.mapWrap {
+  position: relative;
+  margin: 0 16px;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  height: 220px;
+  background: #e8f0e8;
+}
+.mapFrame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+.mapPins {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.mapPin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+}
+
+/* Scroll sections */
+.scrollSection {
+  background: var(--white);
+  margin-top: 8px;
+  padding: 20px 0 16px;
+}
+.hscroll {
+  display: flex;
+  gap: 12px;
+  padding: 4px 16px 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.hscroll::-webkit-scrollbar { display: none; }
+
+/* Editorial cards */
+.editCard {
+  width: 240px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  background: var(--white);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+}
+.editImgWrap { height: 150px; overflow: hidden; background: var(--grey-mid); }
+.editImg { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+.editCard:hover .editImg { transform: scale(1.04); }
+.editBody { padding: 10px 12px 12px; }
+.editTag {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: var(--red);
+  margin-bottom: 5px;
+}
+.editTitle {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--black);
+}
+
+/* ── Desktop ── */
+@media (min-width: 768px) {
+  .mobileOnly { display: none; }
+  .desktopOnly { display: block; }
+
+  .filterBar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: var(--nav-h-desktop);
+    z-index: 50;
+  }
+  .filterBarInner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .filterPills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filterPill {
+    padding: 6px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--grey-dark);
+    background: var(--white);
+    transition: all var(--t);
+    cursor: pointer;
+  }
+  .filterPill:hover { border-color: var(--red); color: var(--red); }
+  .pillActive { border-color: var(--red); color: var(--red); background: rgba(196,18,48,0.05); }
+
+  .desktopContent {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px 24px 48px;
+  }
+  .resultsCount {
+    font-size: 13px;
+    color: var(--grey-text);
+    margin-bottom: 20px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+
+  .footerPromo {
+    margin-top: 48px;
+    padding-top: 32px;
+    border-top: 1px solid var(--border);
+  }
+  .footerPromo h2 {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: var(--black);
+  }
+  .promoLinks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+  }
+  .promoLink {
+    font-size: 13px;
+    color: var(--grey-text);
+    text-decoration: underline;
+    transition: color var(--t);
+  }
+  .promoLink:hover { color: var(--black); }
+}
