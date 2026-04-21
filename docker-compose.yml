@@ -1,0 +1,40 @@
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: docker/DockerfileUI
+    container_name: michelin-ui
+    env_file:
+      - ./env/.env
+    ports:
+      - "${UI_PORT:-5173}:5173"
+    depends_on:
+      - server
+
+  server:
+    build:
+      context: .
+      dockerfile: docker/DockerfileServer
+    container_name: michelin-server
+    env_file:
+      - ./env/.env
+    ports:
+      - "${SERVER_PORT:-3000}:3000"
+    depends_on:
+      - db
+
+  db:
+    build:
+      context: .
+      dockerfile: docker/DockerfileDB
+    container_name: michelin-db
+    restart: unless-stopped
+    env_file:
+      - ./env/.env
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+volumes:
+  db_data:
