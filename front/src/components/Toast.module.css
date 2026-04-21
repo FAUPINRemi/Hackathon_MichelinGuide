@@ -1,0 +1,21 @@
+.toast {
+  position: fixed;
+  bottom: calc(var(--bottomnav-h) + 16px + env(safe-area-inset-bottom, 0));
+  left: 50%;
+  transform: translateX(-50%) translateY(12px);
+  background: rgba(30,30,30,0.92);
+  color: var(--white);
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+  pointer-events: none;
+  z-index: 300;
+  white-space: nowrap;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+@media (min-width: 768px) {
+  .toast { bottom: 24px; }
+}
