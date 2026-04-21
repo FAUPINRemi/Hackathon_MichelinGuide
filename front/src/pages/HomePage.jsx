@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import SearchBar from '../components/SearchBar'
-import RestaurantCard from '../components/RestaurantCard'
-import { MichelinFlower } from '../components/MichelinIcon'
+import SearchBar from '../components/filters/SearchBar'
+import RestaurantCard from '../components/cards/RestaurantCard'
+import { MichelinFlower } from '../components/common/MichelinIcon'
 import { RESTAURANTS, EDITORIAL } from '../data/restaurants'
 import styles from './HomePage.module.css'
 

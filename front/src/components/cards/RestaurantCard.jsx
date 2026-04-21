@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MichelinFlower } from './MichelinIcon'
+import { MichelinFlower } from '../common/MichelinIcon'
 import styles from './RestaurantCard.module.css'
 
 export default function RestaurantCard({ restaurant, onClick, layout = 'grid' }) {

@@ -8,8 +8,8 @@ export default function Nav({ title, onBack, showBack = false }) {
       <header className={styles.desktop}>
         <div className={styles.desktopInner}>
           <a href="#" className={styles.desktopLogo}>
-            <span className={styles.logoM}>MICHELIN</span>
-            <span className={styles.logoG}>GUIDE</span>
+            <span className={styles.logoM}>LE JEUNE GUIDE</span>
+            <span className={styles.logoG}>BY MICHELIN</span>
           </a>
           <nav className={styles.desktopLinks}>
             {['Restaurants', 'Hébergements', 'Guide de voyage', 'Régions', 'Magazine'].map((l) => (

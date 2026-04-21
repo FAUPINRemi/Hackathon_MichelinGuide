@@ -3,7 +3,7 @@ import styles from './Footer.module.css'
 export default function Footer() {
   return (
     <footer className={styles.footer}>
-      <div className={styles.logo}>Guide <span>MICHELIN</span></div>
+      <div className={styles.logo}>Le jeune guide <span>by Michelin</span></div>
 
       <div className={styles.links}>
         <div className={styles.col}>
@@ -47,7 +47,7 @@ export default function Footer() {
           <a href="#">Cookies</a>
           <a href="#">CGU</a>
         </div>
-        <p>© 2025 Michelin. Tous droits réservés.</p>
+        <p>© 2026 Le jeune guide by Michelin. Tous droits réservés.</p>
       </div>
     </footer>
   )

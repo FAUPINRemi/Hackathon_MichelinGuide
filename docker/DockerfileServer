@@ -1,0 +1,7 @@
+FROM node:20-alpine
+
+WORKDIR /app/server
+
+# Placeholder container for future backend implementation.
+# You can later copy your backend source and replace the CMD.
+CMD ["sh", "-c", "echo 'Backend placeholder container started'; tail -f /dev/null"]
