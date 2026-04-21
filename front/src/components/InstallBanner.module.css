@@ -1,0 +1,46 @@
+.banner {
+  position: fixed;
+  bottom: 78px;
+  left: 12px;
+  right: 12px;
+  background: var(--black);
+  color: var(--white);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  z-index: 200;
+  transform: translateY(120%);
+  transition: transform 0.3s ease;
+}
+.banner.visible { transform: translateY(0); }
+
+.icon { font-size: 28px; flex-shrink: 0; }
+.text { flex: 1; }
+.title { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.sub { font-size: 11px; opacity: 0.6; }
+
+.installBtn {
+  background: var(--red);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: 4px;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: background var(--t);
+}
+.installBtn:hover { background: var(--red-dark); }
+
+.closeBtn {
+  color: rgba(255,255,255,0.5);
+  font-size: 18px;
+  padding: 4px;
+  flex-shrink: 0;
+  transition: color var(--t);
+}
+.closeBtn:hover { color: var(--white); }

@@ -1,0 +1,102 @@
+/* ── Desktop ── */
+.desktop {
+  display: none;
+  background: var(--red);
+  height: var(--nav-h-desktop);
+}
+.desktopInner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+.desktopLogo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
+  flex-shrink: 0;
+}
+.logoM {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--white);
+}
+.logoG {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  color: rgba(255,255,255,0.75);
+  text-transform: uppercase;
+}
+.desktopLinks {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+.desktopLink {
+  color: rgba(255,255,255,0.9);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 6px 12px;
+  border-radius: 3px;
+  transition: background var(--t);
+}
+.desktopLink:hover { background: rgba(255,255,255,0.15); color: white; }
+.desktopActions { display: flex; gap: 4px; }
+.desktopIconBtn {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  color: rgba(255,255,255,0.9);
+  border-radius: 50%;
+  transition: background var(--t);
+}
+.desktopIconBtn:hover { background: rgba(255,255,255,0.15); }
+
+/* ── Mobile ── */
+.mobile {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--white);
+  height: var(--nav-h-mobile);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--border);
+}
+.mobileLeft, .mobileRight {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 60px;
+}
+.mobileRight { justify-content: flex-end; }
+.placeholder { width: 36px; }
+.backBtn, .mobileIconBtn {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--black);
+  border-radius: 50%;
+  transition: background var(--t);
+}
+.backBtn:active, .mobileIconBtn:active { background: var(--grey-mid); }
+.mobileTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--black);
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
+
+@media (min-width: 768px) {
+  .desktop { display: block; }
+  .mobile { display: none; }
+}
