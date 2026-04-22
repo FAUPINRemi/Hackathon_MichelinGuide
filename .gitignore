@@ -4,3 +4,5 @@ env/.env.example
 
 bdd/all_hotels.jsonl
 bdd/all_restaurants.jsonl
+
+front/node_modules/
