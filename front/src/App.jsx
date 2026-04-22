@@ -6,6 +6,7 @@ import InstallBanner from './components/feedback/InstallBanner'
 import HomePage from './pages/HomePage'
 import RestaurantDetailPage from './pages/RestaurantDetailPage'
 import HotelDetailPage from './pages/HotelDetailPage'
+import ProfilePage from './pages/ProfilePage'
 import { useToast } from './hooks/useToast'
 import { useInstallPrompt } from './hooks/useInstallPrompt'
 import styles from './App.module.css'
@@ -41,7 +42,7 @@ export default function App() {
     setActiveTab(tab)
     setSelectedRestaurant(null)
     setSelectedHotel(null)
-    if (tab === 'profile' || tab === 'favorites') showToast('Section bientôt disponible')
+    if (tab === 'favorites') showToast('Section bientôt disponible')
   }
 
   const handleInstall = async () => {
@@ -53,7 +54,7 @@ export default function App() {
   const navTitle = isDetail ? detailName : (
     activeTab === 'restaurants' ? 'Restaurants'
     : activeTab === 'hotels'   ? 'Hébergements'
-    : activeTab === 'profile'  ? 'Mon Profil'
+    : activeTab === 'profile'  ? 'Compte'
     : 'Favoris'
   )
 
@@ -72,6 +73,8 @@ export default function App() {
           <RestaurantDetailPage restaurant={selectedRestaurant} />
         ) : selectedHotel ? (
           <HotelDetailPage hotel={selectedHotel} />
+        ) : activeTab === 'profile' ? (
+          <ProfilePage />
         ) : (
           <HomePage
             activeTab={activeTab}
