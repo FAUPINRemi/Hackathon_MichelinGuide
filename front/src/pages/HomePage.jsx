@@ -1,41 +1,74 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import SearchBar from '../components/filters/SearchBar'
 import RestaurantCard from '../components/cards/RestaurantCard'
+import HotelCard from '../components/cards/HotelCard'
 import { MichelinFlower } from '../components/common/MichelinIcon'
-import { RESTAURANTS, EDITORIAL } from '../data/restaurants'
+import { EDITORIAL } from '../data/restaurants'
+import { api } from '../api/client'
 import styles from './HomePage.module.css'
 
-const FILTERS = ['Tous', '3 Étoiles', '2 Étoiles', '1 Étoile', 'Bib Gourmand', 'Étoile Verte']
+const REST_FILTERS = ['Tous', '3 Étoiles', '2 Étoiles', '1 Étoile', 'Bib Gourmand', 'Étoile Verte']
+const FILTER_PARAM = {
+  'Tous': '', '3 Étoiles': '3-stars', '2 Étoiles': '2-stars',
+  '1 Étoile': '1-star', 'Bib Gourmand': 'bib', 'Étoile Verte': 'green',
+}
 
-export default function HomePage({ onRestaurantClick }) {
-  const [search, setSearch] = useState('')
+function useApiData(fetcher, deps) {
+  const [data, setData]       = useState([])
+  const [total, setTotal]     = useState(0)
+  const [loading, setLoading] = useState(true)
+  const [error, setError]     = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    setError(null)
+    fetcher()
+      .then((res) => {
+        if (cancelled) return
+        setData(res.data ?? [])
+        setTotal(res.total ?? 0)
+      })
+      .catch((err) => { if (!cancelled) setError(err.message) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps)
+
+  return { data, total, loading, error }
+}
+
+// ─── Restaurants tab ─────────────────────────────────────────────────────────
+function RestaurantsTab({ onRestaurantClick }) {
+  const [search, setSearch]           = useState('')
   const [activeFilter, setActiveFilter] = useState('Tous')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
 
-  const filtered = RESTAURANTS.filter((r) => {
-    const matchSearch = !search || r.name.toLowerCase().includes(search.toLowerCase()) || r.cuisine.toLowerCase().includes(search.toLowerCase())
-    const matchFilter =
-      activeFilter === 'Tous' ||
-      (activeFilter === '3 Étoiles' && r.stars === 3) ||
-      (activeFilter === '2 Étoiles' && r.stars === 2) ||
-      (activeFilter === '1 Étoile' && r.stars === 1) ||
-      (activeFilter === 'Bib Gourmand' && r.bib)
-    return matchSearch && matchFilter
-  })
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 350)
+    return () => clearTimeout(t)
+  }, [search])
 
-  const starred3 = RESTAURANTS.filter((r) => r.stars === 3)
-  const newStarred = RESTAURANTS.filter((r) => r.stars >= 2)
+  const fetchAll = useCallback(() =>
+    api.restaurants.list({ search: debouncedSearch, filter: FILTER_PARAM[activeFilter], limit: 60 }),
+    [debouncedSearch, activeFilter]
+  )
+
+  const { data: restaurants, total, loading, error } = useApiData(fetchAll, [debouncedSearch, activeFilter])
+
+  const starred3   = restaurants.filter((r) => r.stars === 3)
+  const newStarred = restaurants.filter((r) => r.stars >= 2)
 
   return (
     <div className={styles.page}>
 
-      {/* ── MOBILE layout ── */}
+      {/* ── MOBILE ── */}
       <div className={styles.mobileOnly}>
         <div className={styles.pageHead}>
           <h1 className={styles.pageTitle}>Restaurants</h1>
           <SearchBar value={search} onChange={setSearch} />
         </div>
 
-        {/* Autour de moi */}
         <section className={styles.mapSection}>
           <div className={styles.sectionHead}>
             <h2 className={styles.sectionTitle}>Autour de moi</h2>
@@ -48,7 +81,6 @@ export default function HomePage({ onRestaurantClick }) {
               className={styles.mapFrame}
               loading="lazy"
             />
-            {/* Michelin-style pins overlay (decorative) */}
             <div className={styles.mapPins}>
               {[
                 { top: '38%', left: '52%' }, { top: '55%', left: '35%' },
@@ -63,35 +95,39 @@ export default function HomePage({ onRestaurantClick }) {
           </div>
         </section>
 
-        {/* Nouveaux étoilés — horizontal scroll */}
-        <section className={styles.scrollSection}>
-          <div className={styles.sectionHead}>
-            <div>
-              <h2 className={styles.sectionTitle}>Les nouveaux 3 &amp; 2 Étoiles</h2>
-              <p className={styles.sectionSub}>France 2026</p>
+        {loading && <p className={styles.loadingMsg}>Chargement…</p>}
+        {error   && <p className={styles.errorMsg}>Serveur non disponible</p>}
+
+        {!loading && newStarred.length > 0 && (
+          <section className={styles.scrollSection}>
+            <div className={styles.sectionHead}>
+              <div>
+                <h2 className={styles.sectionTitle}>Les nouveaux 3 &amp; 2 Étoiles</h2>
+                <p className={styles.sectionSub}>Guide MICHELIN 2026</p>
+              </div>
             </div>
-          </div>
-          <div className={styles.hscroll}>
-            {newStarred.map((r) => (
-              <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" />
-            ))}
-          </div>
-        </section>
+            <div className={styles.hscroll}>
+              {newStarred.map((r) => (
+                <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" />
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* 3 étoiles — horizontal scroll */}
-        <section className={styles.scrollSection}>
-          <div className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}>3 Étoiles MICHELIN</h2>
-            <a href="#" className={styles.seeAll}>Tout Voir</a>
-          </div>
-          <div className={styles.hscroll}>
-            {starred3.map((r) => (
-              <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" />
-            ))}
-          </div>
-        </section>
+        {!loading && starred3.length > 0 && (
+          <section className={styles.scrollSection}>
+            <div className={styles.sectionHead}>
+              <h2 className={styles.sectionTitle}>3 Étoiles MICHELIN</h2>
+              <a href="#" className={styles.seeAll}>Tout Voir</a>
+            </div>
+            <div className={styles.hscroll}>
+              {starred3.map((r) => (
+                <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" />
+              ))}
+            </div>
+          </section>
+        )}
 
-        {/* Magazine */}
         <section className={styles.scrollSection}>
           <div className={styles.sectionHead}>
             <h2 className={styles.sectionTitle}>Magazine</h2>
@@ -113,14 +149,13 @@ export default function HomePage({ onRestaurantClick }) {
         </section>
       </div>
 
-      {/* ── DESKTOP layout ── */}
+      {/* ── DESKTOP ── */}
       <div className={styles.desktopOnly}>
-        {/* Filter bar */}
         <div className={styles.filterBar}>
           <div className={styles.filterBarInner}>
-            <SearchBar value={search} onChange={setSearch} placeholder="Rechercher un restaurant, une ville..." />
+            <SearchBar value={search} onChange={setSearch} placeholder="Rechercher un restaurant, une ville…" />
             <div className={styles.filterPills}>
-              {FILTERS.map((f) => (
+              {REST_FILTERS.map((f) => (
                 <button
                   key={f}
                   className={`${styles.filterPill} ${activeFilter === f ? styles.pillActive : ''}`}
@@ -134,16 +169,17 @@ export default function HomePage({ onRestaurantClick }) {
         </div>
 
         <div className={styles.desktopContent}>
-          <p className={styles.resultsCount}>
-            {filtered.length} sur {RESTAURANTS.length} restaurants
-          </p>
+          {loading && <p className={styles.loadingMsg}>Chargement…</p>}
+          {error   && <p className={styles.errorMsg}>Serveur non disponible — lancez le backend.</p>}
+          {!loading && !error && (
+            <p className={styles.resultsCount}>{total} restaurants</p>
+          )}
           <div className={styles.grid}>
-            {filtered.map((r) => (
+            {restaurants.map((r) => (
               <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="grid" />
             ))}
           </div>
 
-          {/* Footer promo */}
           <div className={styles.footerPromo}>
             <h2>À la découverte des expériences du Guide MICHELIN</h2>
             <div className={styles.promoLinks}>
@@ -154,7 +190,125 @@ export default function HomePage({ onRestaurantClick }) {
           </div>
         </div>
       </div>
-
     </div>
   )
+}
+
+// ─── Hotels tab ──────────────────────────────────────────────────────────────
+function HotelsTab({ onHotelClick }) {
+  const [search, setSearch]           = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 350)
+    return () => clearTimeout(t)
+  }, [search])
+
+  const fetchAll = useCallback(() =>
+    api.hotels.list({ search: debouncedSearch, limit: 60 }),
+    [debouncedSearch]
+  )
+
+  const { data: hotels, total, loading, error } = useApiData(fetchAll, [debouncedSearch])
+
+  const plusHotels = hotels.filter((h) => h.isPlus)
+  const ecoHotels  = hotels.filter((h) => h.sustainableHotel)
+
+  return (
+    <div className={styles.page}>
+
+      {/* ── MOBILE ── */}
+      <div className={styles.mobileOnly}>
+        <div className={styles.pageHead}>
+          <h1 className={styles.pageTitle}>Hébergements</h1>
+          <SearchBar value={search} onChange={setSearch} />
+        </div>
+
+        {loading && <p className={styles.loadingMsg}>Chargement…</p>}
+        {error   && <p className={styles.errorMsg}>Serveur non disponible</p>}
+
+        {!loading && hotels.length > 0 && (
+          <>
+            <section className={styles.scrollSection}>
+              <div className={styles.sectionHead}>
+                <div>
+                  <h2 className={styles.sectionTitle}>Sélection MICHELIN</h2>
+                  <p className={styles.sectionSub}>Les meilleures adresses</p>
+                </div>
+              </div>
+              <div className={styles.hscroll}>
+                {hotels.slice(0, 10).map((h) => (
+                  <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="scroll" />
+                ))}
+              </div>
+            </section>
+
+            {plusHotels.length > 0 && (
+              <section className={styles.scrollSection}>
+                <div className={styles.sectionHead}>
+                  <h2 className={styles.sectionTitle}>MICHELIN Plus</h2>
+                  <a href="#" className={styles.seeAll}>Tout Voir</a>
+                </div>
+                <div className={styles.hscroll}>
+                  {plusHotels.map((h) => (
+                    <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="scroll" />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {ecoHotels.length > 0 && (
+              <section className={styles.scrollSection}>
+                <div className={styles.sectionHead}>
+                  <h2 className={styles.sectionTitle}>🌿 Éco-responsables</h2>
+                </div>
+                <div className={styles.hscroll}>
+                  {ecoHotels.map((h) => (
+                    <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="scroll" />
+                  ))}
+                </div>
+              </section>
+            )}
+          </>
+        )}
+
+        {!loading && !error && hotels.length === 0 && (
+          <div className={styles.emptyState}>
+            <p>Aucun hébergement trouvé.</p>
+            <p className={styles.emptyHint}>Importez les données avec :<br /><code>docker compose --profile import up importer</code></p>
+          </div>
+        )}
+      </div>
+
+      {/* ── DESKTOP ── */}
+      <div className={styles.desktopOnly}>
+        <div className={styles.filterBar}>
+          <div className={styles.filterBarInner}>
+            <SearchBar value={search} onChange={setSearch} placeholder="Rechercher un hôtel, une ville…" />
+          </div>
+        </div>
+
+        <div className={styles.desktopContent}>
+          {loading && <p className={styles.loadingMsg}>Chargement…</p>}
+          {error   && <p className={styles.errorMsg}>Serveur non disponible — lancez le backend.</p>}
+          {!loading && !error && (
+            <p className={styles.resultsCount}>{total} hébergements</p>
+          )}
+          <div className={styles.grid}>
+            {hotels.map((h) => (
+              <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="grid" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Main export ─────────────────────────────────────────────────────────────
+export default function HomePage({ activeTab, onRestaurantClick, onHotelClick }) {
+  if (activeTab === 'hotels') {
+    return <HotelsTab onHotelClick={onHotelClick} />
+  }
+  return <RestaurantsTab onRestaurantClick={onRestaurantClick} />
 }

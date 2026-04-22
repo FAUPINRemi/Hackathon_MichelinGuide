@@ -8,8 +8,8 @@ export default function InstallBanner({ visible, onInstall, onDismiss }) {
         <div className={styles.title}>Installer l'app</div>
         <div className={styles.sub}>Accès rapide &amp; hors ligne</div>
       </div>
-      <button className={styles.installBtn} onClick={onInstall}>Installer</button>
-      <button className={styles.closeBtn} onClick={onDismiss} aria-label="Fermer">✕</button>
+      <button type="button" className={styles.installBtn} onClick={onInstall}>Installer</button>
+      <button type="button" className={styles.closeBtn} onClick={onDismiss} aria-label="Fermer">✕</button>
     </div>
   )
 }

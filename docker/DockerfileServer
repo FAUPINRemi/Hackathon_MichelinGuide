@@ -1,7 +1,10 @@
 FROM node:20-alpine
+WORKDIR /app/back
 
-WORKDIR /app/server
+COPY back/package*.json ./
+RUN npm install --omit=dev
 
-# Placeholder container for future backend implementation.
-# You can later copy your backend source and replace the CMD.
-CMD ["sh", "-c", "echo 'Backend placeholder container started'; tail -f /dev/null"]
+COPY back/ ./
+
+EXPOSE 3000
+CMD ["node", "index.js"]

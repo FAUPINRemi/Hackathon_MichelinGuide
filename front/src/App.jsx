@@ -5,6 +5,7 @@ import Toast from './components/feedback/Toast'
 import InstallBanner from './components/feedback/InstallBanner'
 import HomePage from './pages/HomePage'
 import RestaurantDetailPage from './pages/RestaurantDetailPage'
+import HotelDetailPage from './pages/HotelDetailPage'
 import { useToast } from './hooks/useToast'
 import { useInstallPrompt } from './hooks/useInstallPrompt'
 import styles from './App.module.css'
@@ -12,25 +13,35 @@ import styles from './App.module.css'
 export default function App() {
   const [activeTab, setActiveTab] = useState('restaurants')
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
+  const [selectedHotel, setSelectedHotel] = useState(null)
   const { message, visible, showToast } = useToast()
   const { showBanner, install, dismiss } = useInstallPrompt()
 
-  const isDetail = !!selectedRestaurant
+  const isDetail = !!(selectedRestaurant || selectedHotel)
 
   const handleRestaurantClick = (restaurant) => {
     setSelectedRestaurant(restaurant)
+    setSelectedHotel(null)
+    window.scrollTo(0, 0)
+  }
+
+  const handleHotelClick = (hotel) => {
+    setSelectedHotel(hotel)
+    setSelectedRestaurant(null)
     window.scrollTo(0, 0)
   }
 
   const handleBack = () => {
     setSelectedRestaurant(null)
+    setSelectedHotel(null)
     window.scrollTo(0, 0)
   }
 
   const handleTabChange = (tab) => {
     setActiveTab(tab)
     setSelectedRestaurant(null)
-    if (tab !== 'restaurants') showToast('Section bientôt disponible')
+    setSelectedHotel(null)
+    if (tab === 'profile' || tab === 'favorites') showToast('Section bientôt disponible')
   }
 
   const handleInstall = async () => {
@@ -38,10 +49,11 @@ export default function App() {
     if (outcome === 'accepted') showToast('Application installée !')
   }
 
-  const navTitle = isDetail ? selectedRestaurant.name : (
+  const detailName = selectedRestaurant?.name ?? selectedHotel?.name
+  const navTitle = isDetail ? detailName : (
     activeTab === 'restaurants' ? 'Restaurants'
-    : activeTab === 'hotels' ? 'Hébergements'
-    : activeTab === 'profile' ? 'Mon Profil'
+    : activeTab === 'hotels'   ? 'Hébergements'
+    : activeTab === 'profile'  ? 'Mon Profil'
     : 'Favoris'
   )
 
@@ -51,13 +63,21 @@ export default function App() {
         title={navTitle}
         showBack={isDetail}
         onBack={handleBack}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
       />
 
       <main className={styles.main}>
-        {isDetail ? (
+        {selectedRestaurant ? (
           <RestaurantDetailPage restaurant={selectedRestaurant} />
+        ) : selectedHotel ? (
+          <HotelDetailPage hotel={selectedHotel} />
         ) : (
-          <HomePage onRestaurantClick={handleRestaurantClick} />
+          <HomePage
+            activeTab={activeTab}
+            onRestaurantClick={handleRestaurantClick}
+            onHotelClick={handleHotelClick}
+          />
         )}
       </main>
 

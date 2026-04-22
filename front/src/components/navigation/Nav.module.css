@@ -3,6 +3,9 @@
   display: none;
   background: var(--red);
   height: var(--nav-h-desktop);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 .desktopInner {
   max-width: 1280px;
@@ -43,8 +46,26 @@
   padding: 6px 12px;
   border-radius: 3px;
   transition: background var(--t);
+  position: relative;
+  cursor: pointer;
 }
 .desktopLink:hover { background: rgba(255,255,255,0.15); color: white; }
+.desktopLinkActive {
+  color: white;
+  font-weight: 700;
+}
+.desktopLinkActive::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+}
+
+.desktopLogo { cursor: pointer; }
 .desktopActions { display: flex; gap: 4px; }
 .desktopIconBtn {
   width: 36px; height: 36px;
