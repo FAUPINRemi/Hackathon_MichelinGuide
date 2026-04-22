@@ -11,9 +11,14 @@ const FILTER_SQL = {
   'green':    "green_star = true",
 };
 
+// Haversine distance expression (km) — params $1=lat, $2=lng
+const DIST = `(6371 * acos(LEAST(1.0,
+  cos(radians($1)) * cos(radians(lat)) * cos(radians(lng) - radians($2))
+  + sin(radians($1)) * sin(radians(lat))
+)))`;
+
 function format(r) {
   const score = r.distinction_score ?? 0;
-  // score: 5=3★  4=2★  3=1★  2=Bib  1=Sélection
   const stars = score >= 3 ? score - 2 : 0;
   const bib   = r.distinction?.slug === 'bib-gourmand';
 
@@ -32,52 +37,92 @@ function format(r) {
   }
 
   return {
-    id:          r.identifier ?? String(r.id),
-    name:        r.name ?? '',
-    cuisine:     String(cuisine),
-    address:     r.street ?? '',
-    location:    r.city?.name ?? '',
-    price:       priceFromCategory(r.price_category),
-    stars:       Math.min(stars, 3),
+    id:               r.identifier ?? String(r.id),
+    name:             r.name ?? '',
+    cuisine:          String(cuisine),
+    address:          r.street ?? '',
+    location:         r.city?.name ?? '',
+    price:            priceFromCategory(r.price_category),
+    stars:            Math.min(stars, 3),
     bib,
-    green_star:  r.green_star ?? false,
-    likes:       0,
-    phone:       r.phone ?? '',
-    website:     r.website ?? '',
-    description: (r.main_desc ?? '').replace(/<[^>]+>/g, ''),
-    img:         r.image ?? r.main_image ?? '',
-    lat:         r.lat,
-    lng:         r.lng,
+    green_star:       r.green_star ?? false,
+    distinction_slug: r.distinction?.slug ?? null,
+    likes:            0,
+    phone:            r.phone ?? '',
+    website:          r.website ?? '',
+    description:      (r.main_desc ?? '').replace(/<[^>]+>/g, ''),
+    img:              r.image ?? r.main_image ?? '',
+    lat:              r.lat,
+    lng:              r.lng,
     distinction_score: score,
   };
 }
 
 router.get('/', async (req, res) => {
   try {
-    const { search = '', filter = '', page = '1', limit = '24' } = req.query;
+    const {
+      search = '', filter = '', page = '1', limit = '24',
+      lat, lng, radius = '50',
+    } = req.query;
+
     const pageNum  = Math.max(1, parseInt(page, 10));
-    const limitNum = Math.min(100, Math.max(1, parseInt(limit, 10)));
+    const limitNum = Math.min(300, Math.max(1, parseInt(limit, 10)));
     const offset   = (pageNum - 1) * limitNum;
 
-    const conditions = [];
-    const params = [];
+    const useGeo = lat != null && lat !== '' && lng != null && lng !== '';
 
-    if (search) {
-      params.push(`%${search}%`);
-      conditions.push(`(name ILIKE $${params.length} OR cuisines::text ILIKE $${params.length})`);
+    let countSql, dataSql, params;
+
+    if (useGeo) {
+      const latN    = parseFloat(lat);
+      const lngN    = parseFloat(lng);
+      const radiusN = Math.min(200, parseFloat(radius) || 50);
+
+      // $1=lat, $2=lng, $3=radius — extra conditions start at $4
+      params = [latN, lngN, radiusN];
+
+      const innerConds = ['lat IS NOT NULL', 'lng IS NOT NULL'];
+
+      if (search) {
+        params.push(`%${search}%`);
+        const p = params.length;
+        innerConds.push(
+          `(name ILIKE $${p} OR cuisines::text ILIKE $${p} OR city->>'name' ILIKE $${p})`
+        );
+      }
+      if (FILTER_SQL[filter]) innerConds.push(FILTER_SQL[filter]);
+
+      const innerWhere = `WHERE ${innerConds.join(' AND ')}`;
+      const sub  = `SELECT *, ${DIST} AS distance_km FROM restaurants ${innerWhere}`;
+      const outer = `SELECT * FROM (${sub}) t WHERE distance_km < $3`;
+
+      countSql = `SELECT COUNT(*) FROM (${outer}) c`;
+      dataSql  = `${outer} ORDER BY distance_km ASC
+                  LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+
+    } else {
+      params = [];
+      const conditions = [];
+
+      if (search) {
+        params.push(`%${search}%`);
+        const p = params.length;
+        conditions.push(
+          `(name ILIKE $${p} OR cuisines::text ILIKE $${p} OR city->>'name' ILIKE $${p})`
+        );
+      }
+      if (FILTER_SQL[filter]) conditions.push(FILTER_SQL[filter]);
+
+      const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
+      countSql = `SELECT COUNT(*) FROM restaurants ${where}`;
+      dataSql  = `SELECT * FROM restaurants ${where}
+                  ORDER BY distinction_score DESC NULLS LAST, name ASC
+                  LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
     }
-    if (FILTER_SQL[filter]) conditions.push(FILTER_SQL[filter]);
-
-    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
 
     const [countRes, dataRes] = await Promise.all([
-      pool.query(`SELECT COUNT(*) FROM restaurants ${where}`, params),
-      pool.query(
-        `SELECT * FROM restaurants ${where}
-         ORDER BY distinction_score DESC NULLS LAST, name ASC
-         LIMIT $${params.length + 1} OFFSET $${params.length + 2}`,
-        [...params, limitNum, offset]
-      ),
+      pool.query(countSql, params),
+      pool.query(dataSql, [...params, limitNum, offset]),
     ]);
 
     res.json({

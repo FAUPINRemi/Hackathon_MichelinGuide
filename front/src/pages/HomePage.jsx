@@ -1,11 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import SearchBar from '../components/filters/SearchBar'
 import RestaurantCard from '../components/cards/RestaurantCard'
 import HotelCard from '../components/cards/HotelCard'
-import { MichelinFlower } from '../components/common/MichelinIcon'
 import { EDITORIAL } from '../data/restaurants'
 import { api } from '../api/client'
 import styles from './HomePage.module.css'
+
+const RestaurantMap = lazy(() => import('../components/map/RestaurantMap'))
 
 const REST_FILTERS = ['Tous', '3 Étoiles', '2 Étoiles', '1 Étoile', 'Bib Gourmand', 'Étoile Verte']
 const FILTER_PARAM = {
@@ -43,11 +44,61 @@ function RestaurantsTab({ onRestaurantClick }) {
   const [search, setSearch]           = useState('')
   const [activeFilter, setActiveFilter] = useState('Tous')
   const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [mapRestaurants, setMapRestaurants] = useState([])
+  const [mapCenter, setMapCenter]           = useState(null)
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 350)
     return () => clearTimeout(t)
   }, [search])
+
+  // Géocode la recherche → met à jour le centre carte
+  useEffect(() => {
+    if (!debouncedSearch) {
+      setMapCenter(null)
+      return
+    }
+    let cancelled = false
+    fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(debouncedSearch)}&format=json&limit=1&countrycodes=fr,be,ch,lu`,
+      { headers: { 'Accept-Language': 'fr' } }
+    )
+      .then((r) => r.json())
+      .then((results) => {
+        if (cancelled || !results[0]) return
+        setMapCenter({ lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) })
+      })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [debouncedSearch])
+
+  // Fetch les restaurants de la zone carte (change selon mapCenter)
+  useEffect(() => {
+    let cancelled = false
+    if (mapCenter) {
+      // Zone géographique : tous les restaurants dans un rayon de 50 km
+      api.restaurants.list({ lat: mapCenter.lat, lng: mapCenter.lng, radius: 50, limit: 200 })
+        .then((res) => { if (!cancelled) setMapRestaurants(res.data ?? []) })
+        .catch(() => {})
+    } else {
+      // Pas de recherche active : mix étoilés + bibs pour avoir les 3 types de pins
+      Promise.all([
+        api.restaurants.list({ limit: 50 }),
+        api.restaurants.list({ filter: 'bib', limit: 50 }),
+      ]).then(([res1, res2]) => {
+        if (cancelled) return
+        const seen = new Set()
+        setMapRestaurants(
+          [...res1.data, ...res2.data].filter((r) => {
+            if (!r.lat || !r.lng || seen.has(r.id)) return false
+            seen.add(r.id)
+            return true
+          })
+        )
+      }).catch(() => {})
+    }
+    return () => { cancelled = true }
+  }, [mapCenter])
 
   const fetchAll = useCallback(() =>
     api.restaurants.list({ search: debouncedSearch, filter: FILTER_PARAM[activeFilter], limit: 60 }),
@@ -75,23 +126,13 @@ function RestaurantsTab({ onRestaurantClick }) {
             <a href="#" className={styles.seeAll}>Tout Voir</a>
           </div>
           <div className={styles.mapWrap}>
-            <iframe
-              title="Carte des restaurants"
-              src="https://www.openstreetmap.org/export/embed.html?bbox=2.28%2C48.83%2C2.42%2C48.90&layer=mapnik&marker=48.8566%2C2.3522"
-              className={styles.mapFrame}
-              loading="lazy"
-            />
-            <div className={styles.mapPins}>
-              {[
-                { top: '38%', left: '52%' }, { top: '55%', left: '35%' },
-                { top: '30%', left: '68%' }, { top: '65%', left: '60%' },
-                { top: '20%', left: '45%' },
-              ].map((pos, i) => (
-                <div key={i} className={styles.mapPin} style={pos}>
-                  <MichelinFlower size={20} color="#c41230" />
-                </div>
-              ))}
-            </div>
+            <Suspense fallback={<div className={styles.mapFrame} />}>
+              <RestaurantMap
+                restaurants={mapRestaurants}
+                onRestaurantClick={onRestaurantClick}
+                center={mapCenter}
+              />
+            </Suspense>
           </div>
         </section>
 
