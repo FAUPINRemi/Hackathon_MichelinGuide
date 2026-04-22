@@ -1,6 +1,5 @@
 .page { min-height: 100vh; background: var(--bg); }
 
-/* ── Mobile ── */
 .mobileOnly { display: block; }
 .desktopOnly { display: none; }
 
@@ -9,13 +8,12 @@
   padding: 16px 16px 12px;
 }
 .pageTitle {
-  font-size: 30px;
-  font-weight: 700;
+  font-size: var(--title-page);
+  font-weight: var(--weight-far);
   color: var(--black);
   margin-bottom: 12px;
 }
 
-/* Map */
 .mapSection { padding: 20px 0 8px; background: var(--white); margin-top: 8px; }
 .sectionHead {
   padding: 0 16px 12px;
@@ -24,13 +22,13 @@
   justify-content: space-between;
 }
 .sectionTitle {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--title-section);
+  font-weight: var(--weight-far);
   color: var(--black);
   line-height: 1.2;
 }
 .sectionSub {
-  font-size: 12px;
+  font-size: var(--title-sous-section);
   color: var(--grey-text);
   margin-top: 2px;
 }
@@ -46,7 +44,7 @@
   border-radius: var(--radius-card);
   overflow: hidden;
   height: 220px;
-  background: #e8f0e8;
+  background: var(--green-bg-alt);
 }
 .mapFrame {
   width: 100%;
@@ -61,10 +59,9 @@
 .mapPin {
   position: absolute;
   transform: translate(-50%, -50%);
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  filter: var(--drop-shadow-pin);
 }
 
-/* Scroll sections */
 .scrollSection {
   background: var(--white);
   margin-top: 8px;
@@ -81,7 +78,6 @@
 }
 .hscroll::-webkit-scrollbar { display: none; }
 
-/* Editorial cards */
 .editCard {
   width: 240px;
   flex-shrink: 0;
@@ -100,7 +96,7 @@
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: var(--weight-far);
   color: var(--red);
   margin-bottom: 5px;
 }
@@ -111,7 +107,6 @@
   color: var(--black);
 }
 
-/* ── Desktop ── */
 @media (min-width: 768px) {
   .mobileOnly { display: none; }
   .desktopOnly { display: block; }
@@ -121,7 +116,8 @@
     border-bottom: 1px solid var(--border);
     position: sticky;
     top: var(--nav-h-desktop);
-    z-index: 50;
+    z-index: 90;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
   .filterBarInner {
     max-width: 1280px;
@@ -148,7 +144,7 @@
     cursor: pointer;
   }
   .filterPill:hover { border-color: var(--red); color: var(--red); }
-  .pillActive { border-color: var(--red); color: var(--red); background: rgba(196,18,48,0.05); }
+  .pillActive { border-color: var(--red); color: var(--red); background: var(--red-tint); }
 
   .desktopContent {
     max-width: 1280px;
@@ -189,4 +185,39 @@
     transition: color var(--t);
   }
   .promoLink:hover { color: var(--black); }
+}
+
+.loadingMsg {
+  text-align: center;
+  padding: 32px 16px;
+  font-size: 14px;
+  color: var(--grey-text);
+}
+.errorMsg {
+  text-align: center;
+  padding: 32px 16px;
+  font-size: 14px;
+  color: var(--red);
+}
+.emptyState {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--grey-text);
+  font-size: 15px;
+  line-height: 1.8;
+}
+.emptyHint {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--grey-text);
+}
+.emptyHint code {
+  display: inline-block;
+  margin-top: 6px;
+  background: var(--grey-light);
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  color: var(--black);
 }
