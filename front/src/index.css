@@ -1,26 +1,33 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+@import './styles/tokens.css';
 
-:root {
-  --red: #c41230;
-  --red-dark: #9e0e27;
-  --black: #1a1a1a;
-  --white: #ffffff;
-  --bg: #f2f2f2;
-  --grey-light: #f7f7f7;
-  --grey-mid: #e5e5e5;
-  --grey-text: #767676;
-  --grey-dark: #444444;
-  --border: #e0e0e0;
-  --font: -apple-system, 'Helvetica Neue', Arial, sans-serif;
-  --font-serif: 'Georgia', serif;
-  --radius-card: 8px;
-  --shadow-card: 0 1px 4px rgba(0,0,0,0.10);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.14);
-  --t: 0.18s ease;
-  --nav-h-mobile: 52px;
-  --nav-h-desktop: 56px;
-  --bottomnav-h: 56px;
-}
+/*
+ * Pour utiliser Helvetica Neue depuis des fichiers locaux, placez les fichiers
+ * dans front/public/fonts/ et décommentez les blocs @font-face ci-dessous.
+ *
+ * @font-face {
+ *   font-family: 'Helvetica Neue';
+ *   src: url('/fonts/HelveticaNeue-Regular.woff2') format('woff2');
+ *   font-weight: 400;
+ *   font-style: normal;
+ *   font-display: swap;
+ * }
+ * @font-face {
+ *   font-family: 'Helvetica Neue';
+ *   src: url('/fonts/HelveticaNeue-Medium.woff2') format('woff2');
+ *   font-weight: 500;
+ *   font-style: normal;
+ *   font-display: swap;
+ * }
+ * @font-face {
+ *   font-family: 'Helvetica Neue';
+ *   src: url('/fonts/HelveticaNeue-Bold.woff2') format('woff2');
+ *   font-weight: 700;
+ *   font-style: normal;
+ *   font-display: swap;
+ * }
+ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html { scroll-behavior: smooth; }
 
