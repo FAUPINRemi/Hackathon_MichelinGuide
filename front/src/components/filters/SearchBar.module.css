@@ -24,6 +24,6 @@
   -webkit-appearance: none;
 }
 .input::placeholder { color: var(--grey-text); }
-.input:focus { border-color: #aaa; }
+.input:focus { border-color: var(--grey-text); }
 /* hide native search clear btn */
 .input::-webkit-search-cancel-button { display: none; }
