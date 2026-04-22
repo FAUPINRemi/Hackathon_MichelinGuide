@@ -34,7 +34,7 @@
   position: absolute;
   top: 8px; right: 8px;
   width: 32px; height: 32px;
-  background: rgba(0,0,0,0.35);
+  background: var(--overlay-light);
   border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   transition: background var(--t);

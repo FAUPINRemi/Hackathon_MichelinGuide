@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MichelinFlower } from '../common/MichelinIcon'
+import etoileSvg from '../../assets/svg/etoile_michelin.svg'
 import styles from './RestaurantCard.module.css'
 
 export default function RestaurantCard({ restaurant, onClick, layout = 'grid' }) {
@@ -30,7 +30,7 @@ export default function RestaurantCard({ restaurant, onClick, layout = 'grid' })
             <span className={styles.bibIcon}>😊</span>
           ) : (
             Array.from({ length: stars }).map((_, i) => (
-              <MichelinFlower key={i} size={16} color="#c41230" />
+              <img key={i} src={etoileSvg} width={16} height={16} alt="" aria-hidden="true" />
             ))
           )}
         </div>

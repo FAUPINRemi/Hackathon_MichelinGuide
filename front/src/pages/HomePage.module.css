@@ -1,6 +1,9 @@
-.page { min-height: 100vh; background: var(--bg); }
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  padding-bottom: calc(var(--bottomnav-h) + 24px + env(safe-area-inset-bottom, 0));
+}
 
-/* ── Mobile ── */
 .mobileOnly { display: block; }
 .desktopOnly { display: none; }
 
@@ -9,13 +12,12 @@
   padding: 16px 16px 12px;
 }
 .pageTitle {
-  font-size: 30px;
-  font-weight: 700;
+  font-size: var(--title-page);
+  font-weight: var(--weight-far);
   color: var(--black);
   margin-bottom: 12px;
 }
 
-/* Map */
 .mapSection { padding: 20px 0 8px; background: var(--white); margin-top: 8px; }
 .sectionHead {
   padding: 0 16px 12px;
@@ -24,13 +26,13 @@
   justify-content: space-between;
 }
 .sectionTitle {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: var(--title-section);
+  font-weight: var(--weight-far);
   color: var(--black);
   line-height: 1.2;
 }
 .sectionSub {
-  font-size: 12px;
+  font-size: var(--title-sous-section);
   color: var(--grey-text);
   margin-top: 2px;
 }
@@ -46,15 +48,24 @@
   border-radius: var(--radius-card);
   overflow: hidden;
   height: 220px;
-  background: #e8f0e8;
+  background: var(--green-bg-alt);
 }
 .mapFrame {
   width: 100%;
   height: 100%;
   border: none;
 }
+.mapPins {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.mapPin {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  filter: var(--drop-shadow-pin);
+}
 
-/* Scroll sections */
 .scrollSection {
   background: var(--white);
   margin-top: 8px;
@@ -71,7 +82,6 @@
 }
 .hscroll::-webkit-scrollbar { display: none; }
 
-/* Editorial cards */
 .editCard {
   width: 240px;
   flex-shrink: 0;
@@ -90,7 +100,7 @@
   font-size: 10px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  font-weight: 700;
+  font-weight: var(--weight-far);
   color: var(--red);
   margin-bottom: 5px;
 }
@@ -101,8 +111,8 @@
   color: var(--black);
 }
 
-/* ── Desktop ── */
 @media (min-width: 768px) {
+  .page { padding-bottom: 0; }
   .mobileOnly { display: none; }
   .desktopOnly { display: block; }
 
@@ -139,7 +149,7 @@
     cursor: pointer;
   }
   .filterPill:hover { border-color: var(--red); color: var(--red); }
-  .pillActive { border-color: var(--red); color: var(--red); background: rgba(196,18,48,0.05); }
+  .pillActive { border-color: var(--red); color: var(--red); background: var(--red-tint); }
 
   .desktopContent {
     max-width: 1280px;
@@ -182,7 +192,6 @@
   .promoLink:hover { color: var(--black); }
 }
 
-/* Loading / error / empty states */
 .loadingMsg {
   text-align: center;
   padding: 32px 16px;
