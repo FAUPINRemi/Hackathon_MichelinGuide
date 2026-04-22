@@ -1,4 +1,8 @@
-.page { min-height: 100vh; background: var(--bg); }
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  padding-bottom: calc(var(--bottomnav-h) + 24px + env(safe-area-inset-bottom, 0));
+}
 
 .mobileOnly { display: block; }
 .desktopOnly { display: none; }
@@ -108,6 +112,7 @@
 }
 
 @media (min-width: 768px) {
+  .page { padding-bottom: 0; }
   .mobileOnly { display: none; }
   .desktopOnly { display: block; }
 
