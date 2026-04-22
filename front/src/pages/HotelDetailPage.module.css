@@ -4,7 +4,6 @@
   padding-bottom: calc(var(--bottomnav-h) + 20px + env(safe-area-inset-bottom, 0));
 }
 
-/* Hero */
 .hero {
   position: relative;
   aspect-ratio: 4/3;
@@ -21,12 +20,11 @@
   position: absolute;
   bottom: 12px; right: 12px;
   width: 36px; height: 36px;
-  background: rgba(0,0,0,0.45);
+  background: var(--overlay-mid);
   border-radius: 6px;
   display: flex; align-items: center; justify-content: center;
 }
 
-/* Info */
 .info { padding: 16px 16px 12px; }
 
 .badges {
@@ -56,8 +54,8 @@
 .ecoBadge {
   font-size: 11px;
   font-weight: 600;
-  color: #2d6a2d;
-  background: #e8f5e8;
+  color: var(--green);
+  background: var(--green-bg);
   padding: 2px 8px;
   border-radius: 3px;
 }
@@ -72,7 +70,6 @@
 .addressLine { font-size: 14px; color: var(--black); margin-bottom: 2px; }
 .locationLine { font-size: 14px; color: var(--grey-text); }
 
-/* Action tiles */
 .actions {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -94,10 +91,8 @@
 .tileIcon { color: var(--black); display: flex; }
 .tileLabel { font-size: 11px; font-weight: 500; color: var(--black); white-space: nowrap; }
 
-/* Divider */
 .divider { border: none; border-top: 1px solid var(--border); margin: 0 16px; }
 
-/* Sections */
 .section { padding: 16px; }
 .sectionTitle {
   font-size: 22px;
@@ -115,7 +110,6 @@
   color: var(--black);
 }
 
-/* Stay info */
 .stayInfo {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -132,17 +126,15 @@
 .stayLabel { font-size: 11px; color: var(--grey-text); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
 .stayValue { font-size: 15px; font-weight: 700; color: var(--black); }
 
-/* Map */
 .addressText { font-size: 15px; color: var(--black); margin-bottom: 14px; line-height: 1.5; }
 .mapWrap {
   border-radius: var(--radius-card);
   overflow: hidden;
   height: 220px;
-  background: #e8f0e8;
+  background: var(--green-bg-alt);
 }
 .mapFrame { width: 100%; height: 100%; border: none; }
 
-/* CTA */
 .ctaSection {
   padding: 8px 16px 16px;
   display: flex;
@@ -165,7 +157,6 @@
 }
 .ctaBtn:active { background: var(--grey-light); }
 
-/* Desktop */
 @media (min-width: 768px) {
   .page {
     max-width: 720px;

@@ -1,0 +1,58 @@
+:root {
+
+  /* --- Couleurs brand --- */
+  --red:          #c41230;
+  --red-dark:     #9e0e27;
+  --red-tint:     rgba(196, 18, 48, 0.06);
+
+  /* --- Neutrals --- */
+  --black:        #1a1a1a;
+  --black-deep:   #0d0d0d;
+  --white:        #ffffff;
+  --footer-bg:    #111111;
+
+  /* --- Gris --- */
+  --bg:           #f2f2f2;
+  --grey-light:   #f7f7f7;
+  --grey-mid:     #e5e5e5;
+  --grey-text:    #767676;
+  --grey-dark:    #444444;
+  --border:       #e0e0e0;
+
+  /* --- Vert (étoile verte / éco) --- */
+  --green:        #2d6a2d;
+  --green-bg:     #e8f5e8;
+  --green-bg-alt: #e8f0e8;
+
+  /* --- Overlays (noir avec opacité) --- */
+  --overlay-light:  rgba(0, 0, 0, 0.35);
+  --overlay-mid:    rgba(0, 0, 0, 0.45);
+  --overlay-heavy:  rgba(0, 0, 0, 0.50);
+
+  /* --- Typographie --- */
+  /*
+   * Helvetica Neue est la police de référence du projet.
+   * Si vous disposez des fichiers de fonte locale, ajoutez-les dans
+   * front/public/fonts/ et décommentez les @font-face dans index.css.
+   */
+  --font:       'Helvetica Neue', Arial, sans-serif;
+  --font-serif: 'Georgia', serif;
+  --weight-far: 700; 
+  --title-page: 30px;
+  --title-section: 20px;
+  --title-sous-section: 12px;
+
+  /* --- Bordures & ombres --- */
+  --radius-card: 8px;
+  --shadow-card: 0 1px 4px rgba(0, 0, 0, 0.30);
+  --shadow-md:   0 4px 16px rgba(0, 0, 0, 0.24);
+
+  /* --- Animation --- */
+  --t: 0.18s ease;
+  --drop-shadow-pin: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.30));
+
+  /* --- Layout navigation --- */
+  --nav-h-mobile:  52px;
+  --nav-h-desktop: 56px;
+  --bottomnav-h:   56px;
+}
