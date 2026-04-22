@@ -11,7 +11,7 @@ function format(h) {
     address:          h.address ?? '',
     location:         h.city?.name ?? '',
     description:      h.content ?? '',
-    img:              h.main_image ?? '',
+    img:              (() => { try { const m = typeof h.main_image === 'string' ? JSON.parse(h.main_image) : h.main_image; const u = m?.hotrooms_large_url ?? ''; return u ? (u.startsWith('http') ? u : `https://${u}`) : ''; } catch { return ''; } })(),
     lat:              h.lat,
     lng:              h.lng,
     phone:            h.phone ?? '',
