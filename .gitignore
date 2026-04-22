@@ -3,5 +3,7 @@ env/.env.*
 env/.env.example
 node_modules/
 
-bdd/all_hotels.jsonl
-bdd/all_restaurants.jsonl
+bdd/
+
+CLAUDE.md
+.claude/

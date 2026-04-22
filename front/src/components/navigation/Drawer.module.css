@@ -1,7 +1,7 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: var(--overlay-heavy);
   z-index: 150;
   opacity: 0;
   pointer-events: none;
@@ -24,7 +24,7 @@
 .header {
   background: var(--black);
   padding: 0 16px;
-  height: var(--nav-h);
+  height: var(--nav-h-mobile);
   display: flex;
   align-items: center;
   justify-content: space-between;
