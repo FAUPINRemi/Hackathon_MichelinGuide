@@ -1,6 +1,6 @@
 .banner {
   position: fixed;
-  bottom: 78px;
+  bottom: 70px;
   left: 12px;
   right: 12px;
   background: var(--black);
@@ -12,10 +12,11 @@
   gap: 12px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.4);
   z-index: 200;
-  transform: translateY(120%);
+  transform: translateY(calc(100% + 90px));
   transition: transform 0.3s ease;
+  pointer-events: none;
 }
-.banner.visible { transform: translateY(0); }
+.banner.visible { transform: translateY(0); pointer-events: auto; }
 
 .icon { font-size: 28px; flex-shrink: 0; }
 .text { flex: 1; }
@@ -37,10 +38,17 @@
 .installBtn:hover { background: var(--red-dark); }
 
 .closeBtn {
-  color: rgba(255,255,255,0.5);
-  font-size: 18px;
-  padding: 4px;
+  color: rgba(255,255,255,0.7);
+  font-size: 20px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  transition: color var(--t);
+  border-radius: 50%;
+  transition: background var(--t), color var(--t);
+  margin-right: -8px;
 }
 .closeBtn:hover { color: var(--white); }
+.closeBtn:active { background: rgba(255,255,255,0.15); color: var(--white); }

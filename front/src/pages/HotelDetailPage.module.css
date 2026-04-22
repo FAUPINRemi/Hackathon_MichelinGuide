@@ -1,0 +1,179 @@
+.page {
+  background: var(--white);
+  min-height: 100vh;
+  padding-bottom: calc(var(--bottomnav-h) + 20px + env(safe-area-inset-bottom, 0));
+}
+
+/* Hero */
+.hero {
+  position: relative;
+  aspect-ratio: 4/3;
+  background: var(--grey-mid);
+  overflow: hidden;
+}
+.heroImg { width: 100%; height: 100%; object-fit: cover; }
+.heroPlaceholder {
+  width: 100%; height: 100%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--grey-light);
+}
+.heroGrid {
+  position: absolute;
+  bottom: 12px; right: 12px;
+  width: 36px; height: 36px;
+  background: rgba(0,0,0,0.45);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* Info */
+.info { padding: 16px 16px 12px; }
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.distBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--red);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  border: 1px solid var(--red);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.plusBadge {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--white);
+  background: var(--black);
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+.ecoBadge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #2d6a2d;
+  background: #e8f5e8;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.name {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 6px;
+  line-height: 1.2;
+}
+.addressLine { font-size: 14px; color: var(--black); margin-bottom: 2px; }
+.locationLine { font-size: 14px; color: var(--grey-text); }
+
+/* Action tiles */
+.actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  padding: 4px 16px 16px;
+}
+.actionTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 12px 4px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  background: var(--white);
+  transition: border-color var(--t), background var(--t);
+}
+.actionTile.tileActive { border-color: var(--black); background: var(--grey-light); }
+.tileIcon { color: var(--black); display: flex; }
+.tileLabel { font-size: 11px; font-weight: 500; color: var(--black); white-space: nowrap; }
+
+/* Divider */
+.divider { border: none; border-top: 1px solid var(--border); margin: 0 16px; }
+
+/* Sections */
+.section { padding: 16px; }
+.sectionTitle {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 12px;
+}
+.description { font-size: 16px; line-height: 1.6; color: var(--black); }
+.readMore {
+  display: block;
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: underline;
+  color: var(--black);
+}
+
+/* Stay info */
+.stayInfo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.stayItem {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px;
+  background: var(--grey-light);
+  border-radius: 8px;
+}
+.stayLabel { font-size: 11px; color: var(--grey-text); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+.stayValue { font-size: 15px; font-weight: 700; color: var(--black); }
+
+/* Map */
+.addressText { font-size: 15px; color: var(--black); margin-bottom: 14px; line-height: 1.5; }
+.mapWrap {
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  height: 220px;
+  background: #e8f0e8;
+}
+.mapFrame { width: 100%; height: 100%; border: none; }
+
+/* CTA */
+.ctaSection {
+  padding: 8px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ctaBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--black);
+  background: var(--white);
+  transition: background var(--t);
+}
+.ctaBtn:active { background: var(--grey-light); }
+
+/* Desktop */
+@media (min-width: 768px) {
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding-bottom: 48px;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .hero { aspect-ratio: 16/9; }
+  .stayInfo { grid-template-columns: repeat(3, 1fr); }
+}
