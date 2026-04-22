@@ -7,9 +7,11 @@ services:
     env_file:
       - ./env/.env
     environment:
-      - VITE_API_TARGET=http://server:3000
+      - VITE_API_TARGET=${VITE_API_TARGET:-http://server:3000}
+      - UI_HOST=${UI_HOST:-0.0.0.0}
+      - UI_INTERNAL_PORT=${UI_INTERNAL_PORT:-5173}
     ports:
-      - "${UI_PORT:-5173}:5173"
+      - "${UI_PORT:-5173}:${UI_INTERNAL_PORT:-5173}"
     depends_on:
       - server
 
@@ -41,7 +43,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 10
