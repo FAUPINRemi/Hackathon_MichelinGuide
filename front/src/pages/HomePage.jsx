@@ -40,7 +40,7 @@ function useApiData(fetcher, deps) {
 }
 
 // ─── Restaurants tab ─────────────────────────────────────────────────────────
-function RestaurantsTab({ onRestaurantClick }) {
+function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved }) {
   const [search, setSearch]           = useState('')
   const [activeFilter, setActiveFilter] = useState('Tous')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -149,7 +149,7 @@ function RestaurantsTab({ onRestaurantClick }) {
             </div>
             <div className={styles.hscroll}>
               {newStarred.map((r) => (
-                <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" />
+                <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" onSave={onSave} isSaved={isAnySaved?.(r.id, 'restaurant')} />
               ))}
             </div>
           </section>
@@ -163,7 +163,7 @@ function RestaurantsTab({ onRestaurantClick }) {
             </div>
             <div className={styles.hscroll}>
               {starred3.map((r) => (
-                <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" />
+                <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" onSave={onSave} isSaved={isAnySaved?.(r.id, 'restaurant')} />
               ))}
             </div>
           </section>
@@ -217,7 +217,7 @@ function RestaurantsTab({ onRestaurantClick }) {
           )}
           <div className={styles.grid}>
             {restaurants.map((r) => (
-              <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="grid" />
+              <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="grid" onSave={onSave} isSaved={isAnySaved?.(r.id, 'restaurant')} />
             ))}
           </div>
 
@@ -236,7 +236,7 @@ function RestaurantsTab({ onRestaurantClick }) {
 }
 
 // ─── Hotels tab ──────────────────────────────────────────────────────────────
-function HotelsTab({ onHotelClick }) {
+function HotelsTab({ onHotelClick, onSave, isAnySaved }) {
   const [search, setSearch]           = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
 
@@ -279,7 +279,7 @@ function HotelsTab({ onHotelClick }) {
               </div>
               <div className={styles.hscroll}>
                 {hotels.slice(0, 10).map((h) => (
-                  <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="scroll" />
+                  <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="scroll" onSave={onSave} isSaved={isAnySaved?.(h.id, 'hotel')} />
                 ))}
               </div>
             </section>
@@ -292,7 +292,7 @@ function HotelsTab({ onHotelClick }) {
                 </div>
                 <div className={styles.hscroll}>
                   {plusHotels.map((h) => (
-                    <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="scroll" />
+                    <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="scroll" onSave={onSave} isSaved={isAnySaved?.(h.id, 'hotel')} />
                   ))}
                 </div>
               </section>
@@ -305,7 +305,7 @@ function HotelsTab({ onHotelClick }) {
                 </div>
                 <div className={styles.hscroll}>
                   {ecoHotels.map((h) => (
-                    <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="scroll" />
+                    <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="scroll" onSave={onSave} isSaved={isAnySaved?.(h.id, 'hotel')} />
                   ))}
                 </div>
               </section>
@@ -337,7 +337,7 @@ function HotelsTab({ onHotelClick }) {
           )}
           <div className={styles.grid}>
             {hotels.map((h) => (
-              <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="grid" />
+              <HotelCard key={h.id} hotel={h} onClick={onHotelClick} layout="grid" onSave={onSave} isSaved={isAnySaved?.(h.id, 'hotel')} />
             ))}
           </div>
         </div>
@@ -347,9 +347,9 @@ function HotelsTab({ onHotelClick }) {
 }
 
 // ─── Main export ─────────────────────────────────────────────────────────────
-export default function HomePage({ activeTab, onRestaurantClick, onHotelClick }) {
+export default function HomePage({ activeTab, onRestaurantClick, onHotelClick, onSave, isAnySaved }) {
   if (activeTab === 'hotels') {
-    return <HotelsTab onHotelClick={onHotelClick} />
+    return <HotelsTab onHotelClick={onHotelClick} onSave={onSave} isAnySaved={isAnySaved} />
   }
-  return <RestaurantsTab onRestaurantClick={onRestaurantClick} />
+  return <RestaurantsTab onRestaurantClick={onRestaurantClick} onSave={onSave} isAnySaved={isAnySaved} />
 }
