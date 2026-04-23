@@ -1,0 +1,90 @@
+.grid {
+  display: grid;
+  gap: 10px;
+}
+
+.row {
+  display: grid;
+  gap: 5px;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--grey-text);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--grey-text);
+}
+
+.input,
+.select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--white);
+  padding: 10px 12px;
+  color: var(--black);
+  font-size: 14px;
+  font-family: var(--font);
+  transition: border-color var(--t);
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--red);
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--grey-dark);
+  border-radius: 99px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  transition: all var(--t);
+  cursor: pointer;
+}
+
+.pill:active { opacity: 0.7; }
+
+.pillActive {
+  border-color: var(--red);
+  background: var(--red-tint);
+  color: var(--red);
+}
+
+.pillGreen {
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.pillGreenActive {
+  background: var(--green-bg);
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.inlineRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.detourField {
+  display: grid;
+  gap: 4px;
+}

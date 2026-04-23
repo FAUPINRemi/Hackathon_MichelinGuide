@@ -89,6 +89,26 @@
   text-align: center;
 }
 
+.nfcDesktopBanner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 0 24px 24px;
+  padding: 16px 20px;
+  background: var(--grey-light);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  color: var(--grey-dark);
+}
+
+.nfcDesktopText {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--grey-dark);
+  margin: 0;
+}
+
 .menu {
   list-style: none;
   margin: 0;
@@ -108,6 +128,19 @@
 
 .item:first-child {
   border-top: 1px solid var(--border);
+}
+
+.itemClickable {
+  cursor: pointer;
+}
+
+.itemClickable:hover {
+  background: var(--grey-light);
+}
+
+.itemClickable .label {
+  color: var(--red);
+  font-weight: 600;
 }
 
 .label {

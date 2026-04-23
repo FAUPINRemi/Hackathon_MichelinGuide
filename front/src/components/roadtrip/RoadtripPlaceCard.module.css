@@ -1,0 +1,160 @@
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  transition: box-shadow var(--t), border-color var(--t);
+  scroll-margin-top: calc(var(--nav-h-mobile) + 8px);
+}
+
+.highlighted {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px var(--red-tint), var(--shadow-md);
+}
+
+/* ── IMAGE ── */
+.imgWrap {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: var(--grey-mid);
+  overflow: hidden;
+}
+
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.imgPlaceholder {
+  width: 100%;
+  height: 100%;
+}
+
+.placeholderResto {
+  background: var(--green-bg-alt);
+}
+
+.placeholderHotel {
+  background: var(--grey-light);
+}
+
+/* ── OVERLAID BADGES on image ── */
+.typeBadge {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.badgeRed {
+  background: var(--red);
+  color: var(--white);
+}
+
+.badgeDark {
+  background: var(--black-deep);
+  color: var(--white);
+}
+
+.detourBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--white);
+  background: rgba(0, 0, 0, 0.55);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+/* ── BODY ── */
+.body {
+  padding: 10px 12px 12px;
+}
+
+.badgesRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 5px;
+  min-height: 18px;
+}
+
+.distinctions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.distLabel {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--red);
+}
+
+.budgetBadge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--grey-dark);
+  background: var(--grey-light);
+  border: 1px solid var(--border);
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.name {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.city {
+  font-size: 12px;
+  color: var(--grey-text);
+  margin-bottom: 4px;
+}
+
+.cuisines {
+  font-size: 12px;
+  color: var(--grey-text);
+  margin-bottom: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reason {
+  font-size: 13px;
+  color: var(--grey-dark);
+  line-height: 1.45;
+  margin-bottom: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.link {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--red);
+  text-decoration: none;
+  transition: opacity var(--t);
+}
+
+.link:hover {
+  opacity: 0.75;
+}

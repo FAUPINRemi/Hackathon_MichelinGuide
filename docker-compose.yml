@@ -1,15 +1,19 @@
+name: hackathon_michelinguide
+
 services:
   ui:
     build:
       context: .
       dockerfile: docker/DockerfileUI
-    container_name: michelin-ui
     env_file:
       - ./env/.env
     environment:
-      - VITE_API_TARGET=${VITE_API_TARGET:-http://server:3000}
+      - VITE_API_TARGET=${VITE_API_TARGET:-https://server:3000}
       - UI_HOST=${UI_HOST:-0.0.0.0}
       - UI_INTERNAL_PORT=${UI_INTERNAL_PORT:-5173}
+    volumes:
+      - ./credential/certs/key.pem:/app/certs/key.pem:ro
+      - ./credential/certs/cert.pem:/app/certs/cert.pem:ro
     ports:
       - "${UI_PORT:-5173}:${UI_INTERNAL_PORT:-5173}"
     depends_on:
@@ -19,11 +23,14 @@ services:
     build:
       context: .
       dockerfile: docker/DockerfileServer
-    container_name: michelin-server
     env_file:
       - ./env/.env
     environment:
       - DB_HOST=db
+    volumes:
+      - ./env:/app/env:ro
+      - ./credential/certs/key.pem:/app/certs/key.pem:ro
+      - ./credential/certs/cert.pem:/app/certs/cert.pem:ro
     ports:
       - "${SERVER_PORT:-3000}:3000"
     depends_on:
@@ -34,7 +41,6 @@ services:
     build:
       context: .
       dockerfile: docker/DockerfileDB
-    container_name: michelin-db
     restart: unless-stopped
     env_file:
       - ./env/.env
@@ -50,7 +56,6 @@ services:
 
   adminer:
     image: adminer:latest
-    container_name: michelin-adminer
     restart: unless-stopped
     ports:
       - "${ADMINER_PORT:-8080}:8080"
@@ -62,7 +67,6 @@ services:
     build:
       context: .
       dockerfile: docker/DockerfileImporter
-    container_name: michelin-importer
     env_file:
       - ./env/.env
     environment:
