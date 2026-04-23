@@ -1,284 +1,285 @@
-import { useEffect, useMemo, useState } from 'react'
-import { CircleMarker, MapContainer, Popup, Polyline, TileLayer, useMap } from 'react-leaflet'
-import 'leaflet/dist/leaflet.css'
+import { Suspense, lazy, useCallback, useMemo, useRef, useState } from 'react'
 import { api } from '../api/client'
-import SearchBar from '../components/filters/SearchBar'
+import RoadtripForm from '../components/roadtrip/RoadtripForm'
+import RoadtripPromptBox from '../components/roadtrip/RoadtripPromptBox'
+import RoadtripPlaceCard from '../components/roadtrip/RoadtripPlaceCard'
 import styles from './RoadTripPage.module.css'
 
-function decodeGooglePolyline(encoded) {
+const RoadtripMapLeaflet = lazy(() => import('../components/roadtrip/RoadtripMapLeaflet'))
+
+function decodePolyline(encoded) {
   if (!encoded) return []
-
-  let index = 0
-  let lat = 0
-  let lng = 0
+  let index = 0, lat = 0, lng = 0
   const points = []
-
   while (index < encoded.length) {
-    let shift = 0
-    let result = 0
-    let byte = 0
-
-    do {
-      byte = encoded.charCodeAt(index++) - 63
-      result |= (byte & 0x1f) << shift
-      shift += 5
-    } while (byte >= 0x20)
-
-    const deltaLat = (result & 1) ? ~(result >> 1) : (result >> 1)
-    lat += deltaLat
-
-    shift = 0
-    result = 0
-    do {
-      byte = encoded.charCodeAt(index++) - 63
-      result |= (byte & 0x1f) << shift
-      shift += 5
-    } while (byte >= 0x20)
-
-    const deltaLng = (result & 1) ? ~(result >> 1) : (result >> 1)
-    lng += deltaLng
-
+    let shift = 0, result = 0, byte = 0
+    do { byte = encoded.charCodeAt(index++) - 63; result |= (byte & 0x1f) << shift; shift += 5 } while (byte >= 0x20)
+    lat += (result & 1) ? ~(result >> 1) : result >> 1
+    shift = 0; result = 0
+    do { byte = encoded.charCodeAt(index++) - 63; result |= (byte & 0x1f) << shift; shift += 5 } while (byte >= 0x20)
+    lng += (result & 1) ? ~(result >> 1) : result >> 1
     points.push([lat / 1e5, lng / 1e5])
   }
-
   return points
 }
 
-function AutoFitBounds({ points }) {
-  const map = useMap()
+const FORM_INIT = {
+  originLabel: 'Paris',
+  destLabel: 'Lyon',
+  category: 'both',
+  cuisines: '',
+  budget: '',
+  distinctionSlugs: [],
+  greenStar: false,
+  maxDetourPerStop: null,
+  maxTotalDetour: null,
+  distributionStrategy: 'near_route',
+}
 
-  useEffect(() => {
-    if (!points.length) return
-    map.fitBounds(points, { padding: [24, 24] })
-  }, [map, points])
+function buildPayload(mode, form, freeText) {
+  if (mode === 'free_text') {
+    return { input_mode: 'free_text', freeText }
+  }
+  const categories = form.category === 'both' ? ['restaurant', 'hotel'] : [form.category]
+  return {
+    input_mode: 'form',
+    form: {
+      origin: { label: form.originLabel || null, lat: null, lng: null },
+      destination: { label: form.destLabel || null, lat: null, lng: null },
+      categories,
+      cuisines: form.cuisines.split(',').map((s) => s.trim()).filter(Boolean),
+      budget: form.budget ? [form.budget] : [],
+      distinction_slugs: form.distinctionSlugs,
+      green_star: form.greenStar || null,
+      max_detour_minutes_per_stop: form.maxDetourPerStop,
+      max_total_detour_minutes: form.maxTotalDetour,
+      distribution_strategy: form.distributionStrategy,
+    },
+  }
+}
 
-  return null
+function isFormValid(mode, form, freeText) {
+  if (mode === 'free_text') return freeText.trim().length > 0
+  return (form.originLabel?.trim().length > 0) && (form.destLabel?.trim().length > 0)
+}
+
+function buildGoogleMapsUrl(origin, destination, stops) {
+  if (!origin?.lat || !destination?.lat) return null
+  const wps = stops.filter((s) => s.lat != null).map((s) => `${s.lat},${s.lng}`).join('|')
+  return (
+    'https://www.google.com/maps/dir/?api=1' +
+    `&origin=${origin.lat},${origin.lng}` +
+    `&destination=${destination.lat},${destination.lng}` +
+    (wps ? `&waypoints=${encodeURIComponent(wps)}` : '')
+  )
+}
+
+function buildWazeUrl(destination) {
+  if (!destination?.lat) return null
+  return `https://waze.com/ul?ll=${destination.lat},${destination.lng}&navigate=yes`
 }
 
 export default function RoadTripPage() {
   const [mode, setMode] = useState('form')
   const [freeText, setFreeText] = useState('')
-
-  const [originLabel, setOriginLabel] = useState('Paris')
-  const [destLabel, setDestLabel] = useState('Lyon')
-
-  const [category, setCategory] = useState('both')
-  const [cuisines, setCuisines] = useState('')
-  const [budget, setBudget] = useState('€€')
-
+  const [form, setForm] = useState(FORM_INIT)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
+  const [highlightedId, setHighlightedId] = useState(null)
+  const highlightTimer = useRef(null)
 
-  const selectedStops = result?.selected?.selected?.stops ?? []
-  const stopDetours = result?.route?.stop_detours ?? []
-  const candidateIndex = useMemo(() => {
-    const map = new Map()
-    ;(result?.candidates ?? []).forEach((c) => map.set(`${c.category}:${c.id}`, c))
-    return map
-  }, [result])
+  const patchForm = useCallback((patch) => setForm((prev) => ({ ...prev, ...patch })), [])
 
-  const selectedMarkers = useMemo(() => {
-    const points = []
-    selectedStops.forEach((stop) => {
-      const c = candidateIndex.get(`${stop.category}:${stop.id}`)
-      if (c) points.push({ lat: c.lat, lng: c.lng })
+  const enrichedStops = useMemo(() => {
+    if (!result) return []
+    const candidateMap = new Map()
+    ;(result.candidates ?? []).forEach((c) => candidateMap.set(`${c.category}:${c.id}`, c))
+    const detourMap = new Map()
+    ;(result.route?.stop_detours ?? []).forEach((d) => detourMap.set(`${d.category}:${d.id}`, d.detour_minutes))
+
+    return (result.selected?.selected?.stops ?? []).map((stop) => {
+      const c = candidateMap.get(`${stop.category}:${stop.id}`) ?? {}
+      return {
+        ...c,
+        ...stop,
+        detour_minutes: detourMap.get(`${stop.category}:${stop.id}`) ?? null,
+      }
     })
-    return points
-  }, [selectedStops, candidateIndex])
+  }, [result])
 
   const routePolyline = useMemo(() => {
     const encoded = result?.route?.polyline_with_stops || result?.route?.polyline_direct || ''
-    return decodeGooglePolyline(encoded)
+    return decodePolyline(encoded)
   }, [result])
 
-  const fitPoints = useMemo(() => {
-    if (routePolyline.length) return routePolyline
-    return selectedMarkers.map((p) => [p.lat, p.lng])
-  }, [routePolyline, selectedMarkers])
+  const origin = result?.parse?.route?.origin ?? null
+  const destination = result?.parse?.route?.destination ?? null
+  const googleMapsUrl = buildGoogleMapsUrl(origin, destination, enrichedStops)
+  const wazeUrl = buildWazeUrl(destination)
 
   const handleBuild = async () => {
     setLoading(true)
     setError('')
+    setResult(null)
     try {
-      const categories = category === 'both' ? ['restaurant', 'hotel'] : [category]
-      const payload = mode === 'free_text'
-        ? {
-            input_mode: 'free_text',
-            freeText,
-          }
-        : {
-            input_mode: 'form',
-            form: {
-              origin: { label: originLabel || null, lat: null, lng: null },
-              destination: { label: destLabel || null, lat: null, lng: null },
-              categories,
-              cuisines: cuisines.split(',').map((s) => s.trim()).filter(Boolean),
-              budget: budget ? [budget] : [],
-            },
-          }
-
+      const payload = buildPayload(mode, form, freeText)
       const data = await api.roadtrip.build(payload)
       setResult(data)
     } catch (err) {
-      setError(err?.message || 'Erreur serveur roadtrip')
+      setError(err?.message || 'Erreur serveur')
     } finally {
       setLoading(false)
     }
   }
 
+  const scrollToCard = useCallback((stopId) => {
+    const el = document.getElementById(`stop-${stopId}`)
+    if (!el) return
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    clearTimeout(highlightTimer.current)
+    setHighlightedId(stopId)
+    highlightTimer.current = setTimeout(() => setHighlightedId(null), 1800)
+  }, [])
+
+  const valid = isFormValid(mode, form, freeText)
+
   return (
     <div className={styles.page}>
       <section className={styles.mapPanel}>
-        <MapContainer center={[46.6, 2.2]} zoom={6} className={styles.mapFrame}>
-          <TileLayer
-            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
-          {routePolyline.length > 1 && (
-            <Polyline positions={routePolyline} pathOptions={{ color: '#d71920', weight: 4 }} />
-          )}
-          {selectedStops.map((stop) => {
-            const candidate = candidateIndex.get(`${stop.category}:${stop.id}`)
-            if (!candidate) return null
-            const detour = stopDetours.find((d) => d.category === stop.category && d.id === stop.id)
-            return (
-              <CircleMarker
-                key={`${stop.category}-${stop.id}`}
-                center={[candidate.lat, candidate.lng]}
-                radius={8}
-                pathOptions={{
-                  color: stop.category === 'restaurant' ? '#d71920' : '#1f2937',
-                  fillColor: stop.category === 'restaurant' ? '#f87171' : '#4b5563',
-                  fillOpacity: 0.9,
-                }}
-              >
-                <Popup>
-                  <strong>{candidate.name}</strong>
-                  <br />
-                  {candidate.city || 'Ville inconnue'}
-                  <br />
-                  {stop.category} - priorite {stop.priority}
-                  <br />
-                  +{detour?.detour_minutes ?? '-'} min
-                </Popup>
-              </CircleMarker>
-            )
-          })}
-          {!!fitPoints.length && <AutoFitBounds points={fitPoints} />}
-        </MapContainer>
-        <div className={styles.metricsRow}>
-          <article className={styles.metricCard}>
-            <p className={styles.metricLabel}>Direct</p>
-            <p className={styles.metricValue}>{result?.route?.direct_duration_minutes ?? '-'} min</p>
-          </article>
-          <article className={styles.metricCard}>
-            <p className={styles.metricLabel}>Avec arrets</p>
-            <p className={styles.metricValue}>{result?.route?.with_stops_duration_minutes ?? '-'} min</p>
-          </article>
-          <article className={styles.metricCard}>
-            <p className={styles.metricLabel}>Detour total</p>
-            <p className={styles.metricValue}>+{result?.route?.total_detour_minutes ?? '-'} min</p>
-          </article>
+        <div className={styles.mapFrame}>
+          <Suspense fallback={<div className={styles.mapSkeleton} />}>
+            <RoadtripMapLeaflet
+              origin={origin}
+              destination={destination}
+              stops={enrichedStops.filter((s) => s.lat != null)}
+              polyline={routePolyline}
+              onScrollToCard={scrollToCard}
+            />
+          </Suspense>
         </div>
+
+        {result && (
+          <div className={styles.metricsRow}>
+            <article className={styles.metricCard}>
+              <p className={styles.metricLabel}>Trajet direct</p>
+              <p className={styles.metricValue}>{result.route?.direct_duration_minutes ?? '–'} min</p>
+            </article>
+            <article className={styles.metricCard}>
+              <p className={styles.metricLabel}>Avec arrêts</p>
+              <p className={styles.metricValue}>{result.route?.with_stops_duration_minutes ?? '–'} min</p>
+            </article>
+            <article className={`${styles.metricCard} ${styles.metricDetour}`}>
+              <p className={styles.metricLabel}>Détour total</p>
+              <p className={styles.metricValue}>+{result.route?.total_detour_minutes ?? '–'} min</p>
+            </article>
+          </div>
+        )}
       </section>
 
-      <section className={styles.detailsPanel}>
+      <section className={styles.panel}>
         <div className={styles.modeTabs}>
-          <button className={`${styles.modeBtn} ${mode === 'form' ? styles.modeBtnActive : ''}`} onClick={() => setMode('form')}>
+          <button
+            className={`${styles.modeBtn} ${mode === 'form' ? styles.modeBtnActive : ''}`}
+            onClick={() => setMode('form')}
+          >
             Formulaire
           </button>
-          <button className={`${styles.modeBtn} ${mode === 'free_text' ? styles.modeBtnActive : ''}`} onClick={() => setMode('free_text')}>
-            Prompt
+          <button
+            className={`${styles.modeBtn} ${mode === 'free_text' ? styles.modeBtnActive : ''}`}
+            onClick={() => setMode('free_text')}
+          >
+            Prompt IA
           </button>
         </div>
 
         {mode === 'free_text' ? (
-          <div className={styles.formGrid}>
-            <label className={styles.fieldLabel}>Prompt libre</label>
-            <textarea
-              className={styles.textarea}
-              value={freeText}
-              onChange={(e) => setFreeText(e.target.value)}
-              placeholder="Ex: De Paris a Lyon avec 2 restaurants italiens budget €€€, max 20 min de detour"
-            />
-          </div>
+          <RoadtripPromptBox value={freeText} onChange={setFreeText} />
         ) : (
-          <div className={styles.formGrid}>
-            <label className={styles.fieldLabel}>Depart</label>
-            <SearchBar value={originLabel} onChange={setOriginLabel} placeholder="Ville de depart" />
-
-            <label className={styles.fieldLabel}>Arrivee</label>
-            <SearchBar value={destLabel} onChange={setDestLabel} placeholder="Ville d'arrivee" />
-
-            <label className={styles.fieldLabel}>Categories</label>
-            <div className={styles.pills}>
-              {[
-                { id: 'restaurant', label: 'Restaurants' },
-                { id: 'hotel', label: 'Hotels' },
-                { id: 'both', label: 'Les deux' },
-              ].map((item) => (
-                <button
-                  key={item.id}
-                  className={`${styles.pillBtn} ${category === item.id ? styles.pillBtnActive : ''}`}
-                  onClick={() => setCategory(item.id)}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-
-            <label className={styles.fieldLabel}>Cuisines (virgules)</label>
-            <input className={styles.input} value={cuisines} onChange={(e) => setCuisines(e.target.value)} placeholder="italian, seafood, japanese" />
-
-            <label className={styles.fieldLabel}>Budget</label>
-            <select className={styles.select} value={budget} onChange={(e) => setBudget(e.target.value)}>
-              <option value="€">€</option>
-              <option value="€€">€€</option>
-              <option value="€€€">€€€</option>
-              <option value="€€€€">€€€€</option>
-            </select>
-
-          </div>
+          <RoadtripForm form={form} onChange={patchForm} />
         )}
 
-        <button className={styles.submitBtn} onClick={handleBuild} disabled={loading}>
-          {loading ? 'Generation...' : 'Generer le road trip'}
+        <button
+          className={styles.submitBtn}
+          onClick={handleBuild}
+          disabled={loading || !valid}
+        >
+          {loading ? (
+            <span className={styles.submitLoading}>
+              <span className={styles.spinner} />
+              Génération en cours…
+            </span>
+          ) : (
+            '🗺️ Générer mon road trip'
+          )}
         </button>
 
         {error && <p className={styles.errorMsg}>{error}</p>}
 
-        {!!result && (
-          <>
-            <div className={styles.cardList}>
-              {selectedStops.map((stop) => {
-                const candidate = candidateIndex.get(`${stop.category}:${stop.id}`)
-                const detour = stopDetours.find((d) => d.category === stop.category && d.id === stop.id)
-                return (
-                  <article className={styles.stopCard} key={`${stop.category}-${stop.id}`}>
-                    <div className={styles.stopTop}>
-                      <p className={styles.stopType}>{stop.category}</p>
-                      <p className={styles.stopPriority}>Priorite {stop.priority}</p>
-                    </div>
-                    <h3 className={styles.stopTitle}>{candidate?.name || `Stop #${stop.id}`}</h3>
-                    <p className={styles.stopMeta}>{candidate?.city || 'Localisation inconnue'}</p>
-                    <p className={styles.stopReason}>{stop.reason}</p>
-                    <p className={styles.stopDetour}>+{detour?.detour_minutes ?? '-'} min</p>
-                  </article>
-                )
-              })}
+        {result && enrichedStops.length > 0 && (
+          <div className={styles.results}>
+            <div className={styles.resultsHeader}>
+              <h2 className={styles.resultsTitle}>
+                {enrichedStops.length} arrêt{enrichedStops.length > 1 ? 's' : ''} sélectionné{enrichedStops.length > 1 ? 's' : ''}
+              </h2>
+
+              {(googleMapsUrl || wazeUrl) && (
+                <div className={styles.navBtns}>
+                  {googleMapsUrl && (
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${styles.navBtn} ${styles.navBtnGmaps}`}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                      </svg>
+                      Google Maps
+                    </a>
+                  )}
+                  {wazeUrl && (
+                    <a
+                      href={wazeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={`${styles.navBtn} ${styles.navBtnWaze}`}
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                        <path d="M20.54 6.63C19.08 3.93 16.2 2 13 2 8.03 2 4 6.03 4 11c0 1.5.38 2.91 1.04 4.15L4 20l5.02-1.33C10.27 19.53 11.6 20 13 20c4.97 0 9-4.03 9-9 0-1.63-.44-3.16-1.21-4.47l-.25.1z"/>
+                      </svg>
+                      Waze
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
 
-            <div className={styles.notesBox}>
-              <p className={styles.notesTitle}>Notes LLM</p>
-              {(result?.parse?.notes || []).map((n, idx) => (
-                <p className={styles.noteItem} key={`p-${idx}`}>{n}</p>
-              ))}
-              {(result?.selected?.notes || []).map((n, idx) => (
-                <p className={styles.noteItem} key={`s-${idx}`}>{n}</p>
+            <div className={styles.cardList}>
+              {enrichedStops.map((stop) => (
+                <RoadtripPlaceCard
+                  key={`${stop.category}-${stop.id}`}
+                  stop={stop}
+                  isHighlighted={highlightedId === `${stop.category}-${stop.id}`}
+                />
               ))}
             </div>
-          </>
+
+            {(result.selected?.notes?.length > 0 || result.parse?.notes?.length > 0) && (
+              <details className={styles.notesBox}>
+                <summary className={styles.notesTitle}>Notes de l&apos;IA</summary>
+                <div className={styles.notesList}>
+                  {[...(result.parse?.notes ?? []), ...(result.selected?.notes ?? [])].map((n, i) => (
+                    <p key={i} className={styles.noteItem}>{n}</p>
+                  ))}
+                </div>
+              </details>
+            )}
+          </div>
+        )}
+
+        {result && enrichedStops.length === 0 && (
+          <p className={styles.emptyMsg}>Aucun arrêt trouvé pour ce trajet. Essayez d&apos;élargir vos critères.</p>
         )}
       </section>
     </div>
