@@ -165,6 +165,63 @@ export class RoadtripRouteService {
     return resolved;
   }
 
+  async planRoute(
+    originLabel: string,
+    destinationLabel: string,
+    waypoints: Array<{ label: string; lat: number; lng: number }> = [],
+  ): Promise<{
+    origin: { label: string; lat: number; lng: number };
+    destination: { label: string; lat: number; lng: number };
+    waypoints: Array<{ label: string; lat: number; lng: number }>;
+    polyline: string;
+    durationMinutes: number;
+  }> {
+    const origin = await this.resolvePoint('origin', { label: originLabel, lat: null, lng: null });
+    const destination = await this.resolvePoint('destination', { label: destinationLabel, lat: null, lng: null });
+    const waypointPts = waypoints.map((w) => ({ latitude: w.lat, longitude: w.lng }));
+    const route = await this.computeRoute(origin, destination, waypointPts);
+    return {
+      origin: { label: originLabel, lat: origin.latitude, lng: origin.longitude },
+      destination: { label: destinationLabel, lat: destination.latitude, lng: destination.longitude },
+      waypoints,
+      polyline: route.polyline,
+      durationMinutes: route.durationMinutes,
+    };
+  }
+
+  async computeWithStops(
+    origin: { lat: number; lng: number },
+    destination: { lat: number; lng: number },
+    stops: Array<{ lat: number; lng: number; category: 'restaurant' | 'hotel'; id: number }>,
+  ): Promise<RoadtripRouteResult> {
+    const originPt  = { latitude: origin.lat,      longitude: origin.lng };
+    const destPt    = { latitude: destination.lat,  longitude: destination.lng };
+    const stopPts   = stops.map((s) => ({ latitude: s.lat, longitude: s.lng }));
+
+    const direct    = await this.computeRoute(originPt, destPt, []);
+    const withStops = stops.length ? await this.computeRoute(originPt, destPt, stopPts) : direct;
+
+    const stopDetours: RoadtripRouteResult['stop_detours'] = [];
+    for (const stop of stops) {
+      const solo = await this.computeRoute(originPt, destPt, [{ latitude: stop.lat, longitude: stop.lng }]);
+      stopDetours.push({
+        category: stop.category,
+        id: stop.id,
+        detour_minutes: Math.max(0, solo.durationMinutes - direct.durationMinutes),
+      });
+    }
+
+    return {
+      provider: 'google_routes',
+      polyline_direct: direct.polyline,
+      polyline_with_stops: withStops.polyline,
+      direct_duration_minutes: direct.durationMinutes,
+      with_stops_duration_minutes: withStops.durationMinutes,
+      total_detour_minutes: Math.max(0, withStops.durationMinutes - direct.durationMinutes),
+      stop_detours: stopDetours,
+    };
+  }
+
   async buildRoute(parse: RoadtripParse, selectedCandidates: Candidate[]): Promise<RoadtripRouteResult> {
     const origin = await this.resolvePoint('origin', parse.route.origin);
     const destination = await this.resolvePoint('destination', parse.route.destination);

@@ -236,4 +236,205 @@ router.post('/build', buildLimiter, async (req, res, next) => {
   }
 });
 
+// ── PLANNER ENDPOINTS ──────────────────────────────────────────────────────────
+
+/**
+ * GET /api/roadtrip/geocode?q=...
+ * Proxy Nominatim — returns [{ label, displayName, lat, lng }]
+ */
+router.get('/geocode', async (req, res, next) => {
+  try {
+    const q = String(req.query.q || '').trim();
+    if (q.length < 2) { res.json([]); return; }
+    const url = `https://nominatim.openstreetmap.org/search?format=json&limit=6&addressdetails=0&q=${encodeURIComponent(q)}`;
+    const response = await fetch(url, { headers: { 'User-Agent': 'michelin-roadtrip/1.0' } });
+    if (!response.ok) { res.json([]); return; }
+    const data = (await response.json()) as Array<{ display_name: string; lat: string; lon: string }>;
+    const results = data
+      .filter((item) => Number.isFinite(Number(item.lat)) && Number.isFinite(Number(item.lon)))
+      .map((item) => ({
+        label: item.display_name.split(',')[0].trim(),
+        displayName: item.display_name,
+        lat: Number(item.lat),
+        lng: Number(item.lon),
+      }));
+    res.json(results);
+  } catch (err) {
+    next(err);
+  }
+});
+
+function decodePolyline(encoded: string): Array<{ lat: number; lng: number }> {
+  let index = 0, lat = 0, lng = 0;
+  const points: Array<{ lat: number; lng: number }> = [];
+  while (index < encoded.length) {
+    let shift = 0, result = 0, byte = 0;
+    do { byte = encoded.charCodeAt(index++) - 63; result |= (byte & 0x1f) << shift; shift += 5; } while (byte >= 0x20);
+    lat += (result & 1) ? ~(result >> 1) : result >> 1;
+    shift = 0; result = 0;
+    do { byte = encoded.charCodeAt(index++) - 63; result |= (byte & 0x1f) << shift; shift += 5; } while (byte >= 0x20);
+    lng += (result & 1) ? ~(result >> 1) : result >> 1;
+    points.push({ lat: lat / 1e5, lng: lng / 1e5 });
+  }
+  return points;
+}
+
+function samplePolyline(points: Array<{ lat: number; lng: number }>, n: number): Array<{ lat: number; lng: number }> {
+  if (points.length <= n) return points;
+  const step = (points.length - 1) / (n - 1);
+  return Array.from({ length: n }, (_, i) => points[Math.round(i * step)]);
+}
+
+function buildPlannerParse(prefs: {
+  categories: Array<'restaurant' | 'hotel'>;
+  cuisines: string[];
+  budget: Array<'€' | '€€' | '€€€' | '€€€€'>;
+  distinctionSlugs: string[];
+  greenStar: boolean | null;
+  radiusKm: number;
+  limit: number;
+}): RoadtripParse {
+  return {
+    version: '1.0',
+    intent: 'roadtrip_parse',
+    input_mode: 'form',
+    route: {
+      origin: { label: null, lat: null, lng: null },
+      destination: { label: null, lat: null, lng: null },
+      waypoints_user: [],
+    },
+    preferences: {
+      categories: prefs.categories,
+      cuisines: prefs.cuisines,
+      budget: prefs.budget,
+      distinction_slugs: prefs.distinctionSlugs,
+      green_star: prefs.greenStar,
+      max_detour_minutes_per_stop: MAX_DETOUR_MINUTES_PER_STOP,
+      max_total_detour_minutes: null,
+    },
+    plan: {
+      stops_target: { restaurant: 0, hotel: 0 },
+      distribution_strategy: 'near_route',
+    },
+    search_query: {
+      radius_km: prefs.radiusKm,
+      limit_candidates_per_category: prefs.limit,
+      sort: 'distance',
+    },
+    missing_fields: [],
+    notes: [],
+  };
+}
+
+/**
+ * POST /api/roadtrip/plan
+ * Geocode origin + destination, compute direct route, decode polyline,
+ * return sampled corridor points for nearby POI search.
+ */
+router.post('/plan', async (req, res, next) => {
+  try {
+    const { origin, destination, waypoints = [] } = req.body as {
+      origin: string;
+      destination: string;
+      waypoints?: Array<{ label: string; lat: number; lng: number }>;
+    };
+    if (!origin || !destination) {
+      res.status(400).json({ error: 'origin and destination are required' });
+      return;
+    }
+    const data = await roadtripRouteService.planRoute(String(origin), String(destination), waypoints);
+    const polylinePoints = decodePolyline(data.polyline);
+    const samplePoints = samplePolyline(polylinePoints, 15);
+    res.json({ ...data, samplePoints });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/roadtrip/nearby
+ * Find restaurants/hotels within `radiusKm` of the given route points,
+ * excluding already-selected stops.
+ */
+router.post('/nearby', async (req, res, next) => {
+  try {
+    const {
+      routePoints = [],
+      excludeIds = [],
+      preferences = {},
+    } = req.body as {
+      routePoints: Array<{ lat: number; lng: number }>;
+      excludeIds: Array<{ category: string; id: number }>;
+      preferences: {
+        categories?: string[];
+        cuisines?: string[];
+        budget?: string[];
+        distinctionSlugs?: string[];
+        greenStar?: boolean | null;
+        radiusKm?: number;
+        limit?: number;
+      };
+    };
+
+    const categories = (preferences.categories ?? ['restaurant', 'hotel']).filter(
+      (c): c is 'restaurant' | 'hotel' => c === 'restaurant' || c === 'hotel',
+    );
+    const parse = buildPlannerParse({
+      categories,
+      cuisines: preferences.cuisines ?? [],
+      budget: (preferences.budget ?? []) as Array<'€' | '€€' | '€€€' | '€€€€'>,
+      distinctionSlugs: preferences.distinctionSlugs ?? [],
+      greenStar: preferences.greenStar ?? null,
+      radiusKm: preferences.radiusKm ?? 10,
+      limit: preferences.limit ?? 30,
+    });
+
+    const excludeSet = new Set(excludeIds.map((e) => `${e.category}:${e.id}`));
+    const candidates = await searchCandidates(parse, routePoints);
+    const filtered = candidates.filter((c) => !excludeSet.has(`${c.category}:${c.id}`));
+    res.json({ candidates: filtered });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * POST /api/roadtrip/compute
+ * Recompute route + per-stop detours with the user's chosen stops (coords known).
+ */
+router.post('/compute', async (req, res, next) => {
+  try {
+    const { origin, destination, stops = [] } = req.body as {
+      origin: { lat: number; lng: number };
+      destination: { lat: number; lng: number };
+      stops: Array<{ lat: number; lng: number; category: 'restaurant' | 'hotel'; id: number }>;
+    };
+
+    if (!origin?.lat || !origin?.lng || !destination?.lat || !destination?.lng) {
+      res.status(400).json({ error: 'origin and destination with lat/lng are required' });
+      return;
+    }
+
+    // Enforce detour cap: keep only stops likely within 30 min detour (~40km)
+    const ROUGH_MAX_KM = 40;
+    function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
+      const R = 6371;
+      const dLat = (b.lat - a.lat) * Math.PI / 180;
+      const dLng = (b.lng - a.lng) * Math.PI / 180;
+      const s = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
+      return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
+    }
+    const validStops = stops.filter((s) => {
+      const dO = haversineKm(origin, s);
+      const dD = haversineKm(destination, s);
+      return Math.min(dO, dD) <= ROUGH_MAX_KM;
+    });
+
+    const result = await roadtripRouteService.computeWithStops(origin, destination, validStops);
+    res.json(result);
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;

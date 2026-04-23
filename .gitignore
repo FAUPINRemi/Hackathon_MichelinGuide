@@ -11,3 +11,7 @@ bdd/
 bdd/hotels.csv
 env/vertex-service-account.json
 credential/certs/
+
+CLAUDE.md
+
+.claude/

@@ -46,7 +46,11 @@ export const api = {
     restaurants:  (countryCode, regionName, city) => get(`/collection/countries/${countryCode}/regions/${encodeURIComponent(regionName)}/cities/${encodeURIComponent(city)}/restaurants`),
   },
   roadtrip: {
-    parse: (payload) => post('/roadtrip/parse', payload),
-    build: (payload) => post('/roadtrip/build', payload),
+    parse:   (payload) => post('/roadtrip/parse',   payload),
+    build:   (payload) => post('/roadtrip/build',   payload),
+    plan:    (payload) => post('/roadtrip/plan',    payload),
+    nearby:  (payload) => post('/roadtrip/nearby',  payload),
+    compute: (payload) => post('/roadtrip/compute', payload),
+    geocode: (q)       => get('/roadtrip/geocode',  { q }),
   },
 };
