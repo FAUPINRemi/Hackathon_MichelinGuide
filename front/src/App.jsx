@@ -7,6 +7,7 @@ import HomePage from './pages/HomePage'
 import RestaurantDetailPage from './pages/RestaurantDetailPage'
 import HotelDetailPage from './pages/HotelDetailPage'
 import ProfilePage from './pages/ProfilePage'
+import CollectionPage from './pages/CollectionPage'
 import { useToast } from './hooks/useToast'
 import { useInstallPrompt } from './hooks/useInstallPrompt'
 import styles from './App.module.css'
@@ -15,6 +16,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('restaurants')
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [selectedHotel, setSelectedHotel] = useState(null)
+  const [collectionOpen, setCollectionOpen] = useState(false)
   const { message, visible, showToast } = useToast()
   const { showBanner, install, dismiss } = useInstallPrompt()
 
@@ -42,6 +44,7 @@ export default function App() {
     setActiveTab(tab)
     setSelectedRestaurant(null)
     setSelectedHotel(null)
+    setCollectionOpen(false)
     if (tab === 'favorites') showToast('Section bientôt disponible')
   }
 
@@ -73,8 +76,10 @@ export default function App() {
           <RestaurantDetailPage restaurant={selectedRestaurant} />
         ) : selectedHotel ? (
           <HotelDetailPage hotel={selectedHotel} />
+        ) : activeTab === 'profile' && collectionOpen ? (
+          <CollectionPage onClose={() => setCollectionOpen(false)} />
         ) : activeTab === 'profile' ? (
-          <ProfilePage />
+          <ProfilePage onOpenCollection={() => setCollectionOpen(true)} />
         ) : (
           <HomePage
             activeTab={activeTab}

@@ -110,6 +110,19 @@
   border-top: 1px solid var(--border);
 }
 
+.itemClickable {
+  cursor: pointer;
+}
+
+.itemClickable:hover {
+  background: var(--grey-light);
+}
+
+.itemClickable .label {
+  color: var(--red);
+  font-weight: 600;
+}
+
 .label {
   font-family: var(--font);
   font-size: 17px;

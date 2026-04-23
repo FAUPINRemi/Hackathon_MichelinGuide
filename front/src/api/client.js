@@ -19,4 +19,11 @@ export const api = {
     list: (params) => get('/hotels', params),
     get:  (id)    => get(`/hotels/${id}`),
   },
+  collection: {
+    continents:   ()                              => get('/collection/continents'),
+    countries:    (continent)                     => get(`/collection/continents/${continent}/countries`),
+    regions:      (countryCode)                   => get(`/collection/countries/${countryCode}/regions`),
+    cities:       (countryCode, regionName)       => get(`/collection/countries/${countryCode}/regions/${encodeURIComponent(regionName)}/cities`),
+    restaurants:  (countryCode, regionName, city) => get(`/collection/countries/${countryCode}/regions/${encodeURIComponent(regionName)}/cities/${encodeURIComponent(city)}/restaurants`),
+  },
 };
