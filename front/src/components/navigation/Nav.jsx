@@ -3,7 +3,7 @@ import styles from './Nav.module.css'
 const NAV_LINKS = [
   { label: 'Restaurants',      tab: 'restaurants' },
   { label: 'Hébergements',     tab: 'hotels' },
-  { label: 'Guide de voyage',  tab: null },
+  { label: 'Guide de voyage',  tab: 'roadtrip' },
   { label: 'Régions',          tab: null },
   { label: 'Magazine',         tab: null },
 ]

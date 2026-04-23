@@ -1,9 +1,10 @@
+name: hackathon_michelinguide
+
 services:
   ui:
     build:
       context: .
       dockerfile: docker/DockerfileUI
-    container_name: michelin-ui
     env_file:
       - ./env/.env
     environment:
@@ -19,11 +20,12 @@ services:
     build:
       context: .
       dockerfile: docker/DockerfileServer
-    container_name: michelin-server
     env_file:
       - ./env/.env
     environment:
       - DB_HOST=db
+    volumes:
+      - ./env:/app/env:ro
     ports:
       - "${SERVER_PORT:-3000}:3000"
     depends_on:
@@ -34,7 +36,6 @@ services:
     build:
       context: .
       dockerfile: docker/DockerfileDB
-    container_name: michelin-db
     restart: unless-stopped
     env_file:
       - ./env/.env
@@ -50,7 +51,6 @@ services:
 
   adminer:
     image: adminer:latest
-    container_name: michelin-adminer
     restart: unless-stopped
     ports:
       - "${ADMINER_PORT:-8080}:8080"
@@ -62,7 +62,6 @@ services:
     build:
       context: .
       dockerfile: docker/DockerfileImporter
-    container_name: michelin-importer
     env_file:
       - ./env/.env
     environment:

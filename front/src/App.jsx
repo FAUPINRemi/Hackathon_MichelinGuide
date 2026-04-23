@@ -6,6 +6,7 @@ import InstallBanner from './components/feedback/InstallBanner'
 import HomePage from './pages/HomePage'
 import RestaurantDetailPage from './pages/RestaurantDetailPage'
 import HotelDetailPage from './pages/HotelDetailPage'
+import RoadTripPage from './pages/RoadTripPage'
 import { useToast } from './hooks/useToast'
 import { useInstallPrompt } from './hooks/useInstallPrompt'
 import styles from './App.module.css'
@@ -53,6 +54,7 @@ export default function App() {
   const navTitle = isDetail ? detailName : (
     activeTab === 'restaurants' ? 'Restaurants'
     : activeTab === 'hotels'   ? 'Hébergements'
+    : activeTab === 'roadtrip' ? 'Road Trip'
     : activeTab === 'profile'  ? 'Mon Profil'
     : 'Favoris'
   )
@@ -72,6 +74,8 @@ export default function App() {
           <RestaurantDetailPage restaurant={selectedRestaurant} />
         ) : selectedHotel ? (
           <HotelDetailPage hotel={selectedHotel} />
+        ) : activeTab === 'roadtrip' ? (
+          <RoadTripPage />
         ) : (
           <HomePage
             activeTab={activeTab}
