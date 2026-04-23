@@ -14,18 +14,34 @@
   background: var(--red-tint);
 }
 
+.cardLoading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.imgArea {
+  flex-shrink: 0;
+}
+
+.imgClickable {
+  cursor: pointer;
+}
+
 .img {
   width: 64px;
   height: 64px;
   object-fit: cover;
-  flex-shrink: 0;
+  display: block;
 }
 
 .imgPlaceholder {
   width: 64px;
   height: 64px;
   background: var(--green-bg-alt);
-  flex-shrink: 0;
+}
+
+.contentClickable {
+  cursor: pointer;
 }
 
 .content {

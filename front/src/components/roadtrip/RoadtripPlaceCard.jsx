@@ -39,7 +39,7 @@ function Distinction({ slug }) {
   return null
 }
 
-export default function RoadtripPlaceCard({ stop, isHighlighted, onRestaurantClick, onHotelClick }) {
+export default function RoadtripPlaceCard({ stop, isHighlighted, onRestaurantClick, onHotelClick, onRemove }) {
   const isResto = stop.category === 'restaurant'
   const [loading, setLoading] = useState(false)
 
@@ -82,9 +82,21 @@ export default function RoadtripPlaceCard({ stop, isHighlighted, onRestaurantCli
       <div className={styles.body}>
         <div className={styles.topRow}>
           <h3 className={styles.name}>{stop.name}</h3>
-          {stop.detour_minutes != null && (
-            <span className={styles.detourBadge}>+{stop.detour_minutes} min</span>
-          )}
+          <div className={styles.topActions}>
+            {stop.detour_minutes != null && (
+              <span className={styles.detourBadge}>+{stop.detour_minutes} min</span>
+            )}
+            {onRemove && (
+              <button
+                className={styles.removeBtn}
+                onClick={(e) => { e.stopPropagation(); onRemove(stop.category, stop.id) }}
+                aria-label={`Retirer ${stop.name}`}
+                type="button"
+              >
+                ×
+              </button>
+            )}
+          </div>
         </div>
 
         {stop.city && <p className={styles.city}>{stop.city}</p>}

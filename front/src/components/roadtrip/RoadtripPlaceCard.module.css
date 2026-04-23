@@ -99,6 +99,13 @@
   text-overflow: ellipsis;
 }
 
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
 .detourBadge {
   font-size: 10px;
   font-weight: 700;
@@ -107,7 +114,30 @@
   padding: 2px 6px;
   border-radius: 4px;
   white-space: nowrap;
-  flex-shrink: 0;
+}
+
+.removeBtn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--grey-text);
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--t);
+  font-family: var(--font);
+  padding: 0;
+}
+
+.removeBtn:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: var(--red-tint);
 }
 
 .city {

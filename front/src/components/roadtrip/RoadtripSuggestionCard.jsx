@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { api } from '../../api/client'
 import etoileUrl from '../../assets/svg/etoile_michelin.svg'
 import bibsUrl from '../../assets/svg/bibs.svg'
 import styles from './RoadtripSuggestionCard.module.css'
@@ -26,15 +28,48 @@ function DistinctionBadge({ slug }) {
   return null
 }
 
-export default function RoadtripSuggestionCard({ stop, onAdd, isSelected }) {
+export default function RoadtripSuggestionCard({ stop, onAdd, isSelected, onRestaurantClick, onHotelClick }) {
+  const [loading, setLoading] = useState(false)
+  const isResto = stop.category === 'restaurant'
+  const clickable = Boolean((isResto && onRestaurantClick) || (!isResto && onHotelClick))
+
+  async function handleCardClick() {
+    if (loading || !clickable) return
+    try {
+      setLoading(true)
+      if (isResto && onRestaurantClick) {
+        const data = await api.restaurants.get(stop.id)
+        onRestaurantClick(data)
+      } else if (!isResto && onHotelClick) {
+        const data = await api.hotels.get(stop.id)
+        onHotelClick(data)
+      }
+    } catch { /* silently ignore */ } finally {
+      setLoading(false)
+    }
+  }
+
   return (
-    <article className={`${styles.card} ${isSelected ? styles.cardSelected : ''}`}>
-      {stop.image ? (
-        <img src={stop.image} alt={stop.name} className={styles.img} loading="lazy" />
-      ) : (
-        <div className={styles.imgPlaceholder} />
-      )}
-      <div className={styles.content}>
+    <article
+      className={`${styles.card} ${isSelected ? styles.cardSelected : ''} ${loading ? styles.cardLoading : ''}`}
+    >
+      <div
+        className={`${styles.imgArea} ${clickable ? styles.imgClickable : ''}`}
+        onClick={clickable ? handleCardClick : undefined}
+        role={clickable ? 'button' : undefined}
+        aria-label={clickable ? `Voir la fiche de ${stop.name}` : undefined}
+      >
+        {stop.image ? (
+          <img src={stop.image} alt={stop.name} className={styles.img} loading="lazy" />
+        ) : (
+          <div className={styles.imgPlaceholder} />
+        )}
+      </div>
+      <div
+        className={`${styles.content} ${clickable ? styles.contentClickable : ''}`}
+        onClick={clickable ? handleCardClick : undefined}
+        role={clickable ? 'button' : undefined}
+      >
         <p className={styles.type}>{stop.category === 'restaurant' ? 'Restaurant' : 'Hôtel'}</p>
         <p className={styles.name}>{stop.name}</p>
         {stop.city && <p className={styles.city}>{stop.city}</p>}

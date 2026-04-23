@@ -1,4 +1,4 @@
-import { Suspense, lazy, useCallback, useMemo, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../api/client'
 import RoadtripPromptBox from '../components/roadtrip/RoadtripPromptBox'
 import RoadtripPlaceCard from '../components/roadtrip/RoadtripPlaceCard'
@@ -42,6 +42,21 @@ function buildWazeUrl(destination) {
   return `https://waze.com/ul?ll=${destination.lat},${destination.lng}&navigate=yes`
 }
 
+function computeEnrichedStops(data) {
+  if (!data) return []
+  const candidateMap = new Map()
+  ;(data.candidates ?? []).forEach((c) => candidateMap.set(`${c.category}:${c.id}`, c))
+  const detourMap = new Map()
+  ;(data.route?.stop_detours ?? []).forEach((d) => detourMap.set(`${d.category}:${d.id}`, d.detour_minutes))
+  return (data.selected?.selected?.stops ?? []).map((stop) => {
+    const c = candidateMap.get(`${stop.category}:${stop.id}`) ?? {}
+    return { ...c, ...stop, detour_minutes: detourMap.get(`${stop.category}:${stop.id}`) ?? null }
+  })
+}
+
+const SS_RESULT = 'roadtrip_result'
+const SS_STOPS  = 'roadtrip_ia_stops'
+
 const TABS = [
   { id: 'free_text', label: 'Prompt IA'  },
   { id: 'planner',   label: 'Navigateur' },
@@ -54,26 +69,39 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
   const [freeText, setFreeText]   = useState('')
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
-  const [result, setResult]       = useState(null)
-  const [highlightedId, setHighlightedId] = useState(null)
   const [saved, setSaved]         = useState(false)
   const highlightTimer = useRef(null)
+  const [highlightedId, setHighlightedId] = useState(null)
+
+  const [result, setResult] = useState(() => {
+    try { const s = sessionStorage.getItem(SS_RESULT); return s ? JSON.parse(s) : null } catch { return null }
+  })
+  const [iaSelectedStops, setIaSelectedStops] = useState(() => {
+    try { const s = sessionStorage.getItem(SS_STOPS); return s ? JSON.parse(s) : [] } catch { return [] }
+  })
+
+  useEffect(() => {
+    if (result) {
+      try { sessionStorage.setItem(SS_RESULT, JSON.stringify(result)) } catch {}
+    } else {
+      try { sessionStorage.removeItem(SS_RESULT) } catch {}
+    }
+  }, [result])
+
+  useEffect(() => {
+    try { sessionStorage.setItem(SS_STOPS, JSON.stringify(iaSelectedStops)) } catch {}
+  }, [iaSelectedStops])
 
   // ── Navigateur state ─────────────────────────────────────
   const planner = usePlannerState()
 
-  // ── Prompt IA logic ──────────────────────────────────────
-  const enrichedStops = useMemo(() => {
-    if (!result) return []
-    const candidateMap = new Map()
-    ;(result.candidates ?? []).forEach((c) => candidateMap.set(`${c.category}:${c.id}`, c))
-    const detourMap = new Map()
-    ;(result.route?.stop_detours ?? []).forEach((d) => detourMap.set(`${d.category}:${d.id}`, d.detour_minutes))
-    return (result.selected?.selected?.stops ?? []).map((stop) => {
-      const c = candidateMap.get(`${stop.category}:${stop.id}`) ?? {}
-      return { ...c, ...stop, detour_minutes: detourMap.get(`${stop.category}:${stop.id}`) ?? null }
-    })
-  }, [result])
+  // ── Prompt IA derived state ───────────────────────────────
+  const enrichedStops = useMemo(() => computeEnrichedStops(result), [result])
+
+  const iaAvailableStops = useMemo(() => {
+    const keys = new Set(iaSelectedStops.map((s) => `${s.category}:${s.id}`))
+    return enrichedStops.filter((s) => !keys.has(`${s.category}:${s.id}`))
+  }, [enrichedStops, iaSelectedStops])
 
   const routePolyline = useMemo(() => {
     const encoded = result?.route?.polyline_with_stops || result?.route?.polyline_direct || ''
@@ -82,8 +110,21 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
 
   const origin      = result?.parse?.route?.origin ?? null
   const destination = result?.parse?.route?.destination ?? null
-  const googleMapsUrl = buildGoogleMapsUrl(origin, destination, enrichedStops)
+  const googleMapsUrl = buildGoogleMapsUrl(origin, destination, iaSelectedStops)
   const wazeUrl       = buildWazeUrl(destination)
+
+  const addIaStop = useCallback((stop) => {
+    setIaSelectedStops((prev) => {
+      if (prev.some((s) => s.category === stop.category && s.id === stop.id)) return prev
+      return [...prev, stop]
+    })
+    setSaved(false)
+  }, [])
+
+  const removeIaStop = useCallback((category, id) => {
+    setIaSelectedStops((prev) => prev.filter((s) => !(s.category === category && s.id === id)))
+    setSaved(false)
+  }, [])
 
   const handleBuild = async () => {
     setLoading(true)
@@ -93,6 +134,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
     try {
       const data = await api.roadtrip.build({ input_mode: 'free_text', freeText })
       setResult(data)
+      setIaSelectedStops(computeEnrichedStops(data))
     } catch (err) {
       setError(err?.message || 'Erreur serveur')
     } finally {
@@ -102,14 +144,9 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
 
   const handleSaveItinerary = useCallback(() => {
     if (!onSaveItinerary || saved) return
-    onSaveItinerary({
-      origin,
-      destination,
-      stops: enrichedStops,
-      googleMapsUrl,
-    })
+    onSaveItinerary({ origin, destination, stops: iaSelectedStops, googleMapsUrl })
     setSaved(true)
-  }, [onSaveItinerary, saved, origin, destination, enrichedStops, googleMapsUrl])
+  }, [onSaveItinerary, saved, origin, destination, iaSelectedStops, googleMapsUrl])
 
   const scrollToCard = useCallback((stopId) => {
     const el = document.getElementById(`stop-${stopId}`)
@@ -146,6 +183,8 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
     [planner.routeData, planner.selectedStops],
   )
 
+  const hasIaContent = result && (iaSelectedStops.length > 0 || iaAvailableStops.length > 0)
+
   return (
     <div className={styles.page}>
       {/* ── MAP PANEL ──────────────────────────────────────── */}
@@ -166,7 +205,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
               <RoadtripMapLeaflet
                 origin={origin}
                 destination={destination}
-                stops={enrichedStops.filter((s) => s.lat != null)}
+                stops={iaSelectedStops.filter((s) => s.lat != null)}
                 polyline={routePolyline}
                 onScrollToCard={scrollToCard}
               />
@@ -319,6 +358,8 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
                       stop={stop}
                       onAdd={planner.addStop}
                       isSelected={isSelected}
+                      onRestaurantClick={onRestaurantClick}
+                      onHotelClick={onHotelClick}
                     />
                   )
                 })}
@@ -349,14 +390,15 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
 
             {error && <p className={styles.errorMsg}>{error}</p>}
 
-            {result && enrichedStops.length > 0 && (
+            {hasIaContent && (
               <div className={styles.results}>
+                {/* Header */}
                 <div className={styles.resultsHeader}>
                   <h2 className={styles.resultsTitle}>
-                    {enrichedStops.length} arrêt{enrichedStops.length > 1 ? 's' : ''} sélectionné{enrichedStops.length > 1 ? 's' : ''}
+                    {iaSelectedStops.length} arrêt{iaSelectedStops.length !== 1 ? 's' : ''} sélectionné{iaSelectedStops.length !== 1 ? 's' : ''}
                   </h2>
                   <div className={styles.resultActions}>
-                    {onSaveItinerary && (
+                    {onSaveItinerary && iaSelectedStops.length > 0 && (
                       <button
                         className={`${styles.saveBtn} ${saved ? styles.saveBtnDone : ''}`}
                         onClick={handleSaveItinerary}
@@ -365,7 +407,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
                         {saved ? '✓ Enregistré' : 'Enregistrer'}
                       </button>
                     )}
-                    {(googleMapsUrl || wazeUrl) && (
+                    {iaSelectedStops.length > 0 && (googleMapsUrl || wazeUrl) && (
                       <div className={styles.navBtns}>
                         {googleMapsUrl && (
                           <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer"
@@ -390,18 +432,47 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
                   </div>
                 </div>
 
-                <div className={styles.cardList}>
-                  {enrichedStops.map((stop) => (
-                    <RoadtripPlaceCard
-                      key={`${stop.category}-${stop.id}`}
-                      stop={stop}
-                      isHighlighted={highlightedId === `${stop.category}-${stop.id}`}
-                      onRestaurantClick={onRestaurantClick}
-                      onHotelClick={onHotelClick}
-                    />
-                  ))}
-                </div>
+                {/* Selected stops — cards clickables + remove */}
+                {iaSelectedStops.length > 0 && (
+                  <div className={styles.selectedSection}>
+                    <p className={styles.sectionTitle}>Mes arrêts ({iaSelectedStops.length})</p>
+                    <div className={styles.cardList}>
+                      {iaSelectedStops.map((stop) => (
+                        <RoadtripPlaceCard
+                          key={`${stop.category}-${stop.id}`}
+                          stop={stop}
+                          isHighlighted={highlightedId === `${stop.category}-${stop.id}`}
+                          onRestaurantClick={onRestaurantClick}
+                          onHotelClick={onHotelClick}
+                          onRemove={removeIaStop}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
 
+                {/* Available IA suggestions */}
+                {iaAvailableStops.length > 0 && (
+                  <div className={styles.suggestionsSection}>
+                    <p className={styles.sectionTitle}>
+                      Autres suggestions IA ({iaAvailableStops.length})
+                    </p>
+                    <div className={styles.suggestionsList}>
+                      {iaAvailableStops.map((stop) => (
+                        <RoadtripSuggestionCard
+                          key={`${stop.category}-${stop.id}`}
+                          stop={stop}
+                          onAdd={addIaStop}
+                          isSelected={false}
+                          onRestaurantClick={onRestaurantClick}
+                          onHotelClick={onHotelClick}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* IA notes */}
                 {(result.selected?.notes?.length > 0 || result.parse?.notes?.length > 0) && (
                   <details className={styles.notesBox}>
                     <summary className={styles.notesTitle}>Notes de l&apos;IA</summary>
@@ -415,7 +486,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
               </div>
             )}
 
-            {result && enrichedStops.length === 0 && (
+            {result && iaSelectedStops.length === 0 && iaAvailableStops.length === 0 && (
               <p className={styles.emptyMsg}>Aucun arrêt trouvé pour ce trajet. Essayez d&apos;élargir vos critères.</p>
             )}
           </>

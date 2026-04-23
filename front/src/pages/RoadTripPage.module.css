@@ -234,13 +234,23 @@
 }
 
 .navBtnGmaps {
-  background: #4285f4;
-  color: #fff;
+  background: var(--red);
+  color: var(--white);
+}
+
+.navBtnGmaps:hover {
+  background: var(--red-dark);
+  opacity: 1;
 }
 
 .navBtnWaze {
-  background: #33ccff;
-  color: #111;
+  background: var(--red);
+  color: var(--white);
+}
+
+.navBtnWaze:hover {
+  background: var(--red-dark);
+  opacity: 1;
 }
 
 .cardList {
@@ -423,17 +433,17 @@
   align-items: center;
   gap: 5px;
   padding: 7px 12px;
-  background: #4285f4;
-  color: #fff;
+  background: var(--red);
+  color: var(--white);
   border-radius: 6px;
   font-size: 12px;
   font-weight: 700;
   text-decoration: none;
-  transition: opacity var(--t);
+  transition: background var(--t);
 }
 
 .plannerNavBtn:hover {
-  opacity: 0.85;
+  background: var(--red-dark);
 }
 
 .suggestionsSection {
