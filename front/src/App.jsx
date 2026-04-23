@@ -8,7 +8,9 @@ import HomePage from './pages/HomePage'
 import FavoritesPage from './pages/FavoritesPage'
 import RestaurantDetailPage from './pages/RestaurantDetailPage'
 import HotelDetailPage from './pages/HotelDetailPage'
+import RoadTripPage from './pages/RoadTripPage'
 import ProfilePage from './pages/ProfilePage'
+import CollectionPage from './pages/CollectionPage'
 import ConditionsPage from './pages/legal/ConditionsPage'
 import CookiesPage from './pages/legal/CookiesPage'
 import ConfidentialitePage from './pages/legal/ConfidentialitePage'
@@ -23,6 +25,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('restaurants')
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [selectedHotel, setSelectedHotel] = useState(null)
+  const [collectionOpen, setCollectionOpen] = useState(false)
   const [legalPage, setLegalPage] = useState(null)
   const [dialogItem, setDialogItem] = useState(null)
   const { message, visible, showToast } = useToast()
@@ -30,12 +33,9 @@ export default function App() {
   const favorites = useFavorites()
 
   const isDetail = !!(selectedRestaurant || selectedHotel)
-  const isLegal = !!legalPage
+  const isLegal  = !!legalPage
 
-  const handleLegalPage = (id) => {
-    setLegalPage(id)
-    window.scrollTo(0, 0)
-  }
+  const handleLegalPage = (id) => { setLegalPage(id); window.scrollTo(0, 0) }
   const handleLegalBack = () => setLegalPage(null)
 
   const handleRestaurantClick = (restaurant) => {
@@ -60,12 +60,11 @@ export default function App() {
     setActiveTab(tab)
     setSelectedRestaurant(null)
     setSelectedHotel(null)
-    if (tab === 'profile') showToast('Section bientôt disponible')
+    setCollectionOpen(false)
+    setLegalPage(null)
   }
 
-  const handleSave = (item, type) => {
-    setDialogItem({ item, type })
-  }
+  const handleSave = (item, type) => { setDialogItem({ item, type }) }
 
   const handleInstall = async () => {
     const outcome = await install()
@@ -73,21 +72,22 @@ export default function App() {
   }
 
   const LEGAL_TITLES = {
-    conditions: "Conditions d'utilisation",
-    cookies: 'Gestion de vos cookies',
+    conditions:      "Conditions d'utilisation",
+    cookies:         'Gestion de vos cookies',
     confidentialite: 'Politique de confidentialité',
-    notice: 'Notice légale',
-    accessibilite: 'Accessibilité',
+    notice:          'Notice légale',
+    accessibilite:   'Accessibilité',
   }
 
   const detailName = selectedRestaurant?.name ?? selectedHotel?.name
   const navTitle = isLegal ? LEGAL_TITLES[legalPage]
-    : isDetail ? detailName : (
-      activeTab === 'restaurants' ? 'Restaurants'
-      : activeTab === 'hotels'   ? 'Hébergements'
-      : activeTab === 'profile'  ? 'Compte'
-      : 'Favoris'
-    )
+    : isDetail ? detailName
+    : activeTab === 'restaurants' ? 'Restaurants'
+    : activeTab === 'hotels'      ? 'Hébergements'
+    : activeTab === 'roadtrip'    ? 'Road Trip'
+    : activeTab === 'collections' ? 'Collection'
+    : activeTab === 'profile'     ? 'Mon Profil'
+    : 'Favoris'
 
   return (
     <div className={styles.app}>
@@ -100,11 +100,11 @@ export default function App() {
       />
 
       <main className={styles.main}>
-        {legalPage === 'conditions'      ? <ConditionsPage onBack={handleLegalBack} />
-        : legalPage === 'cookies'        ? <CookiesPage onBack={handleLegalBack} />
-        : legalPage === 'confidentialite'? <ConfidentialitePage onBack={handleLegalBack} />
-        : legalPage === 'notice'         ? <NoticeLegalePage onBack={handleLegalBack} />
-        : legalPage === 'accessibilite'  ? <AccessibilitePage onBack={handleLegalBack} />
+        {legalPage === 'conditions'       ? <ConditionsPage onBack={handleLegalBack} />
+        : legalPage === 'cookies'         ? <CookiesPage onBack={handleLegalBack} />
+        : legalPage === 'confidentialite' ? <ConfidentialitePage onBack={handleLegalBack} />
+        : legalPage === 'notice'          ? <NoticeLegalePage onBack={handleLegalBack} />
+        : legalPage === 'accessibilite'   ? <AccessibilitePage onBack={handleLegalBack} />
         : selectedRestaurant ? (
           <RestaurantDetailPage
             restaurant={selectedRestaurant}
@@ -118,6 +118,14 @@ export default function App() {
           />
         ) : selectedHotel ? (
           <HotelDetailPage hotel={selectedHotel} />
+        ) : activeTab === 'profile' && collectionOpen ? (
+          <CollectionPage onClose={() => setCollectionOpen(false)} />
+        ) : activeTab === 'collections' ? (
+          <CollectionPage onClose={() => setActiveTab('profile')} />
+        ) : activeTab === 'profile' ? (
+          <ProfilePage onOpenCollection={() => setCollectionOpen(true)} />
+        ) : activeTab === 'roadtrip' ? (
+          <RoadTripPage />
         ) : activeTab === 'favorites' ? (
           <FavoritesPage
             lists={favorites.lists}
