@@ -1,4 +1,4 @@
-import { useNfc } from '../hooks/useNfc'
+import { useNfc, isMobileDevice } from '../hooks/useNfc'
 import styles from './ProfilePage.module.css'
 
 const STATIC_ITEMS = [
@@ -25,7 +25,8 @@ function NfcIcon() {
 }
 
 export default function ProfilePage({ onOpenCollection }) {
-  const { scanning, status, error, supported, startScan } = useNfc()
+  const { scanning, status, error, startScan } = useNfc()
+  const mobile = isMobileDevice()
 
   function handleScan() {
     startScan((text, serialNumber) => {
@@ -45,22 +46,27 @@ export default function ProfilePage({ onOpenCollection }) {
       <div className={styles.inner}>
         <h1 className={styles.title}>Compte</h1>
 
-        <div className={styles.nfcSection}>
-          <button
-            className={`${styles.nfcBtn} ${scanning ? styles.nfcBtnScanning : ''}`}
-            onClick={handleScan}
-            disabled={!supported}
-            aria-label={scanning ? 'Arrêter le scan NFC' : 'Scanner un tag NFC'}
-          >
+        {mobile ? (
+          <div className={styles.nfcSection}>
+            <button
+              className={`${styles.nfcBtn} ${scanning ? styles.nfcBtnScanning : ''}`}
+              onClick={handleScan}
+              aria-label={scanning ? 'Arrêter le scan NFC' : 'Scanner un tag NFC'}
+            >
+              <NfcIcon />
+              <span>{scanning ? 'Annuler' : 'Scanner NFC'}</span>
+            </button>
+            {status && <p className={styles.nfcStatus}>{status}</p>}
+            {error && <p className={styles.nfcError}>{error}</p>}
+          </div>
+        ) : (
+          <div className={styles.nfcDesktopBanner}>
             <NfcIcon />
-            <span>{scanning ? 'Annuler' : 'Scanner NFC'}</span>
-          </button>
-          {status && <p className={styles.nfcStatus}>{status}</p>}
-          {error && <p className={styles.nfcError}>{error}</p>}
-          {!supported && !error && (
-            <p className={styles.nfcError}>Web NFC non supporté. Utilisez Chrome sur Android.</p>
-          )}
-        </div>
+            <p className={styles.nfcDesktopText}>
+              Consultez notre site sur téléphone pour scanner directement les plaques Michelin des restaurants.
+            </p>
+          </div>
+        )}
 
         <ul className={styles.menu}>
           <li className={`${styles.item} ${styles.itemClickable}`} onClick={onOpenCollection}>

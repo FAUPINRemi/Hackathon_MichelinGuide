@@ -7,6 +7,7 @@ import restaurantsRouter from './routes/restaurants.js';
 import hotelsRouter from './routes/hotels.js';
 import roadtripRouter from './routes/roadtrip.js';
 import placesRouter from './routes/places.js';
+import collectionRouter from './routes/collection.js';
 import { logger } from './lib/logger.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
 import { openapiSpec } from './docs/openapi.js';
@@ -44,6 +45,7 @@ app.use('/api/restaurants', restaurantsRouter);
 app.use('/api/hotels', hotelsRouter);
 app.use('/api/roadtrip', roadtripRouter);
 app.use('/api/places', placesRouter);
+app.use('/api/collection', collectionRouter);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

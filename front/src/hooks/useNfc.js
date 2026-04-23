@@ -1,5 +1,8 @@
 import { useState, useRef } from 'react'
 
+export const isMobileDevice = () =>
+  /Android|iPhone|iPad|iPod/i.test(navigator.userAgent)
+
 export function useNfc() {
   const [scanning, setScanning] = useState(false)
   const [status, setStatus] = useState('')
