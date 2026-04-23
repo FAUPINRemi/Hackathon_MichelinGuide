@@ -1,54 +1,27 @@
 import { useState } from 'react'
+import DetailMap from '../components/map/DetailMap'
 import styles from './HotelDetailPage.module.css'
 
-const ACTION_TILES = [
-  {
-    id: 'notes',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 9h8M8 13h5"/>
-      </svg>
-    ),
-    label: 'Remarques',
-  },
-  {
-    id: 'visited',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <path d="M20 6 9 17l-5-5"/>
-      </svg>
-    ),
-    label: 'Déjà visité',
-  },
-  {
-    id: 'save',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
-      </svg>
-    ),
-    label: 'Sauvegarder',
-  },
-  {
-    id: 'favorite',
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-      </svg>
-    ),
-    label: 'Favori',
-  },
-]
-
 function formatTime(t) {
-  if (!t) return null;
-  const h = Math.floor(t);
-  const m = Math.round((t - h) * 60);
-  return `${String(h).padStart(2, '0')}h${m ? String(m).padStart(2, '0') : '00'}`;
+  if (!t) return null
+  const h = Math.floor(t)
+  const m = Math.round((t - h) * 60)
+  return `${String(h).padStart(2, '0')}h${m ? String(m).padStart(2, '0') : '00'}`
+}
+
+function BuildingIcon() {
+  return (
+    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1">
+      <path d="M3 21h18M3 7l9-4 9 4M5 21V7M19 21V7"/>
+      <rect x="9" y="13" width="6" height="8"/>
+      <rect x="7" y="10" width="2" height="2"/><rect x="15" y="10" width="2" height="2"/>
+    </svg>
+  )
 }
 
 export default function HotelDetailPage({ hotel }) {
-  const [activeActions, setActiveActions] = useState({})
+  const [visited, setVisited]   = useState(false)
+  const [saved, setSaved]       = useState(false)
   const [expanded, setExpanded] = useState(false)
 
   if (!hotel) return null
@@ -60,15 +33,11 @@ export default function HotelDetailPage({ hotel }) {
     distinction, distinction_score, isPlus, sustainableHotel,
   } = hotel
 
-  const toggleAction = (id) => setActiveActions((prev) => ({ ...prev, [id]: !prev[id] }))
-
-  const shortDesc = description?.slice(0, 280)
+  const shortDesc   = description?.slice(0, 280)
   const needsExpand = description?.length > 280
-
   const checkInStr  = formatTime(checkIn)
   const checkOutStr = formatTime(checkOut)
-
-  const hasMap = lat && lng
+  const hasMap      = lat && lng
 
   return (
     <div className={styles.page}>
@@ -79,6 +48,16 @@ export default function HotelDetailPage({ hotel }) {
           ? <img src={img} alt={name} className={styles.heroImg} />
           : <div className={styles.heroPlaceholder}><BuildingIcon /></div>
         }
+        <div className={styles.heroOverlay} />
+        {(distinction_score > 0 || isPlus || sustainableHotel) && (
+          <div className={styles.heroBadges}>
+            {distinction_score > 0 && distinction?.label && (
+              <span className={styles.heroBadge}>{distinction.label.split(':')[0]}</span>
+            )}
+            {isPlus && <span className={styles.heroBadgePlus}>MICHELIN Plus</span>}
+            {sustainableHotel && <span className={styles.heroBadgeEco}>Éco</span>}
+          </div>
+        )}
         <div className={styles.heroGrid}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="white">
             <rect x="1" y="6" width="4" height="16" rx="1"/>
@@ -88,32 +67,46 @@ export default function HotelDetailPage({ hotel }) {
         </div>
       </div>
 
-      {/* Info principale */}
+      {/* Main info */}
       <div className={styles.info}>
-        <div className={styles.badges}>
-          {distinction_score > 0 && distinction?.label && (
-            <span className={styles.distBadge}>{distinction.label.split(':')[0]}</span>
-          )}
-          {isPlus && <span className={styles.plusBadge}>MICHELIN Plus</span>}
-          {sustainableHotel && <span className={styles.ecoBadge}>🌿 Éco-responsable</span>}
-        </div>
         <h1 className={styles.name}>{name}</h1>
-        <p className={styles.addressLine}>{address}</p>
-        <p className={styles.locationLine}>{location}</p>
+        <div className={styles.metaRow}>
+          {address && <span>{address}</span>}
+          {address && location && <span className={styles.metaDot}>·</span>}
+          {location && <span>{location}</span>}
+        </div>
       </div>
 
-      {/* Action tiles */}
+      {/* Action pills */}
       <div className={styles.actions}>
-        {ACTION_TILES.map(({ id, icon, label }) => (
-          <button
-            key={id}
-            className={`${styles.actionTile} ${activeActions[id] ? styles.tileActive : ''}`}
-            onClick={() => toggleAction(id)}
-          >
-            <span className={styles.tileIcon}>{icon}</span>
-            <span className={styles.tileLabel}>{label}</span>
-          </button>
-        ))}
+        <button
+          className={`${styles.actionBtn} ${visited ? styles.actionActive : ''}`}
+          onClick={() => setVisited(v => !v)}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2">
+            <path d="M20 6 9 17l-5-5"/>
+          </svg>
+          <span>Déjà visité</span>
+        </button>
+
+        <button
+          className={`${styles.actionBtn} ${saved ? styles.actionActive : ''}`}
+          onClick={() => setSaved(v => !v)}
+        >
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+          <span>Favori</span>
+        </button>
+
+        <button className={styles.actionBtn}>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+          </svg>
+          <span>Partager</span>
+        </button>
       </div>
 
       <hr className={styles.divider} />
@@ -170,11 +163,12 @@ export default function HotelDetailPage({ hotel }) {
         <p className={styles.addressText}>{address}{location ? `, ${location}` : ''}</p>
         {hasMap && (
           <div className={styles.mapWrap}>
-            <iframe
-              title={`Carte ${name}`}
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${lng - 0.03}%2C${lat - 0.015}%2C${lng + 0.03}%2C${lat + 0.015}&layer=mapnik&marker=${lat}%2C${lng}`}
-              className={styles.mapFrame}
-              loading="lazy"
+            <DetailMap
+              lat={lat}
+              lng={lng}
+              name={name}
+              distinctionScore={distinction_score}
+              type="hotel"
             />
           </div>
         )}
@@ -206,16 +200,15 @@ export default function HotelDetailPage({ hotel }) {
         )}
       </div>
 
-    </div>
-  )
-}
+      {/* Signalement */}
+      <hr className={styles.divider} />
+      <div className={styles.section}>
+        <div className={styles.reportBox}>
+          <p className={styles.reportText}>Avez-vous trouvé une information erronée ou obsolète ?</p>
+          <button className={styles.reportBtn}>Dites-le nous</button>
+        </div>
+      </div>
 
-function BuildingIcon() {
-  return (
-    <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#ccc" strokeWidth="1">
-      <path d="M3 21h18M3 7l9-4 9 4M5 21V7M19 21V7"/>
-      <rect x="9" y="13" width="6" height="8"/>
-      <rect x="7" y="10" width="2" height="2"/><rect x="15" y="10" width="2" height="2"/>
-    </svg>
+    </div>
   )
 }

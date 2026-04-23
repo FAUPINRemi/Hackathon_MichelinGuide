@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, lazy, Suspense } from 'react'
 import SearchBar from '../components/filters/SearchBar'
 import RestaurantCard from '../components/cards/RestaurantCard'
 import ScrollSection from '../components/layout/ScrollSection'
+import Footer from '../components/layout/Footer'
 import { EDITORIAL } from '../data/restaurants'
 import { api } from '../api/client'
 import { useApiData } from '../hooks/useApiData'
@@ -9,18 +10,77 @@ import styles from './HomeTabs.module.css'
 
 const RestaurantMap = lazy(() => import('../components/map/RestaurantMap'))
 
+const DESTINATIONS = [
+  'Abu Dhabi', 'Allemagne', 'Arabie Saoudite', 'Argentine', 'Autriche', 'Belgique',
+  'Brésil', 'Canada', 'Chine Continentale', 'Corée du Sud', 'Croatie', 'Danemark',
+  'Dubai', 'Espagne', 'Estonie', 'Etats-Unis', 'Finlande', 'France', 'Grèce',
+  'Hong Kong RAS', 'Hongrie', 'Irlande', 'Islande', 'Italie', 'Japon',
+  'Les Philippines', 'Lettonie', 'Lituanie', 'Luxembourg', 'Macao RAS', 'Malaisie',
+  'Malte', 'Mexique', 'Norvège', 'Pays-Bas', 'Pologne', 'Portugal', 'Qatar',
+  'Région de Taïwan', 'République Tchèque', 'Royaume-Uni', 'Serbie', 'Singapour',
+  'Slovénie', 'Suède', 'Suisse', 'Thaïlande', 'Turquie', 'Vietnam',
+]
+
+const GUIDE_LINKS = [
+  'À propos du Guide', 'Restaurants', 'Hébergements',
+  'Partenariat privilégié TheFork', 'Les partenaires',
+  'Contactez-nous', 'Laisser un avis', 'Guide MICHELIN Plus',
+]
+
+const GROUPE_LINKS = [
+  "L'entreprise MICHELIN", 'Les pneus MICHELIN', 'ViaMichelin',
+]
+
+function SiteFooterLinks({ onDestinationClick }) {
+  return (
+    <div className={styles.siteFooter}>
+      <div className={styles.siteFooterGrid}>
+        <div className={styles.siteFooterCol}>
+          <p className={styles.siteFooterTitle}>Guide MICHELIN</p>
+          {GUIDE_LINKS.map(l => (
+            <a key={l} href="#" className={styles.siteFooterLink}>{l}</a>
+          ))}
+          <p className={`${styles.siteFooterTitle} ${styles.siteFooterTitleGap}`}>Le groupe MICHELIN</p>
+          {GROUPE_LINKS.map(l => (
+            <a key={l} href="#" className={styles.siteFooterLink}>{l}</a>
+          ))}
+        </div>
+
+        <div className={styles.siteFooterDestinations}>
+          <p className={styles.siteFooterTitle}>Sélections du Guide MICHELIN</p>
+          <div className={styles.destinationsGrid}>
+            {DESTINATIONS.map(d => (
+              <button key={d} className={styles.destinationLink} onClick={() => onDestinationClick(d)}>
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 const REST_FILTERS = ['Tous', '3 Étoiles', '2 Étoiles', '1 Étoile', 'Bib Gourmand', 'Étoile Verte']
 const FILTER_PARAM = {
   'Tous': '', '3 Étoiles': '3-stars', '2 Étoiles': '2-stars',
   '1 Étoile': '1-star', 'Bib Gourmand': 'bib', 'Étoile Verte': 'green',
 }
 
-export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved }) {
+export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved, onLegalPage }) {
   const [search, setSearch]                   = useState('')
   const [activeFilter, setActiveFilter]       = useState('Tous')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [mapRestaurants, setMapRestaurants]   = useState([])
   const [mapCenter, setMapCenter]             = useState(null)
+  const [isMobile, setIsMobile]               = useState(() => !window.matchMedia('(min-width: 768px)').matches)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)')
+    const handler = (e) => setIsMobile(!e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(search), 350)
@@ -100,24 +160,38 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved }
 
         <section className={styles.mapSection}>
           <div className={styles.sectionHead}>
-            <h2 className={styles.sectionTitle}>Autour de moi</h2>
+            <h2 className={styles.sectionTitle}>{debouncedSearch ? debouncedSearch : 'Autour de moi'}</h2>
             <a href="#" className={styles.seeAll}>Tout Voir</a>
           </div>
           <div className={styles.mapWrap}>
-            <Suspense fallback={<div className={styles.mapFrame} />}>
-              <RestaurantMap
-                restaurants={mapRestaurants}
-                onRestaurantClick={onRestaurantClick}
-                center={mapCenter}
-              />
-            </Suspense>
+            {isMobile && (
+              <Suspense fallback={<div className={styles.mapFrame} />}>
+                <RestaurantMap
+                  restaurants={mapRestaurants}
+                  onRestaurantClick={onRestaurantClick}
+                  center={mapCenter}
+                />
+              </Suspense>
+            )}
           </div>
         </section>
 
         {loading && <p className={styles.loadingMsg}>Chargement…</p>}
         {error   && <p className={styles.errorMsg}>Serveur non disponible</p>}
 
-        {!loading && newStarred.length > 0 && (
+        {!loading && debouncedSearch && restaurants.length > 0 && (
+          <ScrollSection title={`Résultats · ${restaurants.length} restaurant${restaurants.length > 1 ? 's' : ''}`}>
+            {restaurants.map((r) => (
+              <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" onSave={onSave} isSaved={isAnySaved?.(r.id, 'restaurant')} />
+            ))}
+          </ScrollSection>
+        )}
+
+        {!loading && debouncedSearch && restaurants.length === 0 && (
+          <p className={styles.emptyState}>Aucun restaurant trouvé pour « {debouncedSearch} »</p>
+        )}
+
+        {!loading && !debouncedSearch && newStarred.length > 0 && (
           <ScrollSection title="Les nouveaux 3 &amp; 2 Étoiles" subtitle="Guide MICHELIN 2026">
             {newStarred.map((r) => (
               <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" onSave={onSave} isSaved={isAnySaved?.(r.id, 'restaurant')} />
@@ -125,7 +199,7 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved }
           </ScrollSection>
         )}
 
-        {!loading && starred3.length > 0 && (
+        {!loading && !debouncedSearch && starred3.length > 0 && (
           <ScrollSection title="3 Étoiles MICHELIN" seeAllHref="#">
             {starred3.map((r) => (
               <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" onSave={onSave} isSaved={isAnySaved?.(r.id, 'restaurant')} />
@@ -133,19 +207,21 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved }
           </ScrollSection>
         )}
 
-        <ScrollSection title="Magazine" seeAllHref="#">
-          {EDITORIAL.map((a) => (
-            <article key={a.id} className={styles.editCard}>
-              <div className={styles.editImgWrap}>
-                <img src={a.img} alt={a.title} loading="lazy" className={styles.editImg} />
-              </div>
-              <div className={styles.editBody}>
-                <p className={styles.editTag}>{a.tag}</p>
-                <h3 className={styles.editTitle}>{a.title}</h3>
-              </div>
-            </article>
-          ))}
-        </ScrollSection>
+        {!debouncedSearch && (
+          <ScrollSection title="Magazine" seeAllHref="#">
+            {EDITORIAL.map((a) => (
+              <article key={a.id} className={styles.editCard}>
+                <div className={styles.editImgWrap}>
+                  <img src={a.img} alt={a.title} loading="lazy" className={styles.editImg} />
+                </div>
+                <div className={styles.editBody}>
+                  <p className={styles.editTag}>{a.tag}</p>
+                  <h3 className={styles.editTitle}>{a.title}</h3>
+                </div>
+              </article>
+            ))}
+          </ScrollSection>
+        )}
       </div>
 
       <div className={styles.desktopOnly}>
@@ -168,7 +244,7 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved }
 
         <div className={styles.desktopContent}>
           {loading && <p className={styles.loadingMsg}>Chargement…</p>}
-          {error   && <p className={styles.errorMsg}>Serveur non disponible — lancez le backend.</p>}
+          {error   && <p className={styles.errorMsg}>Serveur non disponible</p>}
           {!loading && !error && (
             <p className={styles.resultsCount}>{total} restaurants</p>
           )}
@@ -178,16 +254,11 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved }
             ))}
           </div>
 
-          <div className={styles.footerPromo}>
-            <h2>À la découverte des expériences du Guide MICHELIN</h2>
-            <div className={styles.promoLinks}>
-              {['Paris', 'Lyon', 'Bordeaux', 'Marseille', 'Strasbourg', 'Nice', 'Toulouse', 'Nantes', 'Montpellier', 'Lille'].map((c) => (
-                <a key={c} href="#" className={styles.promoLink}>{c}</a>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
+
+      <SiteFooterLinks onDestinationClick={(dest) => { window.scrollTo({ top: 0, behavior: 'instant' }); setSearch(dest); setDebouncedSearch(dest) }} />
+      <Footer onLegalPage={onLegalPage} />
     </div>
   )
 }

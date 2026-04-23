@@ -45,7 +45,7 @@
   margin-bottom: 5px;
   min-height: 18px;
 }
-.bibIcon { font-size: 16px; line-height: 1; }
+.bibIcon { width: 18px; height: 18px; object-fit: contain; }
 
 .name {
   font-size: 14px;
