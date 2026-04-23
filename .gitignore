@@ -3,7 +3,8 @@ env/.env.*
 env/.env.example
 node_modules/
 
-bdd/
-
-CLAUDE.md
-.claude/
+bdd/all_hotels.jsonl
+bdd/all_restaurants.jsonlbdd/hotels.csv
+bdd/restaurants.csv
+bdd/hotels.csv
+env/vertex-service-account.json

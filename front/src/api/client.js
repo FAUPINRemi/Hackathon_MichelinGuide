@@ -10,6 +10,25 @@ async function get(path, params = {}) {
   return res.json();
 }
 
+async function post(path, body = {}) {
+  const res = await fetch(BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) {
+    let errorMessage = `HTTP ${res.status}`;
+    try {
+      const data = await res.json();
+      errorMessage = data.error || errorMessage;
+    } catch {
+      // ignore json parsing error
+    }
+    throw new Error(errorMessage);
+  }
+  return res.json();
+}
+
 export const api = {
   restaurants: {
     list: (params) => get('/restaurants', params),
@@ -25,5 +44,8 @@ export const api = {
     regions:      (countryCode)                   => get(`/collection/countries/${countryCode}/regions`),
     cities:       (countryCode, regionName)       => get(`/collection/countries/${countryCode}/regions/${encodeURIComponent(regionName)}/cities`),
     restaurants:  (countryCode, regionName, city) => get(`/collection/countries/${countryCode}/regions/${encodeURIComponent(regionName)}/cities/${encodeURIComponent(city)}/restaurants`),
+  roadtrip: {
+    parse: (payload) => post('/roadtrip/parse', payload),
+    build: (payload) => post('/roadtrip/build', payload),
   },
 };
