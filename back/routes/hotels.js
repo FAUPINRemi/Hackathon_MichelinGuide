@@ -3,6 +3,15 @@ import pool from '../db.js';
 
 const router = Router();
 
+function parseHotelImg(raw) {
+  try {
+    const m = typeof raw === 'string' ? JSON.parse(raw) : raw
+    const u = m?.hotrooms_large_url ?? ''
+    if (!u) return ''
+    return u.startsWith('http') ? u : `https://${u}`
+  } catch { return '' }
+}
+
 function format(h) {
   const score = h.distinction_score ?? 0;
   return {
@@ -11,7 +20,7 @@ function format(h) {
     address:          h.address ?? '',
     location:         h.city?.name ?? '',
     description:      h.content ?? '',
-    img:              h.main_image ?? '',
+    img:              parseHotelImg(h.main_image),
     lat:              h.lat,
     lng:              h.lng,
     phone:            h.phone ?? '',
@@ -74,8 +83,8 @@ router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
     const result = await pool.query(
-      'SELECT * FROM hotels WHERE hotel_id = $1 OR id = $1 LIMIT 1',
-      [parseInt(id, 10) || 0]
+      'SELECT * FROM hotels WHERE hotel_id = $1 OR id::text = $1 LIMIT 1',
+      [id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'Not found' });
     res.json(format(result.rows[0]));
