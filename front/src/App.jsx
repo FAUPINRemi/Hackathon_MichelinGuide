@@ -66,11 +66,9 @@ export default function App() {
   const navTitle = isDetail ? detailName : (
     activeTab === 'restaurants' ? 'Restaurants'
     : activeTab === 'hotels'   ? 'Hébergements'
- 
     : activeTab === 'roadtrip' ? 'Road Trip'
+    : activeTab === 'collections' ? 'Collection'
     : activeTab === 'profile'  ? 'Mon Profil'
-
-    : activeTab === 'profile'  ? 'Compte'
     : 'Favoris'
   )
 
@@ -91,6 +89,8 @@ export default function App() {
           <HotelDetailPage hotel={selectedHotel} />
         ) : activeTab === 'profile' && collectionOpen ? (
           <CollectionPage onClose={() => setCollectionOpen(false)} />
+        ) : activeTab === 'collections' ? (
+          <CollectionPage onClose={() => setActiveTab('profile')} />
         ) : activeTab === 'profile' ? (
           <ProfilePage onOpenCollection={() => setCollectionOpen(true)} />
         ) : activeTab === 'roadtrip' ? (

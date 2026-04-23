@@ -36,15 +36,25 @@ const TABS = [
     },
   },
   {
-    id: 'profile',
+    id: 'roadtrip',
     label: '',
     icon: (active) => (
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke={active ? '#c41230' : '#767676'} strokeWidth="1.8">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke={active ? '#c41230' : '#767676'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
         <path d="M5 24l8-7 5 4 9-9"/>
         <circle cx="5" cy="24" r="2" fill={active ? '#c41230' : '#767676'} stroke="none"/>
         <circle cx="13" cy="17" r="2" fill={active ? '#c41230' : '#767676'} stroke="none"/>
         <circle cx="18" cy="21" r="2" fill={active ? '#c41230' : '#767676'} stroke="none"/>
         <circle cx="27" cy="12" r="2" fill={active ? '#c41230' : '#767676'} stroke="none"/>
+      </svg>
+    ),
+  },
+  {
+    id: 'profile',
+    label: '',
+    icon: (active) => (
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none" stroke={active ? '#c41230' : '#767676'} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="16" cy="11" r="4.5"/>
+        <path d="M8 24a8 8 0 0 1 16 0"/>
       </svg>
     ),
   },
@@ -60,18 +70,16 @@ const TABS = [
 ]
 
 export default function BottomNav({ active = 'restaurants', onChange }) {
-  const mappedActive = active === 'roadtrip' ? 'profile' : active
-
   return (
     <nav className={styles.nav} aria-label="Navigation principale">
       {TABS.map(({ id, label, icon }) => (
         <button
           key={id}
-          className={`${styles.tab} ${mappedActive === id ? styles.active : ''}`}
-          onClick={() => onChange?.(id === 'profile' ? 'roadtrip' : id)}
+          className={`${styles.tab} ${active === id ? styles.active : ''}`}
+          onClick={() => onChange?.(id)}
           aria-label={id}
         >
-          {icon(mappedActive === id)}
+          {icon(active === id)}
           {label && <span className={styles.label}>{label}</span>}
         </button>
       ))}
