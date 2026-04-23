@@ -37,11 +37,17 @@ Selection rules:
 - If candidates are insufficient, reduce count and explain in notes.
 
 Geographic distribution (CRITICAL):
-- Candidates are already pre-filtered to be near the route. Favor stops spread along the route.
-- Do NOT cluster all stops near origin or all near destination.
-- If stops_target = {restaurant: 2}, pick one stop nearer origin and one nearer destination.
-- If stops_target = {restaurant: 3}, spread them: beginning / middle / end of route.
-- Use the candidate lat/lng to judge position along route relative to origin and destination.
+- Respect stop_area if provided:
+  • "near_destination": ALL stops must be as close as possible to the destination coords. Ignore spread rule.
+  • "near_origin": ALL stops must be as close as possible to the origin coords. Ignore spread rule.
+  • Any other string (city name): ALL stops must be near that city. Pick candidates with the closest lat/lng to it.
+  • Undefined / missing: default spread rule below applies.
+- Default spread rule (when stop_area is undefined):
+  • Candidates are already pre-filtered to be near the route. Favor stops spread along the route.
+  • Do NOT cluster all stops near origin or all near destination.
+  • If stops_target = {restaurant: 2}, pick one stop nearer origin and one nearer destination.
+  • If stops_target = {restaurant: 3}, spread them: beginning / middle / end of route.
+  • Use the candidate lat/lng to judge position along route relative to origin and destination.
 
 Quality rules:
 - Prefer higher distinction_score candidates when equal geographic spread can be maintained.
@@ -76,13 +82,14 @@ export function buildRoadtripSelectUserPrompt(parse: RoadtripParse, candidates: 
   }));
 
   return JSON.stringify({
-    task: 'Select stops from shortlist only. Distribute them geographically along the route.',
+    task: 'Select stops from shortlist only. Respect stop_area for geographic focus.',
     route: {
       origin: { label: parse.route.origin.label, lat: parse.route.origin.lat, lng: parse.route.origin.lng },
       destination: { label: parse.route.destination.label, lat: parse.route.destination.lat, lng: parse.route.destination.lng },
       waypoints_user: parse.route.waypoints_user,
     },
     stops_target: parse.plan.stops_target,
+    stop_area: parse.plan.stop_area ?? null,
     preferences: {
       cuisines: parse.preferences.cuisines,
       budget: parse.preferences.budget,

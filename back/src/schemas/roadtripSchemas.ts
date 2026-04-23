@@ -34,6 +34,7 @@ export const roadtripParseSchema = z.object({
       hotel: z.number().int().min(0),
     }).strict(),
     distribution_strategy: z.enum(['near_route', 'balanced', 'near_cities']),
+    stop_area: z.string().optional(),
   }).strict(),
   search_query: z.object({
     radius_km: z.number().positive(),

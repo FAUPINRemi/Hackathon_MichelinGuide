@@ -33,7 +33,8 @@ Output constraints:
   },
   "plan": {
     "stops_target": { "restaurant": number, "hotel": number },
-    "distribution_strategy": "near_route"
+    "distribution_strategy": "near_route",
+    "stop_area": string | undefined
   },
   "search_query": {
     "radius_km": number,
@@ -53,6 +54,11 @@ Rules:
 - waypoints_user: extract ALL intermediate stops / "passing through" / "via" cities from free text.
 - If user mentions stopping at a city (e.g. "en passant par Dijon"), add it to waypoints_user with label set and lat/lng null.
 - distribution_strategy: always "near_route" — do not change.
+- stop_area: detect where the user wants their stops:
+  • If user says "à [destination]" / "at [destination]" / "in [destination]" where [destination] matches the destination city → set "near_destination"
+  • If user says "à [origin]" / "at [origin]" / "in [origin]" where [origin] matches the origin city → set "near_origin"
+  • If user mentions a specific intermediate city for stops → set that city name as a string (e.g. "Lyon")
+  • Otherwise → omit the field (undefined), meaning stops are spread along the route
 - sort: always "distance" — server overrides this anyway.
 - radius_km: always 40. Server enforces this.
 - limit_candidates_per_category: always 50. Server enforces this.
