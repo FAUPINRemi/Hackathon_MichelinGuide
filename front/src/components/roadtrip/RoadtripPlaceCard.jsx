@@ -4,9 +4,9 @@ import styles from './RoadtripPlaceCard.module.css'
 
 function getStarCount(slug) {
   if (!slug) return 0
-  if (slug.includes('3') || slug.includes('three')) return 3
-  if (slug.includes('2') || slug.includes('two')) return 2
-  if (slug.includes('1') || slug.includes('one') || slug === 'etoile-michelin') return 1
+  if (slug.includes('3-stars')) return 3
+  if (slug.includes('2-stars')) return 2
+  if (slug.includes('1-star')) return 1
   return 0
 }
 
@@ -23,8 +23,7 @@ function Distinction({ slug }) {
   if (slug.includes('green')) {
     return (
       <div className={styles.distinctions}>
-        <span className={styles.greenStar}>🌿</span>
-        <span className={`${styles.distLabel} ${styles.distGreen}`}>Étoile Verte</span>
+        <span className={styles.distLabel} style={{ color: 'var(--green)' }}>Étoile Verte</span>
       </div>
     )
   }
@@ -46,35 +45,42 @@ function Distinction({ slug }) {
 
 export default function RoadtripPlaceCard({ stop, isHighlighted }) {
   const isResto = stop.category === 'restaurant'
+  const hasImage = Boolean(stop.image)
 
   return (
     <article
       id={`stop-${stop.category}-${stop.id}`}
       className={`${styles.card} ${isHighlighted ? styles.highlighted : ''}`}
     >
-      <div className={`${styles.imgWrap} ${isResto ? styles.imgResto : styles.imgHotel}`}>
-        <span className={styles.imgEmoji}>{isResto ? '🍽️' : '🏨'}</span>
+      <div className={styles.imgWrap}>
+        {hasImage ? (
+          <img
+            src={stop.image}
+            alt={stop.name}
+            className={styles.img}
+            loading="lazy"
+          />
+        ) : (
+          <div className={`${styles.imgPlaceholder} ${isResto ? styles.placeholderResto : styles.placeholderHotel}`} />
+        )}
+        <span className={`${styles.typeBadge} ${isResto ? styles.badgeRed : styles.badgeDark}`}>
+          {isResto ? 'Restaurant' : 'Hôtel'}
+        </span>
+        {stop.detour_minutes != null && (
+          <span className={styles.detourBadge}>+{stop.detour_minutes} min</span>
+        )}
       </div>
 
       <div className={styles.body}>
-        <div className={styles.topRow}>
-          <span className={`${styles.typeBadge} ${isResto ? styles.badgeRed : styles.badgeDark}`}>
-            {isResto ? 'Restaurant' : 'Hôtel'}
-          </span>
-          {stop.detour_minutes != null && (
-            <span className={styles.detourBadge}>+{stop.detour_minutes} min</span>
-          )}
-        </div>
-
-        <h3 className={styles.name}>{stop.name}</h3>
-        {stop.city && <p className={styles.city}>{stop.city}</p>}
-
         <div className={styles.badgesRow}>
           <Distinction slug={stop.distinction_slug} />
           {stop.budget_symbol && (
             <span className={styles.budgetBadge}>{stop.budget_symbol}</span>
           )}
         </div>
+
+        <h3 className={styles.name}>{stop.name}</h3>
+        {stop.city && <p className={styles.city}>{stop.city}</p>}
 
         {stop.cuisines?.length > 0 && (
           <p className={styles.cuisines}>{stop.cuisines.join(' · ')}</p>
@@ -89,7 +95,7 @@ export default function RoadtripPlaceCard({ stop, isHighlighted }) {
             rel="noopener noreferrer"
             className={styles.link}
           >
-            Ouvrir la fiche →
+            Ouvrir la fiche
           </a>
         )}
       </div>

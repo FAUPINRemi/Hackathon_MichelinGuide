@@ -42,6 +42,7 @@ export interface Candidate {
   distinction_slug: string | null;
   budget_symbol: '€' | '€€' | '€€€' | '€€€€' | null;
   cuisines: string[];
+  image: string | null;
   score?: number;
 }
 

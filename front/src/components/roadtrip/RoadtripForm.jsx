@@ -1,16 +1,11 @@
 import styles from './RoadtripForm.module.css'
 
+// Slugs must match DB values exactly (distinction->>'slug')
 const DISTINCTIONS = [
-  { slug: '1-star', label: '⭐ 1 Étoile' },
-  { slug: '2-stars', label: '⭐⭐ 2 Étoiles' },
-  { slug: '3-stars', label: '⭐⭐⭐ 3 Étoiles' },
-  { slug: 'bib-gourmand', label: '😊 Bib Gourmand' },
-]
-
-const DISTRIBUTIONS = [
-  { value: 'near_route', label: 'Près de la route' },
-  { value: 'balanced', label: 'Équilibré' },
-  { value: 'near_cities', label: 'Près des villes' },
+  { slug: '1-star-michelin', label: '1 Étoile' },
+  { slug: '2-stars-michelin', label: '2 Étoiles' },
+  { slug: '3-stars-michelin', label: '3 Étoiles' },
+  { slug: 'bib-gourmand', label: 'Bib Gourmand' },
 ]
 
 export default function RoadtripForm({ form, onChange }) {
@@ -18,8 +13,6 @@ export default function RoadtripForm({ form, onChange }) {
     originLabel, destLabel, category,
     cuisines, budget,
     distinctionSlugs, greenStar,
-    maxDetourPerStop, maxTotalDetour,
-    distributionStrategy,
   } = form
 
   const toggleDistinction = (slug) => {
@@ -89,77 +82,35 @@ export default function RoadtripForm({ form, onChange }) {
             className={`${styles.pill} ${styles.pillGreen} ${greenStar ? styles.pillGreenActive : ''}`}
             onClick={() => onChange({ greenStar: !greenStar })}
           >
-            🌿 Étoile Verte
+            Étoile Verte
           </button>
         </div>
       </div>
 
-      <div className={styles.inlineRow}>
-        <div className={styles.row}>
-          <label className={styles.label}>Budget</label>
-          <select
-            className={styles.select}
-            value={budget}
-            onChange={(e) => onChange({ budget: e.target.value })}
-          >
-            <option value="">Tous</option>
-            <option value="€">€</option>
-            <option value="€€">€€</option>
-            <option value="€€€">€€€</option>
-            <option value="€€€€">€€€€</option>
-          </select>
-        </div>
-
-        <div className={styles.row}>
-          <label className={styles.label}>Stratégie</label>
-          <select
-            className={styles.select}
-            value={distributionStrategy}
-            onChange={(e) => onChange({ distributionStrategy: e.target.value })}
-          >
-            {DISTRIBUTIONS.map((o) => (
-              <option key={o.value} value={o.value}>{o.label}</option>
-            ))}
-          </select>
+      <div className={styles.row}>
+        <label className={styles.label}>Budget</label>
+        <div className={styles.pills}>
+          {['€', '€€', '€€€', '€€€€'].map((b) => (
+            <button
+              key={b}
+              type="button"
+              className={`${styles.pill} ${budget === b ? styles.pillActive : ''}`}
+              onClick={() => onChange({ budget: budget === b ? '' : b })}
+            >
+              {b}
+            </button>
+          ))}
         </div>
       </div>
 
       <div className={styles.row}>
-        <label className={styles.label}>Cuisines (virgule-séparées)</label>
+        <label className={styles.label}>Cuisines (séparées par virgule)</label>
         <input
           className={styles.input}
           value={cuisines}
           onChange={(e) => onChange({ cuisines: e.target.value })}
           placeholder="italienne, fruits de mer, japonaise…"
         />
-      </div>
-
-      <div className={styles.row}>
-        <label className={styles.label}>Contraintes de détour</label>
-        <div className={styles.inlineRow}>
-          <div className={styles.detourField}>
-            <span className={styles.hint}>Max / arrêt (min)</span>
-            <input
-              type="number"
-              className={styles.input}
-              value={maxDetourPerStop ?? ''}
-              onChange={(e) => onChange({ maxDetourPerStop: e.target.value ? Number(e.target.value) : null })}
-              placeholder="20"
-              min="1"
-            />
-          </div>
-          <div className={styles.detourField}>
-            <span className={styles.hint}>Max total (min)</span>
-            <input
-              type="number"
-              className={styles.input}
-              value={maxTotalDetour ?? ''}
-              onChange={(e) => onChange({ maxTotalDetour: e.target.value ? Number(e.target.value) : null })}
-              placeholder="60"
-              min="1"
-            />
-          </div>
-        </div>
       </div>
     </div>
   )

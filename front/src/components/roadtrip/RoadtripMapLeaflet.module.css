@@ -5,9 +5,24 @@
 }
 
 .popup {
-  min-width: 160px;
-  max-width: 220px;
-  padding: 2px 0;
+  min-width: 180px;
+  max-width: 240px;
+  padding: 0;
+}
+
+.popupImgWrap {
+  margin: -8px -12px 8px;
+  width: calc(100% + 24px);
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  border-radius: 4px 4px 0 0;
+}
+
+.popupImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .popupType {

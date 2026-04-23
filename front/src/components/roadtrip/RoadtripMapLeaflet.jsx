@@ -2,37 +2,63 @@ import { useEffect } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import etoileUrl from '../../assets/svg/etoile_michelin.svg'
+import bibsUrl from '../../assets/svg/bibs.svg'
+import couvertsUrl from '../../assets/svg/couverts_simple.svg'
+import litUrl from '../../assets/svg/lit.svg'
 import styles from './RoadtripMapLeaflet.module.css'
 
-function makePinSvg(fill) {
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28 38" width="28" height="38"><path d="M14 0C6.27 0 0 6.27 0 14c0 9.68 14 24 14 24S28 23.68 28 14C28 6.27 21.73 0 14 0z" fill="${fill}"/><circle cx="14" cy="14" r="6" fill="white" opacity="0.9"/></svg>`
-}
+// Pin identique à RestaurantMap — fond blanc, cercle rouge, icône Michelin
+function createStopIcon(stop) {
+  const slug = stop.distinction_slug ?? ''
+  const isHotel = stop.category === 'hotel'
 
-function makeIconSvg(fill, emoji) {
-  return `<div style="position:relative;width:32px;height:42px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.28))"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 42" width="32" height="42"><path d="M16 0C7.16 0 0 7.16 0 16c0 11.06 16 26 16 26S32 27.06 32 16C32 7.16 24.84 0 16 0z" fill="${fill}"/></svg><span style="position:absolute;top:5px;left:50%;transform:translateX(-50%);font-size:13px;line-height:1">${emoji}</span></div>`
-}
+  let src, size
+  if (slug === 'bib-gourmand')    { src = bibsUrl;     size = 14 }
+  else if (slug.includes('star')) { src = etoileUrl;   size = 13 }
+  else if (isHotel)               { src = litUrl;      size = 13 }
+  else                            { src = couvertsUrl; size = 12 }
 
-function createEndpointIcon(type) {
-  const fill = type === 'origin' ? '#16a34a' : '#2563eb'
-  const label = type === 'origin' ? 'A' : 'B'
+  const top  = Math.round(4 + (22 - size) / 2)
+  const left = Math.round((32 - size) / 2)
+
+  // Hôtels : cercle sombre pour les distinguer des restos
+  const circleFill = isHotel && !slug.includes('star') ? '#1f2937' : '#c41230'
+
   return L.divIcon({
-    html: `<div style="position:relative;width:28px;height:38px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))">${makePinSvg(fill)}<span style="position:absolute;top:6px;left:50%;transform:translateX(-50%);font-size:11px;font-weight:900;color:${fill};line-height:1">${label}</span></div>`,
-    iconSize: [28, 38],
-    iconAnchor: [14, 38],
-    popupAnchor: [0, -40],
+    html: `<div style="position:relative;width:32px;height:42px;">
+      <svg viewBox="0 0 32 42" width="32" height="42" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16,0C7.163,0,0,7.163,0,16C0,24.837,16,42,16,42s16-17.163,16-26C32,7.163,24.837,0,16,0z"
+          fill="white" stroke="#d0d0d0" stroke-width="1.5"/>
+        <circle cx="16" cy="15" r="11" fill="${circleFill}"/>
+      </svg>
+      <img src="${src}" width="${size}" height="${size}"
+        style="position:absolute;top:${top}px;left:${left}px;filter:brightness(0) invert(1);pointer-events:none;"
+      />
+    </div>`,
     className: '',
+    iconSize:    [32, 42],
+    iconAnchor:  [16, 42],
+    popupAnchor: [0, -44],
   })
 }
 
-function createStopIcon(category) {
-  const fill = category === 'restaurant' ? '#c41230' : '#1f2937'
-  const emoji = category === 'restaurant' ? '🍽' : '🏨'
+// Pin départ/arrivée : lettre A ou B sur fond coloré
+function createEndpointIcon(type) {
+  const fill = type === 'origin' ? '#16a34a' : '#2563eb'
+  const letter = type === 'origin' ? 'A' : 'B'
   return L.divIcon({
-    html: makeIconSvg(fill, emoji),
-    iconSize: [32, 42],
-    iconAnchor: [16, 42],
-    popupAnchor: [0, -44],
+    html: `<div style="position:relative;width:32px;height:42px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.28))">
+      <svg viewBox="0 0 32 42" width="32" height="42" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16,0C7.163,0,0,7.163,0,16C0,24.837,16,42,16,42s16-17.163,16-26C32,7.163,24.837,0,16,0z"
+          fill="${fill}"/>
+      </svg>
+      <span style="position:absolute;top:6px;left:0;width:32px;text-align:center;font-family:'Helvetica Neue',Arial,sans-serif;font-size:13px;font-weight:900;color:#fff;line-height:1;">${letter}</span>
+    </div>`,
     className: '',
+    iconSize:    [32, 42],
+    iconAnchor:  [16, 42],
+    popupAnchor: [0, -44],
   })
 }
 
@@ -41,23 +67,24 @@ function AutoFitBounds({ points }) {
   useEffect(() => {
     if (points.length < 2) return
     map.fitBounds(points, { padding: [36, 36] })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, JSON.stringify(points)])
   return null
 }
 
 function formatDistinction(slug) {
   if (!slug) return null
-  if (slug === 'bib-gourmand') return '😊 Bib Gourmand'
-  if (slug.includes('3') || slug.includes('three')) return '⭐⭐⭐ 3 Étoiles'
-  if (slug.includes('2') || slug.includes('two')) return '⭐⭐ 2 Étoiles'
-  if (slug.includes('1') || slug.includes('one') || slug === 'etoile-michelin') return '⭐ 1 Étoile'
-  if (slug.includes('green')) return '🌿 Étoile Verte'
+  if (slug === 'bib-gourmand')    return 'Bib Gourmand'
+  if (slug.includes('3-stars'))   return '3 Étoiles Michelin'
+  if (slug.includes('2-stars'))   return '2 Étoiles Michelin'
+  if (slug.includes('1-star'))    return '1 Étoile Michelin'
+  if (slug.includes('green'))     return 'Étoile Verte'
   return null
 }
 
 export default function RoadtripMapLeaflet({ origin, destination, stops, polyline, onScrollToCard }) {
   const allPoints = [
-    ...(origin?.lat != null ? [[origin.lat, origin.lng]] : []),
+    ...(origin?.lat != null      ? [[origin.lat, origin.lng]]           : []),
     ...stops.filter((s) => s.lat != null).map((s) => [s.lat, s.lng]),
     ...(destination?.lat != null ? [[destination.lat, destination.lng]] : []),
   ]
@@ -104,14 +131,19 @@ export default function RoadtripMapLeaflet({ origin, destination, stops, polylin
           <Marker
             key={`${stop.category}-${stop.id}`}
             position={[stop.lat, stop.lng]}
-            icon={createStopIcon(stop.category)}
+            icon={createStopIcon(stop)}
           >
             <Popup>
               <div className={styles.popup}>
+                {stop.image && (
+                  <div className={styles.popupImgWrap}>
+                    <img src={stop.image} alt={stop.name} className={styles.popupImg} />
+                  </div>
+                )}
                 <p className={styles.popupType}>
                   {stop.category === 'restaurant' ? 'Restaurant' : 'Hôtel'}
                   {stop.detour_minutes != null && (
-                    <span className={styles.popupDetour}> +{stop.detour_minutes} min</span>
+                    <span className={styles.popupDetour}> · +{stop.detour_minutes} min</span>
                   )}
                 </p>
                 <p className={styles.popupName}>{stop.name}</p>
@@ -124,7 +156,7 @@ export default function RoadtripMapLeaflet({ origin, destination, stops, polylin
                   className={styles.popupBtn}
                   onClick={() => onScrollToCard?.(`${stop.category}-${stop.id}`)}
                 >
-                  Voir la fiche →
+                  Voir la fiche
                 </button>
               </div>
             </Popup>

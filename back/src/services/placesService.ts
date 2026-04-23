@@ -177,6 +177,7 @@ export async function searchCandidates(parse: RoadtripParse, routePoints: Array<
           COALESCE(r.price_category->>'slug', r.price_category->>'code') AS budget_slug,
           r.cuisines,
           r.distinction_score,
+          COALESCE(r.image, r.main_image, '') AS image_url,
           CASE WHEN EXISTS (SELECT 1 FROM route_points)
             THEN (
               SELECT MIN(
@@ -233,6 +234,7 @@ export async function searchCandidates(parse: RoadtripParse, routePoints: Array<
         distinction_slug: row.distinction_slug ? String(row.distinction_slug) : null,
         budget_symbol: priceSymbolFromSlug(row.budget_slug ? String(row.budget_slug) : null),
         cuisines: extractCuisineLabels(row.cuisines),
+        image: row.image_url ? String(row.image_url) : null,
         score: Number(row.score || 0),
       });
     });
@@ -266,6 +268,7 @@ export async function searchCandidates(parse: RoadtripParse, routePoints: Array<
         COALESCE(h.city->>'name', h.neighborhood, h.state_province) AS city,
         lower(COALESCE(h.distinction->>'slug', '')) AS distinction_slug,
         h.distinction_score,
+        COALESCE(h.main_image, '') AS image_url,
         CASE WHEN EXISTS (SELECT 1 FROM route_points)
           THEN (
             SELECT MIN(
@@ -311,6 +314,7 @@ export async function searchCandidates(parse: RoadtripParse, routePoints: Array<
         distinction_slug: row.distinction_slug ? String(row.distinction_slug) : null,
         budget_symbol: null,
         cuisines: [],
+        image: row.image_url ? String(row.image_url) : null,
         score: Number(row.score || 0),
       });
     });

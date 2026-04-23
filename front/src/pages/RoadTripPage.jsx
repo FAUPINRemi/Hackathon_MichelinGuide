@@ -31,9 +31,6 @@ const FORM_INIT = {
   budget: '',
   distinctionSlugs: [],
   greenStar: false,
-  maxDetourPerStop: null,
-  maxTotalDetour: null,
-  distributionStrategy: 'near_route',
 }
 
 function buildPayload(mode, form, freeText) {
@@ -51,9 +48,6 @@ function buildPayload(mode, form, freeText) {
       budget: form.budget ? [form.budget] : [],
       distinction_slugs: form.distinctionSlugs,
       green_star: form.greenStar || null,
-      max_detour_minutes_per_stop: form.maxDetourPerStop,
-      max_total_detour_minutes: form.maxTotalDetour,
-      distribution_strategy: form.distributionStrategy,
     },
   }
 }
