@@ -4,4 +4,5 @@ env/.env.example
 node_modules/
 
 bdd/all_hotels.jsonl
-bdd/all_restaurants.jsonl
+bdd/all_restaurants.jsonlbdd/hotels.csv
+bdd/restaurants.csv
