@@ -4,7 +4,6 @@ export default function HotelCard({ hotel, onClick, layout = 'grid', onSave, isS
   const { name, location, img, distinction, distinction_score, numRooms } = hotel
 
   const hasDistinction = distinction_score > 0
-  const isPlus = hotel.isPlus
 
   const handleSave = (e) => {
     e.stopPropagation()
@@ -30,7 +29,7 @@ export default function HotelCard({ hotel, onClick, layout = 'grid', onSave, isS
             <path d="M0 6.357C0 10.881 3.95401 15.327 9.91701 19.189C10.111 19.309 10.383 19.435 10.581 19.435C10.779 19.435 11.051 19.31 11.249 19.189C17.208 15.327 21.162 10.881 21.162 6.357C21.162 2.64 18.604 0 15.183 0C13.221 0 11.515 1.006 10.581 2.563C9.66099 1.013 7.941 0 5.979 0C2.558 0 0 2.64 0 6.357ZM1.34399 6.357C1.34399 3.37 3.306 1.341 5.964 1.341C7.978 1.341 9.235 2.591 9.974 3.835C10.206 4.192 10.361 4.298 10.581 4.298C10.801 4.298 10.941 4.185 11.185 3.835C11.965 2.606 13.188 1.341 15.198 1.341C17.855 1.341 19.818 3.371 19.818 6.357C19.818 10.427 15.57 14.73 10.775 17.924C10.687 17.987 10.625 18.031 10.581 18.031C10.537 18.031 10.475 17.987 10.394 17.924C5.592 14.73 1.34399 10.426 1.34399 6.357Z" fill={isSaved ? '#c41230' : '#767676'}/>
           </svg>
         </button>
-        {isPlus && <span className={styles.plusBadge}>PLUS</span>}
+        {hotel.isPlus && <span className={styles.plusBadge}>PLUS</span>}
       </div>
 
       <div className={styles.body}>

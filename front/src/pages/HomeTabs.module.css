@@ -31,11 +31,6 @@
   color: var(--black);
   line-height: 1.2;
 }
-.sectionSub {
-  font-size: var(--title-sous-section);
-  color: var(--grey-text);
-  margin-top: 2px;
-}
 .seeAll {
   font-size: 13px;
   color: var(--grey-text);
@@ -55,32 +50,6 @@
   height: 100%;
   border: none;
 }
-.mapPins {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-.mapPin {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  filter: var(--drop-shadow-pin);
-}
-
-.scrollSection {
-  background: var(--white);
-  margin-top: 8px;
-  padding: 20px 0 16px;
-}
-.hscroll {
-  display: flex;
-  gap: 12px;
-  padding: 4px 16px 8px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-.hscroll::-webkit-scrollbar { display: none; }
 
 .editCard {
   width: 240px;
