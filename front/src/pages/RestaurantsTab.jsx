@@ -99,7 +99,7 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved, 
     if (!geoSearch) { setMapCenter(null); return }
     let cancelled = false
     fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(geoSearch)}&format=json&limit=1&countrycodes=fr,be,ch,lu&featuretype=city`,
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(geoSearch)}&format=json&limit=1&featuretype=city`,
       { headers: { 'Accept-Language': 'fr' } }
     )
       .then((r) => r.json())

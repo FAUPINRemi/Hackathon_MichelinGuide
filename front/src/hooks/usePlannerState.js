@@ -92,6 +92,7 @@ export function usePlannerState() {
       const result = await api.roadtrip.compute({
         origin: routeData.origin,
         destination: routeData.destination,
+        waypoints: (routeData.waypoints ?? []).map((w) => ({ lat: w.lat, lng: w.lng })),
         stops: next.map((s) => ({ lat: s.lat, lng: s.lng, category: s.category, id: s.id })),
       })
       setRouteResult(result)
@@ -119,6 +120,7 @@ export function usePlannerState() {
         const result = await api.roadtrip.compute({
           origin: routeData.origin,
           destination: routeData.destination,
+          waypoints: (routeData.waypoints ?? []).map((w) => ({ lat: w.lat, lng: w.lng })),
           stops: next.map((s) => ({ lat: s.lat, lng: s.lng, category: s.category, id: s.id })),
         })
         setRouteResult(result)

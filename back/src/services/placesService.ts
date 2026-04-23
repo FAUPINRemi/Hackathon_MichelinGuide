@@ -8,6 +8,19 @@ const BUDGET_TO_SLUGS: Record<string, string[]> = {
   '€€€€': ['luxury'],
 };
 
+function resolveHotelImage(raw: unknown): string | null {
+  if (!raw) return null;
+  if (typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>;
+    const url = obj.hotrooms_large_url ?? obj.url ?? obj.src;
+    if (url && typeof url === 'string' && url.startsWith('http')) return url;
+    return null;
+  }
+  const str = String(raw);
+  if (!str || str === '[object Object]') return null;
+  return str.startsWith('http') ? str : `https://${str}`;
+}
+
 function priceSymbolFromSlug(slug: string | null | undefined): Candidate['budget_symbol'] {
   if (!slug) return null;
   const s = slug.toLowerCase();
@@ -315,7 +328,7 @@ export async function searchCandidates(parse: RoadtripParse, routePoints: Array<
         distinction_slug: row.distinction_slug ? String(row.distinction_slug) : null,
         budget_symbol: null,
         cuisines: [],
-        image: row.image_url ? String(row.image_url) : null,
+        image: resolveHotelImage(row.image_url),
         score: Number(row.score || 0),
       });
     });

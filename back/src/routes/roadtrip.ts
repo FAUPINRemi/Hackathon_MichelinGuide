@@ -58,7 +58,11 @@ function interpolatePoints(
   return pts;
 }
 
-async function buildRoutePoints(parse: RoadtripParse): Promise<Array<{ lat: number; lng: number }>> {
+async function buildRoutePoints(parse: RoadtripParse): Promise<{
+  points: Array<{ lat: number; lng: number }>;
+  geocodedOrigin: { lat: number; lng: number } | null;
+  geocodedDestination: { lat: number; lng: number } | null;
+}> {
   const allLabels = [
     parse.route.origin,
     ...parse.route.waypoints_user,
@@ -76,6 +80,9 @@ async function buildRoutePoints(parse: RoadtripParse): Promise<Array<{ lat: numb
     }
   }
 
+  const geocodedOrigin      = geocoded[0] ?? null;
+  const geocodedDestination = geocoded[geocoded.length - 1] ?? null;
+
   const validPoints = geocoded.filter((p): p is { lat: number; lng: number } => p != null);
 
   // Add interpolated intermediate points between each pair so the whole corridor is covered
@@ -87,7 +94,7 @@ async function buildRoutePoints(parse: RoadtripParse): Promise<Array<{ lat: numb
     }
   }
 
-  return expanded;
+  return { points: expanded, geocodedOrigin, geocodedDestination };
 }
 
 function applyServerDefaults(parse: RoadtripParse): RoadtripParse {
@@ -185,7 +192,11 @@ router.post('/build', buildLimiter, async (req, res, next) => {
     const parse = applyServerDefaults(parsedRaw);
 
     // Step 3 — geocode origin/waypoints/destination + interpolate corridor points
-    const routePoints = await buildRoutePoints(parse);
+    const { points: routePoints, geocodedOrigin, geocodedDestination } = await buildRoutePoints(parse);
+
+    // Enrich parse with geocoded coordinates so the frontend can render A/B markers
+    if (geocodedOrigin)      { parse.route.origin.lat = geocodedOrigin.lat;           parse.route.origin.lng = geocodedOrigin.lng; }
+    if (geocodedDestination) { parse.route.destination.lat = geocodedDestination.lat; parse.route.destination.lng = geocodedDestination.lng; }
 
     // Step 4 — search candidates near actual route
     let candidates = await searchCandidates(parse, routePoints);
@@ -404,10 +415,11 @@ router.post('/nearby', async (req, res, next) => {
  */
 router.post('/compute', async (req, res, next) => {
   try {
-    const { origin, destination, stops = [] } = req.body as {
+    const { origin, destination, stops = [], waypoints = [] } = req.body as {
       origin: { lat: number; lng: number };
       destination: { lat: number; lng: number };
       stops: Array<{ lat: number; lng: number; category: 'restaurant' | 'hotel'; id: number }>;
+      waypoints: Array<{ lat: number; lng: number }>;
     };
 
     if (!origin?.lat || !origin?.lng || !destination?.lat || !destination?.lng) {
@@ -430,7 +442,7 @@ router.post('/compute', async (req, res, next) => {
       return Math.min(dO, dD) <= ROUGH_MAX_KM;
     });
 
-    const result = await roadtripRouteService.computeWithStops(origin, destination, validStops);
+    const result = await roadtripRouteService.computeWithStops(origin, destination, validStops, waypoints);
     res.json(result);
   } catch (err) {
     next(err);

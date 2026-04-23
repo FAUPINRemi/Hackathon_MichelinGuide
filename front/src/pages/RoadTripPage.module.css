@@ -179,6 +179,37 @@
   color: var(--black);
 }
 
+.resultActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.saveBtn {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1.5px solid var(--red);
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  transition: background var(--t), color var(--t);
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--red);
+  color: var(--white);
+}
+
+.saveBtnDone {
+  border-color: var(--grey-mid);
+  color: var(--grey-text);
+  cursor: default;
+}
+
 .navBtns {
   display: flex;
   gap: 6px;

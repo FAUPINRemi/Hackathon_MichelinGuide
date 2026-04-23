@@ -47,7 +47,7 @@ const TABS = [
   { id: 'planner',   label: 'Navigateur' },
 ]
 
-export default function RoadTripPage() {
+export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveItinerary }) {
   const [mode, setMode] = useState('planner')
 
   // ── Prompt IA state ──────────────────────────────────────
@@ -56,6 +56,7 @@ export default function RoadTripPage() {
   const [error, setError]         = useState('')
   const [result, setResult]       = useState(null)
   const [highlightedId, setHighlightedId] = useState(null)
+  const [saved, setSaved]         = useState(false)
   const highlightTimer = useRef(null)
 
   // ── Navigateur state ─────────────────────────────────────
@@ -88,6 +89,7 @@ export default function RoadTripPage() {
     setLoading(true)
     setError('')
     setResult(null)
+    setSaved(false)
     try {
       const data = await api.roadtrip.build({ input_mode: 'free_text', freeText })
       setResult(data)
@@ -97,6 +99,17 @@ export default function RoadTripPage() {
       setLoading(false)
     }
   }
+
+  const handleSaveItinerary = useCallback(() => {
+    if (!onSaveItinerary || saved) return
+    onSaveItinerary({
+      origin,
+      destination,
+      stops: enrichedStops,
+      googleMapsUrl,
+    })
+    setSaved(true)
+  }, [onSaveItinerary, saved, origin, destination, enrichedStops, googleMapsUrl])
 
   const scrollToCard = useCallback((stopId) => {
     const el = document.getElementById(`stop-${stopId}`)
@@ -342,28 +355,39 @@ export default function RoadTripPage() {
                   <h2 className={styles.resultsTitle}>
                     {enrichedStops.length} arrêt{enrichedStops.length > 1 ? 's' : ''} sélectionné{enrichedStops.length > 1 ? 's' : ''}
                   </h2>
-                  {(googleMapsUrl || wazeUrl) && (
-                    <div className={styles.navBtns}>
-                      {googleMapsUrl && (
-                        <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer"
-                          className={`${styles.navBtn} ${styles.navBtnGmaps}`}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                          </svg>
-                          Google Maps
-                        </a>
-                      )}
-                      {wazeUrl && (
-                        <a href={wazeUrl} target="_blank" rel="noopener noreferrer"
-                          className={`${styles.navBtn} ${styles.navBtnWaze}`}>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M20.54 6.63C19.08 3.93 16.2 2 13 2 8.03 2 4 6.03 4 11c0 1.5.38 2.91 1.04 4.15L4 20l5.02-1.33C10.27 19.53 11.6 20 13 20c4.97 0 9-4.03 9-9 0-1.63-.44-3.16-1.21-4.47l-.25.1z"/>
-                          </svg>
-                          Waze
-                        </a>
-                      )}
-                    </div>
-                  )}
+                  <div className={styles.resultActions}>
+                    {onSaveItinerary && (
+                      <button
+                        className={`${styles.saveBtn} ${saved ? styles.saveBtnDone : ''}`}
+                        onClick={handleSaveItinerary}
+                        disabled={saved}
+                      >
+                        {saved ? '✓ Enregistré' : 'Enregistrer'}
+                      </button>
+                    )}
+                    {(googleMapsUrl || wazeUrl) && (
+                      <div className={styles.navBtns}>
+                        {googleMapsUrl && (
+                          <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer"
+                            className={`${styles.navBtn} ${styles.navBtnGmaps}`}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                              <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                            Google Maps
+                          </a>
+                        )}
+                        {wazeUrl && (
+                          <a href={wazeUrl} target="_blank" rel="noopener noreferrer"
+                            className={`${styles.navBtn} ${styles.navBtnWaze}`}>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                              <path d="M20.54 6.63C19.08 3.93 16.2 2 13 2 8.03 2 4 6.03 4 11c0 1.5.38 2.91 1.04 4.15L4 20l5.02-1.33C10.27 19.53 11.6 20 13 20c4.97 0 9-4.03 9-9 0-1.63-.44-3.16-1.21-4.47l-.25.1z"/>
+                            </svg>
+                            Waze
+                          </a>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className={styles.cardList}>
@@ -372,6 +396,8 @@ export default function RoadTripPage() {
                       key={`${stop.category}-${stop.id}`}
                       stop={stop}
                       isHighlighted={highlightedId === `${stop.category}-${stop.id}`}
+                      onRestaurantClick={onRestaurantClick}
+                      onHotelClick={onHotelClick}
                     />
                   ))}
                 </div>

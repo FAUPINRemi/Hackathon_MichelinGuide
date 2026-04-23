@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { api } from '../../api/client'
 import etoileSvg from '../../assets/svg/etoile_michelin.svg'
 import bibsSvg from '../../assets/svg/bibs.svg'
 import styles from './RoadtripPlaceCard.module.css'
@@ -14,90 +16,91 @@ function Distinction({ slug }) {
   if (!slug) return null
   if (slug === 'bib-gourmand') {
     return (
-      <div className={styles.distinctions}>
-        <img src={bibsSvg} width={16} height={16} alt="Bib Gourmand" />
-        <span className={styles.distLabel}>Bib Gourmand</span>
-      </div>
+      <span className={styles.dist}>
+        <img src={bibsSvg} width={13} height={13} alt="Bib Gourmand" />
+        Bib Gourmand
+      </span>
     )
   }
   if (slug.includes('green')) {
-    return (
-      <div className={styles.distinctions}>
-        <span className={styles.distLabel} style={{ color: 'var(--green)' }}>Étoile Verte</span>
-      </div>
-    )
+    return <span className={styles.dist} style={{ color: 'var(--green)' }}>Étoile Verte</span>
   }
   const stars = getStarCount(slug)
   if (stars > 0) {
     return (
-      <div className={styles.distinctions}>
+      <span className={styles.dist}>
         {Array.from({ length: stars }).map((_, i) => (
-          <img key={i} src={etoileSvg} width={14} height={14} alt="" aria-hidden="true" />
+          <img key={i} src={etoileSvg} width={12} height={12} alt="" aria-hidden="true" />
         ))}
-        <span className={styles.distLabel}>
-          {stars === 1 ? '1 Étoile' : stars === 2 ? '2 Étoiles' : '3 Étoiles'}
-        </span>
-      </div>
+        {stars === 1 ? '1 Étoile' : stars === 2 ? '2 Étoiles' : '3 Étoiles'}
+      </span>
     )
   }
   return null
 }
 
-export default function RoadtripPlaceCard({ stop, isHighlighted }) {
+export default function RoadtripPlaceCard({ stop, isHighlighted, onRestaurantClick, onHotelClick }) {
   const isResto = stop.category === 'restaurant'
-  const hasImage = Boolean(stop.image)
+  const [loading, setLoading] = useState(false)
+
+  async function handleClick() {
+    if (loading) return
+    try {
+      setLoading(true)
+      if (isResto && onRestaurantClick) {
+        const data = await api.restaurants.get(stop.id)
+        onRestaurantClick(data)
+      } else if (!isResto && onHotelClick) {
+        const data = await api.hotels.get(stop.id)
+        onHotelClick(data)
+      }
+    } catch { /* silently ignore */ } finally {
+      setLoading(false)
+    }
+  }
+
+  const clickable = Boolean((isResto && onRestaurantClick) || (!isResto && onHotelClick))
 
   return (
     <article
       id={`stop-${stop.category}-${stop.id}`}
-      className={`${styles.card} ${isHighlighted ? styles.highlighted : ''}`}
+      className={`${styles.card} ${isHighlighted ? styles.highlighted : ''} ${clickable ? styles.clickable : ''} ${loading ? styles.cardLoading : ''}`}
+      onClick={clickable ? handleClick : undefined}
+      role={clickable ? 'button' : undefined}
     >
-      <div className={styles.imgWrap}>
-        {hasImage ? (
-          <img
-            src={stop.image}
-            alt={stop.name}
-            className={styles.img}
-            loading="lazy"
-          />
+      <div className={`${styles.imgCol} ${isResto ? styles.imgResto : styles.imgHotel}`}>
+        {stop.image ? (
+          <img src={stop.image} alt={stop.name} className={styles.img} loading="lazy" />
         ) : (
-          <div className={`${styles.imgPlaceholder} ${isResto ? styles.placeholderResto : styles.placeholderHotel}`} />
+          <div className={styles.imgPlaceholder} />
         )}
         <span className={`${styles.typeBadge} ${isResto ? styles.badgeRed : styles.badgeDark}`}>
-          {isResto ? 'Restaurant' : 'Hôtel'}
+          {isResto ? 'Resto' : 'Hôtel'}
         </span>
-        {stop.detour_minutes != null && (
-          <span className={styles.detourBadge}>+{stop.detour_minutes} min</span>
-        )}
       </div>
 
       <div className={styles.body}>
-        <div className={styles.badgesRow}>
-          <Distinction slug={stop.distinction_slug} />
-          {stop.budget_symbol && (
-            <span className={styles.budgetBadge}>{stop.budget_symbol}</span>
+        <div className={styles.topRow}>
+          <h3 className={styles.name}>{stop.name}</h3>
+          {stop.detour_minutes != null && (
+            <span className={styles.detourBadge}>+{stop.detour_minutes} min</span>
           )}
         </div>
 
-        <h3 className={styles.name}>{stop.name}</h3>
         {stop.city && <p className={styles.city}>{stop.city}</p>}
 
+        <div className={styles.metaRow}>
+          <Distinction slug={stop.distinction_slug} />
+          {stop.budget_symbol && <span className={styles.budget}>{stop.budget_symbol}</span>}
+        </div>
+
         {stop.cuisines?.length > 0 && (
-          <p className={styles.cuisines}>{stop.cuisines.join(' · ')}</p>
+          <p className={styles.cuisines}>{stop.cuisines.slice(0, 2).join(' · ')}</p>
         )}
 
         {stop.reason && <p className={styles.reason}>{stop.reason}</p>}
 
-        {stop.url && (
-          <a
-            href={stop.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.link}
-          >
-            Ouvrir la fiche
-          </a>
-        )}
+        {clickable && <span className={styles.seeMore}>Voir la fiche →</span>}
       </div>
     </article>
   )

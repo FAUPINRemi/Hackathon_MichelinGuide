@@ -11,6 +11,7 @@ import HotelDetailPage from './pages/HotelDetailPage'
 import RoadTripPage from './pages/RoadTripPage'
 import ProfilePage from './pages/ProfilePage'
 import CollectionPage from './pages/CollectionPage'
+import ItinerariesPage from './pages/ItinerariesPage'
 import ConditionsPage from './pages/legal/ConditionsPage'
 import CookiesPage from './pages/legal/CookiesPage'
 import ConfidentialitePage from './pages/legal/ConfidentialitePage'
@@ -19,6 +20,7 @@ import AccessibilitePage from './pages/legal/AccessibilitePage'
 import { useToast } from './hooks/useToast'
 import { useInstallPrompt } from './hooks/useInstallPrompt'
 import { useFavorites } from './hooks/useFavorites'
+import { useItineraries } from './hooks/useItineraries'
 import styles from './App.module.css'
 
 export default function App() {
@@ -26,6 +28,8 @@ export default function App() {
   const [selectedRestaurant, setSelectedRestaurant] = useState(null)
   const [selectedHotel, setSelectedHotel] = useState(null)
   const [collectionOpen, setCollectionOpen] = useState(false)
+  const [itinerariesOpen, setItinerariesOpen] = useState(false)
+  const { itineraries, saveItinerary, deleteItinerary } = useItineraries()
   const [legalPage, setLegalPage] = useState(null)
   const [dialogItem, setDialogItem] = useState(null)
   const { message, visible, showToast } = useToast()
@@ -34,6 +38,7 @@ export default function App() {
 
   const isDetail = !!(selectedRestaurant || selectedHotel)
   const isLegal  = !!legalPage
+  const isSubPage = collectionOpen || itinerariesOpen
 
   const handleLegalPage = (id) => { setLegalPage(id); window.scrollTo(0, 0) }
   const handleLegalBack = () => setLegalPage(null)
@@ -61,6 +66,7 @@ export default function App() {
     setSelectedRestaurant(null)
     setSelectedHotel(null)
     setCollectionOpen(false)
+    setItinerariesOpen(false)
     setLegalPage(null)
   }
 
@@ -82,6 +88,7 @@ export default function App() {
   const detailName = selectedRestaurant?.name ?? selectedHotel?.name
   const navTitle = isLegal ? LEGAL_TITLES[legalPage]
     : isDetail ? detailName
+    : itinerariesOpen ? 'Mes itinéraires'
     : activeTab === 'restaurants' ? 'Restaurants'
     : activeTab === 'hotels'      ? 'Hébergements'
     : activeTab === 'roadtrip'    ? 'Road Trip'
@@ -118,14 +125,30 @@ export default function App() {
           />
         ) : selectedHotel ? (
           <HotelDetailPage hotel={selectedHotel} />
+        ) : activeTab === 'profile' && itinerariesOpen ? (
+          <ItinerariesPage
+            itineraries={itineraries}
+            onDelete={deleteItinerary}
+            onClose={() => setItinerariesOpen(false)}
+          />
         ) : activeTab === 'profile' && collectionOpen ? (
           <CollectionPage onClose={() => setCollectionOpen(false)} />
         ) : activeTab === 'collections' ? (
           <CollectionPage onClose={() => setActiveTab('profile')} />
         ) : activeTab === 'profile' ? (
-          <ProfilePage onOpenCollection={() => setCollectionOpen(true)} />
+          <ProfilePage
+            onOpenCollection={() => setCollectionOpen(true)}
+            onOpenItineraries={() => setItinerariesOpen(true)}
+          />
         ) : activeTab === 'roadtrip' ? (
-          <RoadTripPage />
+          <RoadTripPage
+            onRestaurantClick={handleRestaurantClick}
+            onHotelClick={handleHotelClick}
+            onSaveItinerary={({ origin, destination, stops, googleMapsUrl }) => {
+              saveItinerary({ origin, destination, stops, googleMapsUrl })
+              showToast('Itinéraire enregistré !')
+            }}
+          />
         ) : activeTab === 'favorites' ? (
           <FavoritesPage
             lists={favorites.lists}

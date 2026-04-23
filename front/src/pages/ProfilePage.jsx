@@ -24,7 +24,7 @@ function NfcIcon() {
   )
 }
 
-export default function ProfilePage({ onOpenCollection }) {
+export default function ProfilePage({ onOpenCollection, onOpenItineraries }) {
   const { scanning, status, error, startScan } = useNfc()
   const mobile = isMobileDevice()
 
@@ -69,6 +69,12 @@ export default function ProfilePage({ onOpenCollection }) {
         )}
 
         <ul className={styles.menu}>
+          <li className={`${styles.item} ${styles.itemClickable}`} onClick={onOpenItineraries}>
+            <span className={styles.label}>Mes itinéraires</span>
+            <svg className={styles.chevron} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </li>
           <li className={`${styles.item} ${styles.itemClickable}`} onClick={onOpenCollection}>
             <span className={styles.label}>Collection</span>
             <svg className={styles.chevron} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
