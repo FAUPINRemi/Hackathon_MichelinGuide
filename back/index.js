@@ -1,3 +1,5 @@
+import https from 'https';
+import fs from 'fs';
 import express from 'express';
 import cors from 'cors';
 import restaurants from './routes/restaurants.js';
@@ -15,4 +17,8 @@ app.use('/api/restaurants', restaurants);
 app.use('/api/hotels', hotels);
 app.use('/api/collection', collection);
 
-app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
+const key = fs.readFileSync(process.env.SSL_KEY_PATH);
+const cert = fs.readFileSync(process.env.SSL_CERT_PATH);
+https.createServer({ key, cert }, app).listen(PORT, '0.0.0.0', () =>
+  console.log(`HTTPS server running on :${PORT}`)
+);
