@@ -1,0 +1,59 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-heavy);
+  z-index: 400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.box {
+  background: var(--white);
+  border-radius: 12px;
+  padding: 24px 20px 20px;
+  width: 100%;
+  max-width: 340px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--black);
+  margin-bottom: 14px;
+}
+.input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  padding: 11px 14px;
+  font-size: 15px;
+  font-family: var(--font);
+  color: var(--black);
+  outline: none;
+  transition: border-color var(--t);
+  margin-bottom: 14px;
+}
+.input:focus { border-color: var(--red); }
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.cancel {
+  padding: 9px 18px;
+  font-size: 14px;
+  color: var(--grey-text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.confirm {
+  padding: 9px 18px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--red);
+  color: var(--white);
+  border-radius: 6px;
+  transition: background var(--t);
+}
+.confirm:disabled { background: var(--grey-mid); color: var(--grey-text); }

@@ -25,7 +25,6 @@ function format(r) {
   const cuisineObj = Array.isArray(r.cuisines) ? r.cuisines[0] : null;
   const cuisine = cuisineObj?.label ?? cuisineObj ?? '';
 
-  const priceSymbols = ['', '€', '€€', '€€€', '€€€€'];
   function priceFromCategory(cat) {
     if (!cat) return '€€';
     const slug = (cat.slug || cat.code || cat).toString();
