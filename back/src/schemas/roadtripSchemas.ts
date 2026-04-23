@@ -95,7 +95,7 @@ export const candidateSchema = z.object({
   distinction_slug: z.string().nullable(),
   budget_symbol: z.enum(['€', '€€', '€€€', '€€€€']).nullable(),
   cuisines: z.array(z.string()),
-  image: z.string().nullable().optional(),
+  image: z.string().nullable(),
   score: z.number().optional(),
 }).strict();
 
