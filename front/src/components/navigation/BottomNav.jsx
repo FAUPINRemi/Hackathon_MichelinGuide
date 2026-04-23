@@ -25,14 +25,10 @@ const TABS = [
       const c = active ? '#c41230' : '#767676'
       return (
         <svg width="26" height="22" viewBox="0 0 26 22" fill="none" stroke={c} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          {/* Cadre du lit */}
           <rect x="1" y="13" width="24" height="6" rx="1.5"/>
-          {/* Matelas / surface */}
           <path d="M4 13V8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5"/>
-          {/* Oreillers */}
           <rect x="6" y="9" width="6" height="4" rx="1"/>
           <rect x="14" y="9" width="6" height="4" rx="1"/>
-          {/* Pieds de lit */}
           <line x1="3" y1="19" x2="3" y2="21"/>
           <line x1="23" y1="19" x2="23" y2="21"/>
         </svg>

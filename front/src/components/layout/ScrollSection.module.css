@@ -1,0 +1,38 @@
+.section {
+  background: var(--white);
+  margin-top: 8px;
+  padding: 20px 0 16px;
+}
+.head {
+  padding: 0 16px 12px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.title {
+  font-size: var(--title-section);
+  font-weight: var(--weight-far);
+  color: var(--black);
+  line-height: 1.2;
+}
+.sub {
+  font-size: var(--title-sous-section);
+  color: var(--grey-text);
+  margin-top: 2px;
+}
+.seeAll {
+  font-size: 13px;
+  color: var(--grey-text);
+  text-decoration: underline;
+  flex-shrink: 0;
+}
+.hscroll {
+  display: flex;
+  gap: 12px;
+  padding: 4px 16px 8px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.hscroll::-webkit-scrollbar { display: none; }
