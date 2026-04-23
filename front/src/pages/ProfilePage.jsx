@@ -1,7 +1,7 @@
 import { useNfc } from '../hooks/useNfc'
 import styles from './ProfilePage.module.css'
 
-const MENU_ITEMS = [
+const STATIC_ITEMS = [
   'Profil',
   'Newsletter',
   'Programme Plus',
@@ -24,7 +24,7 @@ function NfcIcon() {
   )
 }
 
-export default function ProfilePage() {
+export default function ProfilePage({ onOpenCollection }) {
   const { scanning, status, error, supported, startScan } = useNfc()
 
   function handleScan() {
@@ -63,7 +63,13 @@ export default function ProfilePage() {
         </div>
 
         <ul className={styles.menu}>
-          {MENU_ITEMS.map((label) => (
+          <li className={`${styles.item} ${styles.itemClickable}`} onClick={onOpenCollection}>
+            <span className={styles.label}>Collection</span>
+            <svg className={styles.chevron} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M9 18l6-6-6-6"/>
+            </svg>
+          </li>
+          {STATIC_ITEMS.map((label) => (
             <li key={label} className={styles.item}>
               <span className={styles.label}>{label}</span>
               <svg className={styles.chevron} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
