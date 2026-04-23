@@ -37,7 +37,10 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved }
       .then((r) => r.json())
       .then((results) => {
         if (cancelled || !results[0]) return
-        setMapCenter({ lat: parseFloat(results[0].lat), lng: parseFloat(results[0].lon) })
+        const lat = parseFloat(results[0].lat)
+        const lng = parseFloat(results[0].lon)
+        if (!isFinite(lat) || !isFinite(lng)) return
+        setMapCenter({ lat, lng })
       })
       .catch(() => {})
     return () => { cancelled = true }

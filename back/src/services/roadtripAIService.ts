@@ -37,22 +37,23 @@ export function validateSelectionAgainstCandidates(parse: RoadtripParse, candida
   };
 
   const candidateIndex = new Set(candidates.map((c) => `${c.category}:${c.id}`));
-  const selectedKeys = new Set<string>();
+  const seenKeys = new Set<string>();
 
-  const counts = { restaurant: 0, hotel: 0 };
-  selected.selected.stops.forEach((stop) => {
+  // Remove stops not in shortlist or duplicates
+  selected.selected.stops = selected.selected.stops.filter((stop) => {
     const key = `${stop.category}:${stop.id}`;
-    if (!candidateIndex.has(key)) {
-      throw new Error(`Selected stop not in shortlist: ${key}`);
-    }
-    if (selectedKeys.has(key)) {
-      throw new Error(`Duplicate selected stop: ${key}`);
-    }
-    selectedKeys.add(key);
-    counts[stop.category] += 1;
+    if (!candidateIndex.has(key) || seenKeys.has(key)) return false;
+    seenKeys.add(key);
+    return true;
   });
 
-  if (counts.restaurant > byCategory.restaurant || counts.hotel > byCategory.hotel) {
-    throw new Error('Selected stops exceed requested target counts');
-  }
+  // Sort by priority (1 = must stop) then trim to target per category
+  selected.selected.stops.sort((a, b) => (a.priority ?? 3) - (b.priority ?? 3));
+
+  const counts = { restaurant: 0, hotel: 0 };
+  selected.selected.stops = selected.selected.stops.filter((stop) => {
+    if (counts[stop.category] >= byCategory[stop.category]) return false;
+    counts[stop.category] += 1;
+    return true;
+  });
 }

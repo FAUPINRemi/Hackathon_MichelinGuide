@@ -2,18 +2,19 @@ import { pool } from '../db/pool.js';
 import type { Candidate, RoadtripParse } from '../types/roadtrip.js';
 
 const BUDGET_TO_SLUGS: Record<string, string[]> = {
-  '€': ['inexpensive', 'P01'],
-  '€€': ['moderate', 'P02'],
-  '€€€': ['expensive', 'P03'],
-  '€€€€': ['luxury', 'P04'],
+  '€': ['affordable'],
+  '€€': ['mid-range'],
+  '€€€': ['premium'],
+  '€€€€': ['luxury'],
 };
 
 function priceSymbolFromSlug(slug: string | null | undefined): Candidate['budget_symbol'] {
   if (!slug) return null;
-  if (slug.includes('P01') || slug === 'inexpensive') return '€';
-  if (slug.includes('P02') || slug === 'moderate') return '€€';
-  if (slug.includes('P03') || slug === 'expensive') return '€€€';
-  if (slug.includes('P04') || slug === 'luxury') return '€€€€';
+  const s = slug.toLowerCase();
+  if (s === 'affordable') return '€';
+  if (s === 'mid-range') return '€€';
+  if (s === 'premium') return '€€€';
+  if (s === 'luxury') return '€€€€';
   return null;
 }
 

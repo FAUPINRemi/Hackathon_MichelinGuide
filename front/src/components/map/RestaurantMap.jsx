@@ -55,7 +55,7 @@ function LocationManager({ center, restaurants }) {
 
   // Fly vers le centre explicite quand il change (recherche ville)
   useEffect(() => {
-    if (!center) return
+    if (!center || !isFinite(center.lat) || !isFinite(center.lng)) return
     map.flyTo([center.lat, center.lng], 11, { duration: 1.2 })
   }, [center, map])
 
