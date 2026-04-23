@@ -3,8 +3,10 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: row;
   overflow: hidden;
-  transition: box-shadow var(--t), border-color var(--t);
+  transition: box-shadow var(--t), border-color var(--t), transform var(--t);
   scroll-margin-top: calc(var(--nav-h-mobile) + 8px);
 }
 
@@ -13,13 +15,31 @@
   box-shadow: 0 0 0 2px var(--red-tint), var(--shadow-md);
 }
 
-/* ── IMAGE ── */
-.imgWrap {
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.cardLoading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ── IMAGE COLUMN ── */
+.imgCol {
   position: relative;
-  aspect-ratio: 16/9;
-  background: var(--grey-mid);
+  width: 80px;
+  min-width: 80px;
+  flex-shrink: 0;
   overflow: hidden;
 }
+
+.imgResto { background: var(--green-bg-alt, #f0faf0); }
+.imgHotel { background: var(--grey-light); }
 
 .img {
   width: 100%;
@@ -33,128 +53,122 @@
   height: 100%;
 }
 
-.placeholderResto {
-  background: var(--green-bg-alt);
-}
-
-.placeholderHotel {
-  background: var(--grey-light);
-}
-
-/* ── OVERLAID BADGES on image ── */
 .typeBadge {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  font-size: 10px;
+  bottom: 5px;
+  left: 4px;
+  font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  padding: 3px 8px;
-  border-radius: 4px;
+  letter-spacing: 0.05em;
+  padding: 2px 5px;
+  border-radius: 3px;
+  line-height: 1.3;
 }
 
-.badgeRed {
-  background: var(--red);
-  color: var(--white);
-}
-
-.badgeDark {
-  background: var(--black-deep);
-  color: var(--white);
-}
-
-.detourBadge {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  font-size: 11px;
-  font-weight: 700;
-  color: var(--white);
-  background: rgba(0, 0, 0, 0.55);
-  padding: 3px 8px;
-  border-radius: 4px;
-}
+.badgeRed  { background: var(--red);       color: var(--white); }
+.badgeDark { background: var(--black-deep); color: var(--white); }
 
 /* ── BODY ── */
 .body {
-  padding: 10px 12px 12px;
+  flex: 1;
+  min-width: 0;
+  padding: 9px 11px 9px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
 }
 
-.badgesRow {
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
+  line-height: 1.25;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.detourBadge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--white);
+  background: rgba(0,0,0,0.52);
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.city {
+  font-size: 11px;
+  color: var(--grey-text);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metaRow {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 6px;
-  margin-bottom: 5px;
-  min-height: 18px;
+  gap: 5px;
+  min-height: 16px;
 }
 
-.distinctions {
-  display: flex;
+.dist {
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-}
-
-.distLabel {
+  gap: 3px;
   font-size: 11px;
   font-weight: 600;
   color: var(--red);
 }
 
-.budgetBadge {
+.budget {
   font-size: 11px;
   font-weight: 600;
   color: var(--grey-dark);
   background: var(--grey-light);
   border: 1px solid var(--border);
-  padding: 1px 6px;
-  border-radius: 4px;
-}
-
-.name {
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--black);
-  margin-bottom: 3px;
-  line-height: 1.3;
-}
-
-.city {
-  font-size: 12px;
-  color: var(--grey-text);
-  margin-bottom: 4px;
+  padding: 1px 5px;
+  border-radius: 3px;
 }
 
 .cuisines {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--grey-text);
-  margin-bottom: 5px;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .reason {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--grey-dark);
-  line-height: 1.45;
-  margin-bottom: 8px;
+  line-height: 1.4;
+  margin: 0;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.link {
-  display: inline-block;
-  font-size: 12px;
-  font-weight: 700;
+.seeMore {
+  font-size: 11px;
+  font-weight: 600;
   color: var(--red);
-  text-decoration: none;
-  transition: opacity var(--t);
-}
-
-.link:hover {
-  opacity: 0.75;
+  margin-top: 2px;
 }

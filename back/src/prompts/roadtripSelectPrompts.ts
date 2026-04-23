@@ -31,6 +31,9 @@ Selection rules:
 - Select EXACTLY N restaurants and M hotels where:
   N = parse.plan.stops_target.restaurant
   M = parse.plan.stops_target.hotel
+- CRITICAL: your stops[] array MUST contain EXACTLY N+M entries. Never exceed this total.
+  If you have too many good candidates, pick only the best N restaurants and best M hotels.
+  Do NOT add extra stops "just in case". Do NOT note over-selection in notes[].
 - If candidates are insufficient, reduce count and explain in notes.
 
 Geographic distribution (CRITICAL):

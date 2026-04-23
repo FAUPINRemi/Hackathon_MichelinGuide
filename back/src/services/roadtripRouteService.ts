@@ -193,17 +193,21 @@ export class RoadtripRouteService {
     origin: { lat: number; lng: number },
     destination: { lat: number; lng: number },
     stops: Array<{ lat: number; lng: number; category: 'restaurant' | 'hotel'; id: number }>,
+    waypoints: Array<{ lat: number; lng: number }> = [],
   ): Promise<RoadtripRouteResult> {
-    const originPt  = { latitude: origin.lat,      longitude: origin.lng };
-    const destPt    = { latitude: destination.lat,  longitude: destination.lng };
-    const stopPts   = stops.map((s) => ({ latitude: s.lat, longitude: s.lng }));
+    const originPt     = { latitude: origin.lat,      longitude: origin.lng };
+    const destPt       = { latitude: destination.lat,  longitude: destination.lng };
+    const waypointPts  = waypoints.map((w) => ({ latitude: w.lat, longitude: w.lng }));
+    const stopPts      = stops.map((s) => ({ latitude: s.lat, longitude: s.lng }));
 
-    const direct    = await this.computeRoute(originPt, destPt, []);
-    const withStops = stops.length ? await this.computeRoute(originPt, destPt, stopPts) : direct;
+    const direct    = await this.computeRoute(originPt, destPt, waypointPts);
+    const withStops = stops.length
+      ? await this.computeRoute(originPt, destPt, [...waypointPts, ...stopPts])
+      : direct;
 
     const stopDetours: RoadtripRouteResult['stop_detours'] = [];
     for (const stop of stops) {
-      const solo = await this.computeRoute(originPt, destPt, [{ latitude: stop.lat, longitude: stop.lng }]);
+      const solo = await this.computeRoute(originPt, destPt, [...waypointPts, { latitude: stop.lat, longitude: stop.lng }]);
       stopDetours.push({
         category: stop.category,
         id: stop.id,
