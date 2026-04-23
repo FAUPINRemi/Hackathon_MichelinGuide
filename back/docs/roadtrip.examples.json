@@ -1,0 +1,79 @@
+{
+  "build_request": {
+    "input_mode": "free_text",
+    "freeText": "Je pars de Paris vers Lyon, je veux 2 restaurants gastronomiques italiens budget €€€, Bib accepté, max 20 min de détour par arrêt."
+  },
+  "build_response": {
+    "parse": {
+      "version": "1.0",
+      "intent": "roadtrip_parse",
+      "input_mode": "free_text",
+      "route": {
+        "origin": { "label": "Paris", "lat": null, "lng": null },
+        "destination": { "label": "Lyon", "lat": null, "lng": null },
+        "waypoints_user": []
+      },
+      "preferences": {
+        "categories": ["restaurant"],
+        "cuisines": ["italienne"],
+        "budget": ["€€€"],
+        "distinction_slugs": ["bib-gourmand"],
+        "green_star": null,
+        "max_detour_minutes_per_stop": 20,
+        "max_total_detour_minutes": null
+      },
+      "plan": {
+        "stops_target": { "restaurant": 2, "hotel": 0 },
+        "distribution_strategy": "near_route"
+      },
+      "search_query": {
+        "radius_km": 10,
+        "limit_candidates_per_category": 30,
+        "sort": "relevance"
+      },
+      "missing_fields": ["route.origin.lat", "route.origin.lng", "route.destination.lat", "route.destination.lng"],
+      "notes": ["Coordinates are null because geocoding is backend responsibility."]
+    },
+    "candidates": [
+      {
+        "category": "restaurant",
+        "id": 421,
+        "name": "Trattoria Demo",
+        "lat": 46.1,
+        "lng": 4.5,
+        "city": "Macon",
+        "distinction_slug": "bib-gourmand",
+        "budget_symbol": "€€€",
+        "cuisines": ["italienne"],
+        "score": 78
+      }
+    ],
+    "selected": {
+      "version": "1.0",
+      "intent": "roadtrip_select",
+      "selected": {
+        "stops": [
+          {
+            "category": "restaurant",
+            "id": 421,
+            "reason": "Cuisine italienne alignée au budget et distinction demandée.",
+            "priority": 1
+          }
+        ]
+      },
+      "missing_fields": ["insufficient_restaurant_candidates"],
+      "notes": ["1 restaurant selected instead of 2 due to shortlist size."]
+    },
+    "route": {
+      "provider": "google_routes",
+      "polyline_direct": "abc123",
+      "polyline_with_stops": "def456",
+      "direct_duration_minutes": 260,
+      "with_stops_duration_minutes": 286,
+      "total_detour_minutes": 26,
+      "stop_detours": [
+        { "category": "restaurant", "id": 421, "detour_minutes": 26 }
+      ]
+    }
+  }
+}

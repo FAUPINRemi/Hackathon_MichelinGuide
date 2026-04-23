@@ -8,6 +8,7 @@ import HomePage from './pages/HomePage'
 import FavoritesPage from './pages/FavoritesPage'
 import RestaurantDetailPage from './pages/RestaurantDetailPage'
 import HotelDetailPage from './pages/HotelDetailPage'
+import RoadTripPage from './pages/RoadTripPage'
 import ProfilePage from './pages/ProfilePage'
 import { useToast } from './hooks/useToast'
 import { useInstallPrompt } from './hooks/useInstallPrompt'
@@ -63,6 +64,10 @@ export default function App() {
   const navTitle = isDetail ? detailName : (
     activeTab === 'restaurants' ? 'Restaurants'
     : activeTab === 'hotels'   ? 'Hébergements'
+ 
+    : activeTab === 'roadtrip' ? 'Road Trip'
+    : activeTab === 'profile'  ? 'Mon Profil'
+
     : activeTab === 'profile'  ? 'Compte'
     : 'Favoris'
   )
@@ -82,6 +87,8 @@ export default function App() {
           <RestaurantDetailPage restaurant={selectedRestaurant} />
         ) : selectedHotel ? (
           <HotelDetailPage hotel={selectedHotel} />
+        ) : activeTab === 'roadtrip' ? (
+          <RoadTripPage />
         ) : activeTab === 'favorites' ? (
           <FavoritesPage
             lists={favorites.lists}
