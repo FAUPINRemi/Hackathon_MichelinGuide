@@ -1,0 +1,317 @@
+/* ── Page shell ── */
+.page {
+  background: var(--white);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: calc(var(--bottomnav-h) + 80px + env(safe-area-inset-bottom, 0));
+}
+
+/* ── Header ── */
+.header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--white);
+  z-index: 20;
+}
+.backBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--black);
+  flex-shrink: 0;
+  transition: background var(--t);
+}
+.backBtn:hover { background: var(--grey-light); }
+.title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--black);
+  flex: 1;
+}
+
+/* ── Body ── */
+.body {
+  flex: 1;
+  padding: 20px 16px;
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.intro {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--grey-text);
+  margin-bottom: 20px;
+}
+
+/* ── Global toggle row ── */
+.globalRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 2px solid var(--black);
+  margin-bottom: 4px;
+}
+.globalLabel {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+/* ── Purpose list ── */
+.purposeList {
+  margin-bottom: 20px;
+}
+.purposeRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 13px 0;
+  border-bottom: 1px solid var(--border);
+}
+.purposeLabel {
+  font-size: 13px;
+  color: var(--black);
+  line-height: 1.4;
+  flex: 1;
+}
+
+/* ── Toggle component ── */
+.toggle {
+  flex-shrink: 0;
+  width: 44px;
+  height: 26px;
+  border-radius: 13px;
+  background: var(--grey-mid);
+  padding: 3px;
+  transition: background 0.2s ease;
+  position: relative;
+}
+.toggleOn { background: var(--red); }
+
+.toggleThumb {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--white);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.22);
+  transition: transform 0.2s ease;
+  transform: translateX(0);
+}
+.toggleOn .toggleThumb { transform: translateX(18px); }
+
+/* ── Partners button ── */
+.partnersBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--black);
+  background: var(--white);
+  transition: background var(--t), border-color var(--t);
+}
+.partnersBtn:hover { background: var(--grey-light); border-color: var(--grey-dark); }
+.partnersBtn svg:last-child { margin-left: auto; color: var(--grey-text); }
+
+/* ── Sticky save bar ── */
+.saveBar {
+  position: fixed;
+  bottom: calc(var(--bottomnav-h) + env(safe-area-inset-bottom, 0));
+  left: 0;
+  right: 0;
+  display: flex;
+  gap: 10px;
+  padding: 12px 16px;
+  background: var(--white);
+  border-top: 1px solid var(--border);
+  z-index: 30;
+}
+.saveBtn {
+  flex: 1;
+  padding: 13px;
+  border: 1.5px solid var(--black);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--black);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: background var(--t);
+}
+.saveBtn:hover { background: var(--grey-light); }
+.saveBtnDone { border-color: var(--green); color: var(--green); }
+
+.acceptAllBtn {
+  flex: 1;
+  padding: 13px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--white);
+  background: var(--black);
+  transition: background var(--t);
+}
+.acceptAllBtn:hover { background: var(--grey-dark); }
+
+/* ── Partners panel ── */
+.panelOverlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay-heavy);
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+}
+
+.panel {
+  background: var(--white);
+  width: 100%;
+  max-height: 88vh;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.panelClose {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--black);
+  transition: background var(--t);
+}
+.panelClose:hover { background: var(--grey-light); }
+.panelTitle {
+  flex: 1;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--black);
+}
+.panelX {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  color: var(--grey-text);
+  transition: background var(--t);
+}
+.panelX:hover { background: var(--grey-light); }
+
+.panelIntro {
+  padding: 14px 16px 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--grey-text);
+  flex-shrink: 0;
+}
+
+.partnerRowAll {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--grey-light);
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.partnerList {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.partnerRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.partnerLabel {
+  font-size: 14px;
+  color: var(--black);
+}
+
+.panelFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0));
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.didomiBadge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--grey-text);
+}
+.panelSave {
+  padding: 11px 28px;
+  background: var(--black);
+  color: var(--white);
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background var(--t);
+}
+.panelSave:hover { background: var(--grey-dark); }
+
+/* ── Desktop ── */
+@media (min-width: 768px) {
+  .page {
+    max-width: 720px;
+    margin: 0 auto;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .saveBar {
+    max-width: 720px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+  }
+  .panelOverlay { align-items: center; }
+  .panel {
+    max-width: 480px;
+    max-height: 80vh;
+    margin: auto;
+    border-radius: 16px;
+  }
+}

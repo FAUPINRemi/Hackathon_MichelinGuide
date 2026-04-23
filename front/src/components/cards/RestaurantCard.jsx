@@ -1,4 +1,5 @@
 import etoileSvg from '../../assets/svg/etoile_michelin.svg'
+import bibsSvg from '../../assets/svg/bibs.svg'
 import styles from './RestaurantCard.module.css'
 
 export default function RestaurantCard({ restaurant, onClick, layout = 'grid', onSave, isSaved = false }) {
@@ -30,7 +31,7 @@ export default function RestaurantCard({ restaurant, onClick, layout = 'grid', o
       <div className={styles.body}>
         <div className={styles.distinctions}>
           {bib ? (
-            <span className={styles.bibIcon}>😊</span>
+            <img src={bibsSvg} className={styles.bibIcon} alt="Bib Gourmand" aria-label="Bib Gourmand" />
           ) : (
             Array.from({ length: stars }).map((_, i) => (
               <img key={i} src={etoileSvg} width={16} height={16} alt="" aria-hidden="true" />
