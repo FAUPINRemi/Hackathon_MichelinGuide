@@ -27,11 +27,19 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved }
     return () => clearTimeout(t)
   }, [search])
 
+  // Debounce séparé plus long pour Nominatim — évite les faux positifs sur frappe rapide
+  const [geoSearch, setGeoSearch] = useState('')
   useEffect(() => {
-    if (!debouncedSearch) { setMapCenter(null); return }
+    if (search.length < 3) { setGeoSearch(''); return }
+    const t = setTimeout(() => setGeoSearch(search), 900)
+    return () => clearTimeout(t)
+  }, [search])
+
+  useEffect(() => {
+    if (!geoSearch) { setMapCenter(null); return }
     let cancelled = false
     fetch(
-      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(debouncedSearch)}&format=json&limit=1&countrycodes=fr,be,ch,lu`,
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(geoSearch)}&format=json&limit=1&countrycodes=fr,be,ch,lu&featuretype=city`,
       { headers: { 'Accept-Language': 'fr' } }
     )
       .then((r) => r.json())
@@ -44,7 +52,7 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved }
       })
       .catch(() => {})
     return () => { cancelled = true }
-  }, [debouncedSearch])
+  }, [geoSearch])
 
   useEffect(() => {
     let cancelled = false

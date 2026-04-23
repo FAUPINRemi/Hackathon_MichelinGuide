@@ -1,6 +1,15 @@
 import { Router } from 'express';
 import { pool } from '../db/pool.js';
 
+function resolveImageUrl(v: unknown): string {
+  const raw = typeof v === 'object' && v !== null
+    ? (v as Record<string, unknown>).hotrooms_large_url
+    : v;
+  if (!raw || String(raw) === '[object Object]') return '';
+  const url = String(raw);
+  return url.startsWith('http') ? url : `https://${url}`;
+}
+
 const router = Router();
 
 function format(h: Record<string, unknown>) {
@@ -10,7 +19,7 @@ function format(h: Record<string, unknown>) {
     address: String(h.address ?? ''),
     location: String(((h.city as Record<string, unknown>)?.name ?? '')),
     description: String(h.content ?? ''),
-    img: String(h.main_image ?? ''),
+    img: resolveImageUrl(h.main_image),
     lat: Number(h.lat ?? 0),
     lng: Number(h.lng ?? 0),
     phone: String(h.phone ?? ''),

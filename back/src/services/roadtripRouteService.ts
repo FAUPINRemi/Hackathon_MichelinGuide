@@ -150,19 +150,36 @@ export class RoadtripRouteService {
     };
   }
 
+  private async resolveWaypoints(
+    waypoints: RoadtripParse['route']['waypoints_user'],
+  ): Promise<Array<{ latitude: number; longitude: number }>> {
+    const resolved: Array<{ latitude: number; longitude: number }> = [];
+    for (const wp of waypoints) {
+      if (wp.lat !== null && wp.lng !== null) {
+        resolved.push({ latitude: wp.lat, longitude: wp.lng });
+      } else if (wp.label) {
+        const geocoded = await this.geocodeLabel(wp.label);
+        if (geocoded) resolved.push(geocoded);
+      }
+    }
+    return resolved;
+  }
+
   async buildRoute(parse: RoadtripParse, selectedCandidates: Candidate[]): Promise<RoadtripRouteResult> {
     const origin = await this.resolvePoint('origin', parse.route.origin);
     const destination = await this.resolvePoint('destination', parse.route.destination);
+    const userWaypoints = await this.resolveWaypoints(parse.route.waypoints_user);
 
     const orderedStops = [...selectedCandidates];
     const stops = orderedStops.map((stop) => ({ latitude: stop.lat, longitude: stop.lng }));
 
-    const direct = await this.computeRoute(origin, destination, []);
-    const withStops = await this.computeRoute(origin, destination, stops);
+    // User waypoints define the base route (e.g. Lyon) — included in both direct and with-stops
+    const direct = await this.computeRoute(origin, destination, userWaypoints);
+    const withStops = await this.computeRoute(origin, destination, [...userWaypoints, ...stops]);
 
     const stopDetours: RoadtripRouteResult['stop_detours'] = [];
     for (const stop of orderedStops) {
-      const solo = await this.computeRoute(origin, destination, [{ latitude: stop.lat, longitude: stop.lng }]);
+      const solo = await this.computeRoute(origin, destination, [...userWaypoints, { latitude: stop.lat, longitude: stop.lng }]);
       stopDetours.push({
         category: stop.category,
         id: stop.id,

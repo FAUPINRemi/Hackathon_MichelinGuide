@@ -100,6 +100,15 @@ const HOTEL_COLS = [
 ];
 const HOTEL_K = HOTEL_COLS.length; // 32
 
+function hotelImageUrl(v) {
+  const raw = typeof v === 'object' && v !== null
+    ? v.hotrooms_large_url
+    : v;
+  if (!raw) return null;
+  const url = String(raw);
+  return url.startsWith('http') ? url : `https://${url}`;
+}
+
 function hotelValues(h) {
   const geo = typeof h._geoloc === 'object' ? h._geoloc : geoFrom(h._geoloc);
   const address = parseJson(h.address);
@@ -115,7 +124,7 @@ function hotelValues(h) {
     toInt(h.num_rooms), toInt(h.num_reviews), toInt(h.loved_count), toInt(h.favorite_count),
     toBool(h.is_plus), toBool(h.new_to_selection), toBool(h.sustainable_hotel), toBool(h.bookable),
     toJsonb(h.distinction), toInt(h.distinction_score),
-    s(h.main_image), s(h.language),
+    hotelImageUrl(h.main_image), s(h.language),
   ];
 }
 
