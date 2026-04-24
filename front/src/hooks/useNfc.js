@@ -11,6 +11,10 @@ export function useNfc() {
   const supported = typeof window !== 'undefined' && 'NDEFReader' in window
 
   async function startScan(onRead) {
+    if (!window.isSecureContext) {
+      setError('NFC nécessite HTTPS. Accédez au site via une connexion sécurisée.')
+      return
+    }
     if (!supported) {
       setError('Web NFC non supporté. Utilisez Chrome sur Android.')
       return

@@ -5,6 +5,7 @@ import cors from 'cors';
 import restaurants from './routes/restaurants.js';
 import hotels from './routes/hotels.js';
 import collection from './routes/collection.js';
+import auth from './routes/auth.js';
 
 const app = express();
 const PORT = process.env.SERVER_PORT || 3000;
@@ -16,6 +17,7 @@ app.get('/health', (_, res) => res.json({ ok: true }));
 app.use('/api/restaurants', restaurants);
 app.use('/api/hotels', hotels);
 app.use('/api/collection', collection);
+app.use('/api/auth', auth);
 
 const key = fs.readFileSync(process.env.SSL_KEY_PATH);
 const cert = fs.readFileSync(process.env.SSL_CERT_PATH);

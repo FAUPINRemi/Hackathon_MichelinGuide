@@ -17,10 +17,12 @@ import CookiesPage from './pages/legal/CookiesPage'
 import ConfidentialitePage from './pages/legal/ConfidentialitePage'
 import NoticeLegalePage from './pages/legal/NoticeLegalePage'
 import AccessibilitePage from './pages/legal/AccessibilitePage'
+import LoginPage from './pages/LoginPage'
 import { useToast } from './hooks/useToast'
 import { useInstallPrompt } from './hooks/useInstallPrompt'
 import { useFavorites } from './hooks/useFavorites'
 import { useItineraries } from './hooks/useItineraries'
+import { useAuth } from './hooks/useAuth'
 import styles from './App.module.css'
 
 export default function App() {
@@ -35,6 +37,7 @@ export default function App() {
   const { message, visible, showToast } = useToast()
   const { showBanner, install, dismiss } = useInstallPrompt()
   const favorites = useFavorites()
+  const { user, login, logout } = useAuth()
 
   const isDetail = !!(selectedRestaurant || selectedHotel)
   const isLegal  = !!legalPage
@@ -125,6 +128,8 @@ export default function App() {
           />
         ) : selectedHotel ? (
           <HotelDetailPage hotel={selectedHotel} />
+        ) : activeTab === 'profile' && !user ? (
+          <LoginPage onLogin={login} />
         ) : activeTab === 'profile' && itinerariesOpen ? (
           <ItinerariesPage
             itineraries={itineraries}
@@ -136,10 +141,7 @@ export default function App() {
         ) : activeTab === 'collections' ? (
           <CollectionPage onClose={() => setActiveTab('profile')} />
         ) : activeTab === 'profile' ? (
-          <ProfilePage
-            onOpenCollection={() => setCollectionOpen(true)}
-            onOpenItineraries={() => setItinerariesOpen(true)}
-          />
+          <ProfilePage onOpenCollection={() => setCollectionOpen(true)} onLogout={logout} user={user} onOpenItineraries={() => setItinerariesOpen(true)}/>
         ) : activeTab === 'roadtrip' ? (
           <RoadTripPage
             onRestaurantClick={handleRestaurantClick}
