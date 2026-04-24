@@ -9,6 +9,7 @@ const FILTER_SQL: Record<string, string> = {
   '1-star': "distinction_score = 3",
   bib: "(distinction->>'slug' = 'bib-gourmand')",
   green: 'green_star = true',
+  budget: "(price_category::text ILIKE '%P01%' OR price_category::text ILIKE '%P02%' OR price_category::text ILIKE '%inexpensive%' OR price_category::text ILIKE '%moderate%')",
 };
 
 function format(r: Record<string, unknown>) {
