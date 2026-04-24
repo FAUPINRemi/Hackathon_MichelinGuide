@@ -8,7 +8,6 @@ import couvertsUrl from '../../assets/svg/couverts_simple.svg'
 import litUrl from '../../assets/svg/lit.svg'
 import styles from './RoadtripMapLeaflet.module.css'
 
-// Pin identique à RestaurantMap — fond blanc, cercle rouge, icône Michelin
 function createStopIcon(stop) {
   const slug = stop.distinction_slug ?? ''
   const isHotel = stop.category === 'hotel'
@@ -22,7 +21,6 @@ function createStopIcon(stop) {
   const top  = Math.round(4 + (22 - size) / 2)
   const left = Math.round((32 - size) / 2)
 
-  // Hôtels : cercle sombre pour les distinguer des restos
   const circleFill = isHotel && !slug.includes('star') ? '#1f2937' : '#c41230'
 
   return L.divIcon({
@@ -43,7 +41,6 @@ function createStopIcon(stop) {
   })
 }
 
-// Pin départ/arrivée : lettre A ou B sur fond coloré
 function createEndpointIcon(type) {
   const fill = type === 'origin' ? '#16a34a' : '#2563eb'
   const letter = type === 'origin' ? 'A' : 'B'

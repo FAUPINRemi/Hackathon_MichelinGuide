@@ -1,6 +1,5 @@
 import styles from './RoadtripForm.module.css'
 
-// Slugs must match DB values exactly (distinction->>'slug')
 const DISTINCTIONS = [
   { slug: '1-star-michelin', label: '1 Étoile' },
   { slug: '2-stars-michelin', label: '2 Étoiles' },

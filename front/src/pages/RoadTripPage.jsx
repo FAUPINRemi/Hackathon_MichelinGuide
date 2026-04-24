@@ -65,7 +65,6 @@ const TABS = [
 export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveItinerary }) {
   const [mode, setMode] = useState('planner')
 
-  // ── Prompt IA state ──────────────────────────────────────
   const [freeText, setFreeText]   = useState('')
   const [loading, setLoading]     = useState(false)
   const [error, setError]         = useState('')
@@ -94,10 +93,8 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
     try { sessionStorage.setItem(SS_STOPS, JSON.stringify(iaSelectedStops)) } catch {}
   }, [iaSelectedStops])
 
-  // ── Navigateur state ─────────────────────────────────────
   const planner = usePlannerState()
 
-  // ── Prompt IA derived state ───────────────────────────────
   const enrichedStops = useMemo(() => computeEnrichedStops(result), [result])
 
   const iaAvailableStops = useMemo(() => {
@@ -200,7 +197,6 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
     highlightTimer.current = setTimeout(() => setHighlightedId(null), 1800)
   }, [])
 
-  // ── Navigateur derived state ─────────────────────────────
   const plannerPolyline = useMemo(() => {
     const encoded = planner.routeResult?.polyline_with_stops || planner.routeData?.polyline || ''
     return decodePolyline(encoded)
@@ -230,7 +226,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
 
   return (
     <div className={styles.page}>
-      {/* ── MAP PANEL ──────────────────────────────────────── */}
+      {}
       <section className={styles.mapPanel}>
         <div className={styles.mapFrame}>
           <Suspense fallback={<div className={styles.mapSkeleton} />}>
@@ -295,7 +291,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
         )}
       </section>
 
-      {/* ── RIGHT PANEL ────────────────────────────────────── */}
+      {}
       <section className={styles.panel}>
         <div className={styles.modeTabs}>
           {TABS.map((tab) => (
@@ -309,7 +305,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
           ))}
         </div>
 
-        {/* ── NAVIGATEUR ── */}
+        {}
         {mode === 'planner' && planner.step === 'setup' && (
           <>
             <RoadtripPlannerSetup
@@ -415,7 +411,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
           </div>
         )}
 
-        {/* ── PROMPT IA ── */}
+        {}
         {mode === 'free_text' && (
           <>
             <RoadtripPromptBox value={freeText} onChange={setFreeText} />
@@ -479,7 +475,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
                   </div>
                 </div>
 
-                {/* Selected stops — cards clickables + remove */}
+                {}
                 {iaSelectedStops.length > 0 && (
                   <div className={styles.selectedSection}>
                     <p className={styles.sectionTitle}>Mes arrêts ({iaSelectedStops.length})</p>
@@ -498,7 +494,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
                   </div>
                 )}
 
-                {/* Available IA suggestions */}
+                {}
                 {iaAvailableStops.length > 0 && (
                   <div className={styles.suggestionsSection}>
                     <p className={styles.sectionTitle}>
@@ -519,7 +515,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
                   </div>
                 )}
 
-                {/* IA notes */}
+                {}
                 {(result.selected?.notes?.length > 0 || result.parse?.notes?.length > 0) && (
                   <details className={styles.notesBox}>
                     <summary className={styles.notesTitle}>Notes de l&apos;IA</summary>

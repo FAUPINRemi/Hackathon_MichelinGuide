@@ -2,7 +2,12 @@ import { Router } from 'express';
 import { pool } from '../db/pool.js';
 
 const router = Router();
-const USER_ID = 1;
+
+function getUserId(req: import('express').Request): number {
+  const h = req.headers['x-user-id'];
+  const parsed = parseInt(Array.isArray(h) ? h[0] : (h ?? ''), 10);
+  return Number.isFinite(parsed) ? parsed : 1;
+}
 
 const CONTINENT_MAP: Record<string, string> = {
   AD: 'Europe', AT: 'Europe', BA: 'Europe', BE: 'Europe', CH: 'Europe',
@@ -76,6 +81,8 @@ const CONTINENT_ORDER = [
 
 const REGION_SQL = `CASE WHEN region LIKE '{%' THEN (region::jsonb)->>'name' ELSE COALESCE(NULLIF(TRIM(region), ''), 'Autre') END`;
 
+const DISTINCTION_FILTER = `distinction_score >= 3`;
+
 function toSlug(name: string) {
   return name.toLowerCase().replace(/\s+/g, '-');
 }
@@ -95,13 +102,14 @@ function parseRegionName(raw: string | null): string {
 }
 
 // GET /api/collection/continents
-router.get('/continents', async (_req, res, next) => {
+router.get('/continents', async (req, res, next) => {
   try {
+    const userId = getUserId(req);
     const [totalRes, visitedRes] = await Promise.all([
       pool.query(`
         SELECT country->>'code' AS code, COUNT(*) AS total
         FROM restaurants
-        WHERE country->>'code' IS NOT NULL
+        WHERE country->>'code' IS NOT NULL AND ${DISTINCTION_FILTER}
         GROUP BY code
       `),
       pool.query(`
@@ -110,7 +118,7 @@ router.get('/continents', async (_req, res, next) => {
         JOIN restaurants r ON r.id = c.id_restaurant
         WHERE c.id_client = $1
         GROUP BY code
-      `, [USER_ID]),
+      `, [userId]),
     ]);
 
     const visitedByCode: Record<string, number> = {};
@@ -141,6 +149,7 @@ router.get('/continents', async (_req, res, next) => {
 // GET /api/collection/continents/:continent/countries
 router.get('/continents/:continent/countries', async (req, res, next) => {
   try {
+    const userId = getUserId(req);
     const continentName = fromSlug(req.params.continent);
     if (!continentName) { res.status(404).json({ error: 'Continent not found' }); return; }
 
@@ -152,7 +161,7 @@ router.get('/continents/:continent/countries', async (req, res, next) => {
       pool.query(`
         SELECT country->>'code' AS code, COUNT(*) AS total
         FROM restaurants
-        WHERE country->>'code' = ANY($1)
+        WHERE country->>'code' = ANY($1) AND ${DISTINCTION_FILTER}
         GROUP BY code
         ORDER BY total DESC
       `, [codes]),
@@ -162,7 +171,7 @@ router.get('/continents/:continent/countries', async (req, res, next) => {
         JOIN restaurants r ON r.id = c.id_restaurant
         WHERE c.id_client = $1 AND r.country->>'code' = ANY($2)
         GROUP BY code
-      `, [USER_ID, codes]),
+      `, [userId, codes]),
     ]);
 
     const visitedByCode: Record<string, number> = {};
@@ -181,13 +190,14 @@ router.get('/continents/:continent/countries', async (req, res, next) => {
 // GET /api/collection/countries/:country/regions
 router.get('/countries/:country/regions', async (req, res, next) => {
   try {
+    const userId = getUserId(req);
     const countryCode = req.params.country.toUpperCase();
 
     const [totalRes, visitedRes] = await Promise.all([
       pool.query(`
         SELECT region AS region_raw, COUNT(*) AS total
         FROM restaurants
-        WHERE country->>'code' = $1
+        WHERE country->>'code' = $1 AND ${DISTINCTION_FILTER}
         GROUP BY region_raw
         ORDER BY total DESC
       `, [countryCode]),
@@ -197,7 +207,7 @@ router.get('/countries/:country/regions', async (req, res, next) => {
         JOIN restaurants r ON r.id = c.id_restaurant
         WHERE c.id_client = $1 AND r.country->>'code' = $2
         GROUP BY region_raw
-      `, [USER_ID, countryCode]),
+      `, [userId, countryCode]),
     ]);
 
     const totalMap: Record<string, number> = {};
@@ -222,6 +232,7 @@ router.get('/countries/:country/regions', async (req, res, next) => {
 // GET /api/collection/countries/:country/regions/:region/cities
 router.get('/countries/:country/regions/:region/cities', async (req, res, next) => {
   try {
+    const userId = getUserId(req);
     const countryCode = req.params.country.toUpperCase();
     const regionName  = req.params.region;
 
@@ -232,6 +243,7 @@ router.get('/countries/:country/regions/:region/cities', async (req, res, next) 
         WHERE country->>'code' = $1
           AND ${REGION_SQL} = $2
           AND city->>'name' IS NOT NULL
+          AND ${DISTINCTION_FILTER}
         GROUP BY city_name
         ORDER BY total DESC
       `, [countryCode, regionName]),
@@ -244,7 +256,7 @@ router.get('/countries/:country/regions/:region/cities', async (req, res, next) 
           AND ${REGION_SQL.replace(/\bregion\b/g, 'r.region')} = $3
           AND r.city->>'name' IS NOT NULL
         GROUP BY city_name
-      `, [USER_ID, countryCode, regionName]),
+      `, [userId, countryCode, regionName]),
     ]);
 
     const visitedByCity: Record<string, number> = {};
@@ -262,6 +274,7 @@ router.get('/countries/:country/regions/:region/cities', async (req, res, next) 
 // GET /api/collection/countries/:country/regions/:region/cities/:city/restaurants
 router.get('/countries/:country/regions/:region/cities/:city/restaurants', async (req, res, next) => {
   try {
+    const userId = getUserId(req);
     const countryCode = req.params.country.toUpperCase();
     const regionName  = req.params.region;
     const cityName    = req.params.city;
@@ -275,8 +288,9 @@ router.get('/countries/:country/regions/:region/cities/:city/restaurants', async
       WHERE r.country->>'code' = $2
         AND ${REGION_SQL.replace(/\bregion\b/g, 'r.region')} = $3
         AND r.city->>'name' = $4
+        AND ${DISTINCTION_FILTER.replace(/\bdistinction/g, 'r.distinction')}
       ORDER BY r.distinction_score DESC NULLS LAST, r.name ASC
-    `, [USER_ID, countryCode, regionName, cityName]);
+    `, [userId, countryCode, regionName, cityName]);
 
     res.json(result.rows.map((r) => {
       const score    = Number(r.distinction_score ?? 0);
@@ -294,6 +308,34 @@ router.get('/countries/:country/regions/:region/cities/:city/restaurants', async
         visited: Boolean(r.visited),
       };
     }));
+  } catch (err) { next(err); }
+});
+
+// POST /api/collection/scan
+router.post('/scan', async (req, res, next) => {
+  try {
+    const userId = getUserId(req);
+    const { id } = req.body as { id?: string };
+    if (!id) { res.status(400).json({ error: 'Missing id field' }); return; }
+
+    const lookup = await pool.query(
+      `SELECT id, name FROM restaurants WHERE id = $1 LIMIT 1`,
+      [parseInt(id, 10)]
+    );
+    if (!lookup.rows.length) {
+      res.status(404).json({ error: `Restaurant "${id}" not found` }); return;
+    }
+
+    const restaurant = lookup.rows[0] as { id: number; name: string };
+
+    await pool.query(
+      `INSERT INTO collection (id_client, id_restaurant)
+       VALUES ($1, $2)
+       ON CONFLICT (id_client, id_restaurant) DO NOTHING`,
+      [userId, restaurant.id]
+    );
+
+    res.json({ ok: true, restaurant: restaurant.name });
   } catch (err) { next(err); }
 });
 
