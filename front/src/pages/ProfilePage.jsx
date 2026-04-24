@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNfc, isMobileDevice } from '../hooks/useNfc'
 import bonhommeSvg from '../assets/svg/bonhomme.svg'
+import { api } from '../api/client'
 import styles from './ProfilePage.module.css'
 
 const STATIC_ITEMS = [
