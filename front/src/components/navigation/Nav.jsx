@@ -17,8 +17,8 @@ export default function Nav({ title, onBack, showBack = false, activeTab, onTabC
             className={styles.desktopLogo}
             onClick={() => onTabChange?.('restaurants')}
           >
-            <span className={styles.logoM}>LE JEUNE GUIDE</span>
-            <span className={styles.logoG}>BY MICHELIN</span>
+            <span className={styles.logoM}>MICHELIN</span>
+            <span className={styles.logoG}>GUIDE</span>
           </button>
 
           <nav className={styles.desktopLinks}>

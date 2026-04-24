@@ -36,7 +36,7 @@ const AMENITIES = [
 
 const TODAY_IDX = (new Date().getDay() + 6) % 7
 
-export default function RestaurantDetailPage({ restaurant, isSaved = false, onSave, onHotelClick, onSaveHotel, isAnySaved, getNote, setNote }) {
+export default function RestaurantDetailPage({ restaurant, isSaved = false, onSave, onHotelClick, onSaveHotel, isAnySaved, getNote, setNote, onRoadtrip }) {
   const [visited, setVisited]           = useState(false)
   const [showNote, setShowNote]         = useState(false)
   const [expanded, setExpanded]         = useState(false)
@@ -172,7 +172,7 @@ export default function RestaurantDetailPage({ restaurant, isSaved = false, onSa
 
       {/* Road-trip CTA */}
       <div className={styles.section}>
-        <button className={styles.roadtripBtn}>
+        <button className={styles.roadtripBtn} onClick={onRoadtrip}>
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M3 17l4-8 4 4 4-6 4 10"/>
             <path d="M3 21h18"/>

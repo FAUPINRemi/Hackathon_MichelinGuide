@@ -25,7 +25,7 @@ export default function Drawer({ open, onClose }) {
       <div className={`${styles.overlay} ${open ? styles.open : ''}`} onClick={onClose} />
       <aside className={`${styles.drawer} ${open ? styles.open : ''}`}>
         <div className={styles.header}>
-          <span className={styles.logo}>Le jeune guide <span>by Michelin</span></span>
+          <span className={styles.logo}>Michelin Guide</span>
           <button className={styles.close} onClick={onClose} aria-label="Fermer">✕</button>
         </div>
 
