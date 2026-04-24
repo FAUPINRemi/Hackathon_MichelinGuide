@@ -55,8 +55,12 @@ export const api = {
     scan:         (payload)                       => post('/collection/scan', payload),
   },
   roadtrip: {
-    parse: (payload) => post('/roadtrip/parse', payload),
-    build: (payload) => post('/roadtrip/build', payload),
+    parse:   (payload) => post('/roadtrip/parse',   payload),
+    build:   (payload) => post('/roadtrip/build',   payload),
+    plan:    (payload) => post('/roadtrip/plan',    payload),
+    nearby:  (payload) => post('/roadtrip/nearby',  payload),
+    compute: (payload) => post('/roadtrip/compute', payload),
+    geocode: (q)       => get('/roadtrip/geocode',  { q }),
   },
   auth: {
     login: (mail, password) => post('/auth/login', { mail, password }),

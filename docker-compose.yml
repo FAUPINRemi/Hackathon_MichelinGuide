@@ -8,9 +8,12 @@ services:
     env_file:
       - ./env/.env
     environment:
-      - VITE_API_TARGET=${VITE_API_TARGET:-http://server:3000}
+      - VITE_API_TARGET=${VITE_API_TARGET:-https://server:3000}
       - UI_HOST=${UI_HOST:-0.0.0.0}
       - UI_INTERNAL_PORT=${UI_INTERNAL_PORT:-5173}
+    volumes:
+      - ./credential/certs/key.pem:/app/certs/key.pem:ro
+      - ./credential/certs/cert.pem:/app/certs/cert.pem:ro
     ports:
       - "${UI_PORT:-5173}:${UI_INTERNAL_PORT:-5173}"
     depends_on:
@@ -26,6 +29,8 @@ services:
       - DB_HOST=db
     volumes:
       - ./env:/app/env:ro
+      - ./credential/certs/key.pem:/app/certs/key.pem:ro
+      - ./credential/certs/cert.pem:/app/certs/cert.pem:ro
     ports:
       - "${SERVER_PORT:-3000}:3000"
     depends_on:

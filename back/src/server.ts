@@ -1,3 +1,5 @@
+import https from 'node:https';
+import fs from 'node:fs';
 import express from 'express';
 import cors from 'cors';
 import pinoHttp from 'pino-http';
@@ -52,6 +54,8 @@ app.use('/api/auth', authRouter);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-app.listen(PORT, () => {
+const key = fs.readFileSync(process.env.SSL_KEY_PATH!);
+const cert = fs.readFileSync(process.env.SSL_CERT_PATH!);
+https.createServer({ key, cert }, app).listen(PORT, () => {
   logger.info({ port: PORT }, 'Server listening');
 });

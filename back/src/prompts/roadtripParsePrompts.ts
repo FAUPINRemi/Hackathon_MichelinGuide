@@ -7,13 +7,11 @@ export const ROADTRIP_PARSE_SYSTEM_PROMPT = `You are a deterministic JSON normal
 
 Goal:
 - Transform a user request (form or free text) into strict JSON criteria.
-- Never select restaurants/hotels.
+- Never select restaurants or hotels — only extract criteria.
 - Never invent places or coordinates.
 
 Output constraints:
-- Return JSON only.
-- No markdown.
-- No extra keys.
+- Return JSON only. No markdown. No extra keys.
 - Match EXACTLY this schema and key order:
 {
   "version": "1.0",
@@ -35,33 +33,43 @@ Output constraints:
   },
   "plan": {
     "stops_target": { "restaurant": number, "hotel": number },
-    "distribution_strategy": "near_route" | "balanced" | "near_cities"
+    "distribution_strategy": "near_route",
+    "stop_area": string | undefined
   },
   "search_query": {
     "radius_km": number,
     "limit_candidates_per_category": number,
-    "sort": "relevance" | "distance" | "distinction"
+    "sort": "distance"
   },
   "missing_fields": string[],
   "notes": string[]
 }
 
 Rules:
-- If info is missing, put null and add a field path in missing_fields.
-- categories can only include restaurant/hotel.
+- Do NOT geocode. Keep lat/lng always null — the server geocodes.
+- categories: only "restaurant" and/or "hotel".
 - Normalize budget to €, €€, €€€, €€€€ only.
-- distinction_slugs must use: "3-stars-michelin", "2-stars-michelin", "1-star-michelin", "bib-gourmand", "selected".
-- Do not geocode. Keep lat/lng null unless provided by input.
-- If user asks both categories, include both.
+- distinction_slugs MUST use EXACTLY: "3-stars-michelin", "2-stars-michelin", "1-star-michelin", "bib-gourmand", "selected".
+  Map user inputs: "1 étoile" / "1 star" / "1-star" → "1-star-michelin", "2 étoiles" / "2 stars" → "2-stars-michelin", etc.
+- waypoints_user: extract ALL intermediate stops / "passing through" / "via" cities from free text.
+- If user mentions stopping at a city (e.g. "en passant par Dijon"), add it to waypoints_user with label set and lat/lng null.
+- distribution_strategy: always "near_route" — do not change.
+- stop_area: detect where the user wants their stops:
+  • If user says "à [destination]" / "at [destination]" / "in [destination]" where [destination] matches the destination city → set "near_destination"
+  • If user says "à [origin]" / "at [origin]" / "in [origin]" where [origin] matches the origin city → set "near_origin"
+  • If user mentions a specific intermediate city for stops → set that city name as a string (e.g. "Lyon")
+  • Otherwise → omit the field (undefined), meaning stops are spread along the route
+- sort: always "distance" — server overrides this anyway.
+- radius_km: always 40. Server enforces this.
+- limit_candidates_per_category: always 50. Server enforces this.
+- max_detour_minutes_per_stop: null — server enforces 30 min hard cap automatically.
+- max_total_detour_minutes: null unless user explicitly requests a total detour limit.
 
 Defaults:
 - stops_target = {restaurant:2, hotel:0} if restaurant only.
 - stops_target = {restaurant:0, hotel:1} if hotel only.
-- stops_target = {restaurant:2, hotel:1} if both.
-- distribution_strategy = "near_route".
-- radius_km = 10.
-- limit_candidates_per_category = 30.
-- sort = "relevance".
+- stops_target = {restaurant:2, hotel:1} if both or unspecified.
+- If user specifies a count (e.g. "3 restaurants"), use that count.
 
 Do not output explanations.`;
 
@@ -79,13 +87,7 @@ export function buildRoadtripParseUserPrompt(input: ParseRequest): string {
       budget: input.form?.budget ?? null,
       distinction_slugs: input.form?.distinction_slugs ?? null,
       green_star: input.form?.green_star ?? null,
-      max_detour_minutes_per_stop: input.form?.max_detour_minutes_per_stop ?? null,
-      max_total_detour_minutes: input.form?.max_total_detour_minutes ?? null,
       stops_target: input.form?.stops_target ?? null,
-      distribution_strategy: input.form?.distribution_strategy ?? null,
-      radius_km: input.form?.radius_km ?? null,
-      limit_candidates_per_category: input.form?.limit_candidates_per_category ?? null,
-      sort: input.form?.sort ?? null,
     },
   });
 }

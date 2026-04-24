@@ -136,29 +136,6 @@
     gap: 16px;
   }
 
-  .footerPromo {
-    margin-top: 48px;
-    padding-top: 32px;
-    border-top: 1px solid var(--border);
-  }
-  .footerPromo h2 {
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: var(--black);
-  }
-  .promoLinks {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 24px;
-  }
-  .promoLink {
-    font-size: 13px;
-    color: var(--grey-text);
-    text-decoration: underline;
-    transition: color var(--t);
-  }
-  .promoLink:hover { color: var(--black); }
 }
 
 .loadingMsg {
@@ -194,4 +171,78 @@
   border-radius: 4px;
   font-size: 12px;
   color: var(--black);
+}
+
+/* ── Site footer links (destinations + guide sections) ── */
+.siteFooter {
+  border-top: 1px solid var(--border);
+  padding: 32px 16px 24px;
+  background: var(--bg);
+}
+
+.siteFooterGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.siteFooterCol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.siteFooterTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--black);
+  margin-bottom: 8px;
+}
+.siteFooterTitleGap { margin-top: 20px; }
+
+.siteFooterLink {
+  font-size: 13px;
+  color: var(--grey-text);
+  padding: 3px 0;
+  transition: color var(--t);
+  text-align: left;
+}
+.siteFooterLink:hover { color: var(--red); }
+
+.siteFooterDestinations { display: flex; flex-direction: column; }
+
+.destinationsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 16px;
+}
+
+.destinationLink {
+  font-size: 13px;
+  color: var(--grey-text);
+  padding: 4px 0;
+  text-align: left;
+  transition: color var(--t);
+}
+.destinationLink:hover { color: var(--red); }
+
+@media (min-width: 768px) {
+  .siteFooter { padding: 40px 32px 32px; }
+
+  .siteFooterGrid {
+    flex-direction: row;
+    gap: 48px;
+    align-items: flex-start;
+  }
+
+  .siteFooterCol { flex-shrink: 0; min-width: 160px; }
+
+  .siteFooterDestinations { flex: 1; }
+
+  .destinationsGrid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px 20px;
+  }
 }

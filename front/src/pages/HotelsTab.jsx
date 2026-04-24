@@ -2,11 +2,12 @@ import { useState, useEffect, useCallback } from 'react'
 import SearchBar from '../components/filters/SearchBar'
 import HotelCard from '../components/cards/HotelCard'
 import ScrollSection from '../components/layout/ScrollSection'
+import Footer from '../components/layout/Footer'
 import { api } from '../api/client'
 import { useApiData } from '../hooks/useApiData'
 import styles from './HomeTabs.module.css'
 
-export default function HotelsTab({ onHotelClick, onSave, isAnySaved }) {
+export default function HotelsTab({ onHotelClick, onSave, isAnySaved, onLegalPage }) {
   const [search, setSearch]                   = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
 
@@ -64,10 +65,7 @@ export default function HotelsTab({ onHotelClick, onSave, isAnySaved }) {
         )}
 
         {!loading && !error && hotels.length === 0 && (
-          <div className={styles.emptyState}>
-            <p>Aucun hébergement trouvé.</p>
-            <p className={styles.emptyHint}>Importez les données avec :<br /><code>docker compose --profile import up importer</code></p>
-          </div>
+          <p className={styles.emptyState}>Aucun hébergement trouvé.</p>
         )}
       </div>
 
@@ -80,7 +78,7 @@ export default function HotelsTab({ onHotelClick, onSave, isAnySaved }) {
 
         <div className={styles.desktopContent}>
           {loading && <p className={styles.loadingMsg}>Chargement…</p>}
-          {error   && <p className={styles.errorMsg}>Serveur non disponible — lancez le backend.</p>}
+          {error   && <p className={styles.errorMsg}>Serveur non disponible</p>}
           {!loading && !error && (
             <p className={styles.resultsCount}>{total} hébergements</p>
           )}
@@ -91,6 +89,8 @@ export default function HotelsTab({ onHotelClick, onSave, isAnySaved }) {
           </div>
         </div>
       </div>
+
+      <Footer onLegalPage={onLegalPage} />
     </div>
   )
 }

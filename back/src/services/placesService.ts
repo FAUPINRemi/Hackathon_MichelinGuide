@@ -2,18 +2,32 @@ import { pool } from '../db/pool.js';
 import type { Candidate, RoadtripParse } from '../types/roadtrip.js';
 
 const BUDGET_TO_SLUGS: Record<string, string[]> = {
-  '€': ['inexpensive', 'P01'],
-  '€€': ['moderate', 'P02'],
-  '€€€': ['expensive', 'P03'],
-  '€€€€': ['luxury', 'P04'],
+  '€': ['affordable'],
+  '€€': ['mid-range'],
+  '€€€': ['premium'],
+  '€€€€': ['luxury'],
 };
+
+function resolveHotelImage(raw: unknown): string | null {
+  if (!raw) return null;
+  if (typeof raw === 'object') {
+    const obj = raw as Record<string, unknown>;
+    const url = obj.hotrooms_large_url ?? obj.url ?? obj.src;
+    if (url && typeof url === 'string' && url.startsWith('http')) return url;
+    return null;
+  }
+  const str = String(raw);
+  if (!str || str === '[object Object]') return null;
+  return str.startsWith('http') ? str : `https://${str}`;
+}
 
 function priceSymbolFromSlug(slug: string | null | undefined): Candidate['budget_symbol'] {
   if (!slug) return null;
-  if (slug.includes('P01') || slug === 'inexpensive') return '€';
-  if (slug.includes('P02') || slug === 'moderate') return '€€';
-  if (slug.includes('P03') || slug === 'expensive') return '€€€';
-  if (slug.includes('P04') || slug === 'luxury') return '€€€€';
+  const s = slug.toLowerCase();
+  if (s === 'affordable') return '€';
+  if (s === 'mid-range') return '€€';
+  if (s === 'premium') return '€€€';
+  if (s === 'luxury') return '€€€€';
   return null;
 }
 
@@ -177,6 +191,7 @@ export async function searchCandidates(parse: RoadtripParse, routePoints: Array<
           COALESCE(r.price_category->>'slug', r.price_category->>'code') AS budget_slug,
           r.cuisines,
           r.distinction_score,
+          COALESCE(r.image, r.main_image, '') AS image_url,
           CASE WHEN EXISTS (SELECT 1 FROM route_points)
             THEN (
               SELECT MIN(
@@ -233,6 +248,7 @@ export async function searchCandidates(parse: RoadtripParse, routePoints: Array<
         distinction_slug: row.distinction_slug ? String(row.distinction_slug) : null,
         budget_symbol: priceSymbolFromSlug(row.budget_slug ? String(row.budget_slug) : null),
         cuisines: extractCuisineLabels(row.cuisines),
+        image: row.image_url ? String(row.image_url) : null,
         score: Number(row.score || 0),
       });
     });
@@ -266,6 +282,7 @@ export async function searchCandidates(parse: RoadtripParse, routePoints: Array<
         COALESCE(h.city->>'name', h.neighborhood, h.state_province) AS city,
         lower(COALESCE(h.distinction->>'slug', '')) AS distinction_slug,
         h.distinction_score,
+        COALESCE(h.main_image, '') AS image_url,
         CASE WHEN EXISTS (SELECT 1 FROM route_points)
           THEN (
             SELECT MIN(
@@ -311,6 +328,7 @@ export async function searchCandidates(parse: RoadtripParse, routePoints: Array<
         distinction_slug: row.distinction_slug ? String(row.distinction_slug) : null,
         budget_symbol: null,
         cuisines: [],
+        image: resolveHotelImage(row.image_url),
         score: Number(row.score || 0),
       });
     });

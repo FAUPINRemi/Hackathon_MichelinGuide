@@ -22,6 +22,7 @@ export interface RoadtripParse {
   plan: {
     stops_target: { restaurant: number; hotel: number };
     distribution_strategy: 'near_route' | 'balanced' | 'near_cities';
+    stop_area?: string;
   };
   search_query: {
     radius_km: number;
@@ -42,6 +43,7 @@ export interface Candidate {
   distinction_slug: string | null;
   budget_symbol: '€' | '€€' | '€€€' | '€€€€' | null;
   cuisines: string[];
+  image: string | null;
   score?: number;
 }
 

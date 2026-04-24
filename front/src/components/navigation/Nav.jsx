@@ -4,6 +4,8 @@ const NAV_LINKS = [
   { label: 'Restaurants',      tab: 'restaurants' },
   { label: 'Hébergements',     tab: 'hotels' },
   { label: 'Guide de voyage',  tab: 'roadtrip' },
+  { label: 'Collections',      tab: 'collections' },
+  { label: 'Compte',           tab: 'profile' },
   { label: 'Régions',          tab: null },
   { label: 'Magazine',         tab: null },
 ]
