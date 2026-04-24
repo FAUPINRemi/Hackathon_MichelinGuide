@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker compose *)",
+      "Bash(docker exec *)",
+      "Bash(curl -s -X POST http://localhost:3000/api/collection/scan -H 'Content-Type: application/json' -d '{\"id\":\"6177\"}')",
+      "Bash(curl -s -X POST http://localhost:3000/api/collection/scan -H 'Content-Type: application/json' -d '{\"id\":\"16132\"}')"
+    ]
+  }
+}

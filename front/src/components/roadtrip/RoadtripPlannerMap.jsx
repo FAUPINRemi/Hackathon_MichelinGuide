@@ -8,7 +8,6 @@ import couvertsUrl from '../../assets/svg/couverts_simple.svg'
 import litUrl from '../../assets/svg/lit.svg'
 import styles from './RoadtripPlannerMap.module.css'
 
-// Selected stop — full Michelin pin (same as RoadtripMapLeaflet)
 function createSelectedIcon(stop) {
   const slug = stop.distinction_slug ?? ''
   const isHotel = stop.category === 'hotel'
@@ -38,7 +37,6 @@ function createSelectedIcon(stop) {
   })
 }
 
-// Suggestion pin — smaller, gray circle
 function createSuggestionIcon(stop) {
   const slug = stop.distinction_slug ?? ''
   const isHotel = stop.category === 'hotel'
@@ -91,7 +89,6 @@ function AutoFitBounds({ points }) {
   useEffect(() => {
     if (points.length < 2) return
     map.fitBounds(points, { padding: [36, 36] })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [map, JSON.stringify(points)])
   return null
 }

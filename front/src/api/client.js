@@ -1,11 +1,19 @@
 const BASE = '/api';
 
+function userHeaders() {
+  try {
+    const u = JSON.parse(localStorage.getItem('mg_user'));
+    if (u?.id) return { 'X-User-Id': String(u.id) };
+  } catch { /* ignore */ }
+  return {};
+}
+
 async function get(path, params = {}) {
   const url = new URL(BASE + path, window.location.origin);
   Object.entries(params).forEach(([k, v]) => {
     if (v !== '' && v !== undefined && v !== null) url.searchParams.set(k, v);
   });
-  const res = await fetch(url.toString());
+  const res = await fetch(url.toString(), { headers: userHeaders() });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
@@ -13,7 +21,7 @@ async function get(path, params = {}) {
 async function post(path, body = {}) {
   const res = await fetch(BASE + path, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...userHeaders() },
     body: JSON.stringify(body),
   });
   if (!res.ok) {
@@ -44,6 +52,7 @@ export const api = {
     regions:      (countryCode)                   => get(`/collection/countries/${countryCode}/regions`),
     cities:       (countryCode, regionName)       => get(`/collection/countries/${countryCode}/regions/${encodeURIComponent(regionName)}/cities`),
     restaurants:  (countryCode, regionName, city) => get(`/collection/countries/${countryCode}/regions/${encodeURIComponent(regionName)}/cities/${encodeURIComponent(city)}/restaurants`),
+    scan:         (payload)                       => post('/collection/scan', payload),
   },
   roadtrip: {
     parse:   (payload) => post('/roadtrip/parse',   payload),
@@ -52,5 +61,8 @@ export const api = {
     nearby:  (payload) => post('/roadtrip/nearby',  payload),
     compute: (payload) => post('/roadtrip/compute', payload),
     geocode: (q)       => get('/roadtrip/geocode',  { q }),
+  },
+  auth: {
+    login: (mail, password) => post('/auth/login', { mail, password }),
   },
 };

@@ -39,7 +39,6 @@ export function validateSelectionAgainstCandidates(parse: RoadtripParse, candida
   const candidateIndex = new Set(candidates.map((c) => `${c.category}:${c.id}`));
   const seenKeys = new Set<string>();
 
-  // Remove stops not in shortlist or duplicates
   selected.selected.stops = selected.selected.stops.filter((stop) => {
     const key = `${stop.category}:${stop.id}`;
     if (!candidateIndex.has(key) || seenKeys.has(key)) return false;
@@ -47,7 +46,6 @@ export function validateSelectionAgainstCandidates(parse: RoadtripParse, candida
     return true;
   });
 
-  // Sort by priority (1 = must stop) then trim to target per category
   selected.selected.stops.sort((a, b) => (a.priority ?? 3) - (b.priority ?? 3));
 
   const counts = { restaurant: 0, hotel: 0 };
