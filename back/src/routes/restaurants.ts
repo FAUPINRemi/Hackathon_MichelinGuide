@@ -89,7 +89,7 @@ router.get('/', async (req, res, next) => {
 
 router.get('/:id', async (req, res, next) => {
   try {
-    const result = await pool.query('SELECT * FROM restaurants WHERE identifier = $1 LIMIT 1', [req.params.id]);
+    const result = await pool.query('SELECT * FROM restaurants WHERE identifier = $1 OR id::text = $1 LIMIT 1', [req.params.id]);
     if (!result.rows.length) {
       res.status(404).json({ error: 'Not found' });
       return;
