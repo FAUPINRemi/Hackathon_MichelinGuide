@@ -2,20 +2,20 @@ import styles from './Drawer.module.css'
 
 const MENU_ITEMS = [
   { section: 'Restaurants', items: [
-    { icon: '⭐', label: 'Restaurants Étoilés' },
-    { icon: '😊', label: 'Bib Gourmand' },
-    { icon: '🍽️', label: 'Assiette MICHELIN' },
-    { icon: '🌿', label: 'Étoile Verte' },
+    { icon: '', label: 'Restaurants Étoilés' },
+    { icon: '', label: 'Bib Gourmand' },
+    { icon: '', label: 'Assiette MICHELIN' },
+    { icon: '', label: 'Étoile Verte' },
   ]},
   { section: 'Hôtels', items: [
-    { icon: '🏨', label: 'Clés MICHELIN' },
-    { icon: '✨', label: 'Hôtels d\'exception' },
+    { icon: '', label: 'Clés MICHELIN' },
+    { icon: '', label: 'Hôtels d\'exception' },
   ]},
   { section: 'Découvrir', items: [
-    { icon: '🗺️', label: 'Explorer les villes' },
-    { icon: '✈️', label: 'Voyages gastronomiques' },
-    { icon: '📰', label: 'Actualités & Événements' },
-    { icon: '🎁', label: 'Offrir une expérience' },
+    { icon: '', label: 'Explorer les villes' },
+    { icon: '', label: 'Voyages gastronomiques' },
+    { icon: '', label: 'Actualités & Événements' },
+    { icon: '', label: 'Offrir une expérience' },
   ]},
 ]
 

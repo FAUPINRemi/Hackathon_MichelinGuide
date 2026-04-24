@@ -4,7 +4,7 @@ import { api } from '../api/client'
 const SETUP_INIT = {
   origin: '',
   destination: '',
-  waypoints: [],   // Array<{ label, displayName, lat, lng }>
+  waypoints: [],  
   radiusKm: 10,
   category: 'both',
   budget: '',

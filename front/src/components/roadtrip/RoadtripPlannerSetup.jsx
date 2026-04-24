@@ -18,7 +18,6 @@ function WaypointInput({ waypoints, onChange }) {
   const debounceRef = useRef(null)
   const wrapRef     = useRef(null)
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClick(e) {
       if (wrapRef.current && !wrapRef.current.contains(e.target)) setOpen(false)
