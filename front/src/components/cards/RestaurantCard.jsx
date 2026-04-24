@@ -2,8 +2,20 @@ import etoileSvg from '../../assets/svg/etoile_michelin.svg'
 import bibsSvg from '../../assets/svg/bibs.svg'
 import styles from './RestaurantCard.module.css'
 
+function fakeLikes(id) {
+  const s = String(id)
+  let h = 5381
+  for (let i = 0; i < s.length; i++) h = ((h << 5) + h + s.charCodeAt(i)) | 0
+  return (Math.abs(h) % 1950) + 50
+}
+
+function formatLikes(n) {
+  return n >= 1000 ? `${(n / 1000).toFixed(1)}k` : String(n)
+}
+
 export default function RestaurantCard({ restaurant, onClick, layout = 'grid', onSave, isSaved = false }) {
-  const { name, cuisine, location, price, stars, bib, img } = restaurant
+  const { name, cuisine, location, price, stars, bib, img, id } = restaurant
+  const likes = formatLikes(fakeLikes(id))
 
   const handleSave = (e) => {
     e.stopPropagation()
@@ -34,13 +46,21 @@ export default function RestaurantCard({ restaurant, onClick, layout = 'grid', o
             <img src={bibsSvg} className={styles.bibIcon} alt="Bib Gourmand" aria-label="Bib Gourmand" />
           ) : (
             Array.from({ length: stars }).map((_, i) => (
-              <img key={i} src={etoileSvg} width={16} height={16} alt="" aria-hidden="true" />
+              <img key={i} src={etoileSvg} width={15} height={15} alt="" aria-hidden="true" />
             ))
           )}
         </div>
         <h3 className={styles.name}>{name}</h3>
         <p className={styles.meta}>{location} · {cuisine}</p>
-        <p className={styles.price}>{price}</p>
+        <div className={styles.footer}>
+          <p className={styles.price}>{price}</p>
+          <span className={styles.likes}>
+            <svg width="12" height="11" viewBox="0 0 22 20" fill="var(--red)" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 6.357C0 10.881 3.95401 15.327 9.91701 19.189C10.111 19.309 10.383 19.435 10.581 19.435C10.779 19.435 11.051 19.31 11.249 19.189C17.208 15.327 21.162 10.881 21.162 6.357C21.162 2.64 18.604 0 15.183 0C13.221 0 11.515 1.006 10.581 2.563C9.66099 1.013 7.941 0 5.979 0C2.558 0 0 2.64 0 6.357Z"/>
+            </svg>
+            {likes}
+          </span>
+        </div>
       </div>
     </article>
   )

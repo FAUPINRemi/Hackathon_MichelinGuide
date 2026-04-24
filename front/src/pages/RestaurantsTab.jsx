@@ -6,6 +6,7 @@ import Footer from '../components/layout/Footer'
 import { EDITORIAL } from '../data/restaurants'
 import { api } from '../api/client'
 import { useApiData } from '../hooks/useApiData'
+import heroPng from '../assets/hero.png'
 import styles from './HomeTabs.module.css'
 
 const RestaurantMap = lazy(() => import('../components/map/RestaurantMap'))
@@ -61,9 +62,9 @@ function SiteFooterLinks({ onDestinationClick }) {
   )
 }
 
-const REST_FILTERS = ['Tous', '3 Étoiles', '2 Étoiles', '1 Étoile', 'Bib Gourmand', 'Étoile Verte']
+const REST_FILTERS = ['Tous', 'Jeune', '3 Étoiles', '2 Étoiles', '1 Étoile', 'Bib Gourmand', 'Étoile Verte']
 const FILTER_PARAM = {
-  'Tous': '', '3 Étoiles': '3-stars', '2 Étoiles': '2-stars',
+  'Tous': '', 'Jeune': 'budget', '3 Étoiles': '3-stars', '2 Étoiles': '2-stars',
   '1 Étoile': '1-star', 'Bib Gourmand': 'bib', 'Étoile Verte': 'green',
 }
 
@@ -74,6 +75,9 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved, 
   const [mapRestaurants, setMapRestaurants]   = useState([])
   const [mapCenter, setMapCenter]             = useState(null)
   const [isMobile, setIsMobile]               = useState(() => !window.matchMedia('(min-width: 768px)').matches)
+  const [parisRestaurants, setParisRestaurants] = useState([])
+  const [travelRestaurants, setTravelRestaurants] = useState([])
+  const [budgetRestaurants, setBudgetRestaurants] = useState([])
 
   useEffect(() => {
     const mq = window.matchMedia('(min-width: 768px)')
@@ -87,7 +91,34 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved, 
     return () => clearTimeout(t)
   }, [search])
 
-  // Debounce séparé plus long pour Nominatim — évite les faux positifs sur frappe rapide
+  // Budget/Jeune section
+  useEffect(() => {
+    api.restaurants.list({ filter: 'budget', limit: 16 })
+      .then(res => setBudgetRestaurants(res.data ?? []))
+      .catch(() => {})
+  }, [])
+
+  // Paris restaurants for the featured section
+  useEffect(() => {
+    api.restaurants.list({ search: 'Paris', limit: 12 })
+      .then(res => setParisRestaurants(res.data ?? []))
+      .catch(() => {})
+  }, [])
+
+  // Travel section: best restaurants, 1 per country
+  useEffect(() => {
+    api.restaurants.list({ limit: 200 })
+      .then(res => {
+        const byCountry = {}
+        for (const r of (res.data ?? [])) {
+          const key = r.country_code || r.country
+          if (key && !byCountry[key]) byCountry[key] = r
+        }
+        setTravelRestaurants(Object.values(byCountry).slice(0, 14))
+      })
+      .catch(() => {})
+  }, [])
+
   const [geoSearch, setGeoSearch] = useState('')
   useEffect(() => {
     if (search.length < 3) { setGeoSearch(''); return }
@@ -149,9 +180,12 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved, 
   const starred3   = restaurants.filter((r) => r.stars === 3)
   const newStarred = restaurants.filter((r) => r.stars >= 2)
 
+  const isHomepage = !debouncedSearch && activeFilter === 'Tous'
+
   return (
     <div className={styles.page}>
 
+      {/* ── Mobile ── */}
       <div className={styles.mobileOnly}>
         <div className={styles.pageHead}>
           <h1 className={styles.pageTitle}>Restaurants</h1>
@@ -224,17 +258,29 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved, 
         )}
       </div>
 
+      {/* ── Desktop ── */}
       <div className={styles.desktopOnly}>
+
+        {/* Filter bar — sticky */}
         <div className={styles.filterBar}>
           <div className={styles.filterBarInner}>
-            <SearchBar value={search} onChange={setSearch} placeholder="Rechercher un restaurant, une ville…" />
+            <SearchBar value={search} onChange={setSearch} placeholder="Rechercher un restaurant, une ville, une cuisine…" />
             <div className={styles.filterPills}>
               {REST_FILTERS.map((f) => (
                 <button
                   key={f}
-                  className={`${styles.filterPill} ${activeFilter === f ? styles.pillActive : ''}`}
+                  className={[
+                    styles.filterPill,
+                    f === 'Jeune' ? styles.pillJeune : '',
+                    activeFilter === f ? styles.pillActive : '',
+                  ].join(' ')}
                   onClick={() => setActiveFilter(f)}
                 >
+                  {f === 'Jeune' && (
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" style={{marginRight: 4, flexShrink: 0}}>
+                      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                    </svg>
+                  )}
                   {f}
                 </button>
               ))}
@@ -242,18 +288,151 @@ export default function RestaurantsTab({ onRestaurantClick, onSave, isAnySaved, 
           </div>
         </div>
 
-        <div className={styles.desktopContent}>
+        {/* Homepage sections */}
+        {isHomepage && (
+          <>
+            {/* Hero */}
+            <section className={styles.deskHero}>
+              <img
+                src={parisRestaurants.find(r => r.img)?.img || heroPng}
+                className={styles.deskHeroBg}
+                alt=""
+              />
+              <div className={styles.deskHeroOverlay} />
+              <div className={styles.deskHeroContent}>
+                <span className={styles.deskHeroBadge}>Ville phare · Paris</span>
+                <h1 className={styles.deskHeroTitle}>L'art de la table,<br />à portée de main</h1>
+                <p className={styles.deskHeroSub}>Restaurants étoilés, Bib Gourmand et tables d'exception</p>
+              </div>
+            </section>
+
+            {/* Budget / Jeune section */}
+            {budgetRestaurants.length > 0 && (
+              <div className={`${styles.deskSection} ${styles.deskSectionBudget}`}>
+                <div className={styles.deskSectionHead}>
+                  <div>
+                    <div className={styles.budgetBadge}>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z"/>
+                      </svg>
+                      Sélection Jeune
+                    </div>
+                    <h2 className={styles.deskSectionTitle}>Bien manger sans se ruiner</h2>
+                    <p className={styles.deskSectionSub}>Bib Gourmand &amp; tables €/€€ — le meilleur rapport qualité-prix selon MICHELIN</p>
+                  </div>
+                  <button
+                    className={styles.deskSeeAll}
+                    onClick={() => { setActiveFilter('Jeune'); window.scrollTo({ top: 0, behavior: 'smooth' }) }}
+                  >
+                    Tout voir
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+                <div className={styles.deskHScroll}>
+                  {budgetRestaurants.map((r) => (
+                    <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" onSave={onSave} isSaved={isAnySaved?.(r.id, 'restaurant')} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Paris section */}
+            {parisRestaurants.length > 0 && (
+              <div className={styles.deskSection}>
+                <div className={styles.deskSectionHead}>
+                  <div>
+                    <h2 className={styles.deskSectionTitle}>Restaurants populaires · Paris</h2>
+                    <p className={styles.deskSectionSub}>Les meilleures tables de la capitale française</p>
+                  </div>
+                  <button className={styles.deskSeeAll} onClick={() => { setSearch('Paris'); setDebouncedSearch('Paris') }}>
+                    Tout voir
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <path d="M5 12h14M12 5l7 7-7 7"/>
+                    </svg>
+                  </button>
+                </div>
+                <div className={styles.deskHScroll}>
+                  {parisRestaurants.map((r) => (
+                    <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" onSave={onSave} isSaved={isAnySaved?.(r.id, 'restaurant')} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Travel section */}
+            {travelRestaurants.length > 0 && (
+              <div className={styles.deskSection}>
+                <div className={styles.deskSectionHead}>
+                  <div>
+                    <h2 className={styles.deskSectionTitle}>Voyage gastronomique</h2>
+                    <p className={styles.deskSectionSub}>Une table d'exception par destination</p>
+                  </div>
+                </div>
+                <div className={styles.deskHScroll}>
+                  {travelRestaurants.map((r) => (
+                    <div key={r.id} className={styles.travelCard} onClick={() => onRestaurantClick?.(r)}>
+                      <div className={styles.travelImgWrap}>
+                        {r.img
+                          ? <img src={r.img} alt={r.name} className={styles.travelImg} loading="lazy" />
+                          : <div className={styles.travelImgPlaceholder} />
+                        }
+                        <div className={styles.travelOverlay} />
+                        <div className={styles.travelInfo}>
+                          <p className={styles.travelCountry}>{r.country || r.location}</p>
+                          <p className={styles.travelName}>{r.name}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* New starred */}
+            {!loading && newStarred.length > 0 && (
+              <div className={styles.deskSection}>
+                <div className={styles.deskSectionHead}>
+                  <div>
+                    <h2 className={styles.deskSectionTitle}>Les nouveaux étoilés 2026</h2>
+                    <p className={styles.deskSectionSub}>Nouvelles distinctions 3 et 2 Étoiles</p>
+                  </div>
+                </div>
+                <div className={styles.deskHScroll}>
+                  {newStarred.map((r) => (
+                    <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="scroll" onSave={onSave} isSaved={isAnySaved?.(r.id, 'restaurant')} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Results grid */}
+        <div className={`${styles.desktopContent} ${isHomepage ? styles.desktopContentHome : ''}`}>
           {loading && <p className={styles.loadingMsg}>Chargement…</p>}
           {error   && <p className={styles.errorMsg}>Serveur non disponible</p>}
           {!loading && !error && (
-            <p className={styles.resultsCount}>{total} restaurants</p>
+            <>
+              <div className={styles.resultsHeader}>
+                <h2 className={styles.resultsTitle}>
+                  {debouncedSearch
+                    ? `${total} résultat${total > 1 ? 's' : ''} pour « ${debouncedSearch} »`
+                    : activeFilter !== 'Tous'
+                      ? `${total} restaurants · ${activeFilter}`
+                      : 'Toute la sélection'
+                  }
+                </h2>
+                <p className={styles.resultsCount}>{total} restaurants</p>
+              </div>
+              <div className={styles.grid}>
+                {restaurants.map((r) => (
+                  <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="grid" onSave={onSave} isSaved={isAnySaved?.(r.id, 'restaurant')} />
+                ))}
+              </div>
+            </>
           )}
-          <div className={styles.grid}>
-            {restaurants.map((r) => (
-              <RestaurantCard key={r.id} restaurant={r} onClick={onRestaurantClick} layout="grid" onSave={onSave} isSaved={isAnySaved?.(r.id, 'restaurant')} />
-            ))}
-          </div>
-
         </div>
       </div>
 

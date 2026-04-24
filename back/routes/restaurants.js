@@ -9,6 +9,7 @@ const FILTER_SQL = {
   '1-star':   "distinction_score = 3",
   'bib':      "(distinction->>'slug' = 'bib-gourmand')",
   'green':    "green_star = true",
+  'budget':   "(price_category::text ILIKE '%P01%' OR price_category::text ILIKE '%P02%' OR price_category::text ILIKE '%inexpensive%' OR distinction->>'slug' = 'bib-gourmand')",
 };
 
 // Haversine distance expression (km) — params $1=lat, $2=lng
@@ -54,6 +55,8 @@ function format(r) {
     lat:              r.lat,
     lng:              r.lng,
     distinction_score: score,
+    country:          r.country?.name ?? '',
+    country_code:     r.country?.code ?? '',
   };
 }
 

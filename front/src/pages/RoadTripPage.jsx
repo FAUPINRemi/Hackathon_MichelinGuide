@@ -78,6 +78,8 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
   const [iaSelectedStops, setIaSelectedStops] = useState(() => {
     try { const s = sessionStorage.getItem(SS_STOPS); return s ? JSON.parse(s) : [] } catch { return [] }
   })
+  const [iaRouteResult, setIaRouteResult] = useState(null)
+  const iaComputeRef = useRef(false)
 
   useEffect(() => {
     if (result) {
@@ -101,12 +103,27 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
   }, [enrichedStops, iaSelectedStops])
 
   const routePolyline = useMemo(() => {
-    const encoded = result?.route?.polyline_with_stops || result?.route?.polyline_direct || ''
+    // Prefer recomputed polyline (with user-added stops), then original build result
+    const encoded = iaRouteResult?.polyline_with_stops
+      || result?.route?.polyline_with_stops
+      || result?.route?.polyline_direct
+      || ''
     return decodePolyline(encoded)
-  }, [result])
+  }, [iaRouteResult, result])
 
   const origin      = result?.parse?.route?.origin ?? null
   const destination = result?.parse?.route?.destination ?? null
+  const iaDetourMap = useMemo(() => new Map(
+    (iaRouteResult?.stop_detours ?? []).map((d) => [`${d.category}:${d.id}`, d.detour_minutes]),
+  ), [iaRouteResult])
+
+  const iaSelectedStopsWithDetours = useMemo(() =>
+    iaSelectedStops.map((s) => ({
+      ...s,
+      detour_minutes: iaDetourMap.get(`${s.category}:${s.id}`) ?? s.detour_minutes ?? null,
+    })),
+  [iaSelectedStops, iaDetourMap])
+
   const googleMapsUrl = buildGoogleMapsUrl(origin, destination, iaSelectedStops)
   const wazeUrl       = buildWazeUrl(destination)
 
@@ -122,6 +139,32 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
     setIaSelectedStops((prev) => prev.filter((s) => !(s.category === category && s.id === id)))
     setSaved(false)
   }, [])
+
+  // Recompute IA route whenever selected stops change
+  useEffect(() => {
+    if (!result) { setIaRouteResult(null); return }
+    const orig = result?.parse?.route?.origin
+    const dest = result?.parse?.route?.destination
+    if (!orig?.lat || !dest?.lat) return
+    if (iaSelectedStops.length === 0) { setIaRouteResult(null); return }
+
+    // Debounce: skip if a compute is already in flight
+    if (iaComputeRef.current) return
+    iaComputeRef.current = true
+
+    api.roadtrip.compute({
+      origin:      { lat: orig.lat, lng: orig.lng },
+      destination: { lat: dest.lat, lng: dest.lng },
+      stops: iaSelectedStops
+        .filter((s) => s.lat != null && s.lng != null)
+        .map((s) => ({ lat: s.lat, lng: s.lng, category: s.category, id: String(s.id) })),
+      waypoints: [],
+    })
+      .then((r) => setIaRouteResult(r))
+      .catch(() => {})
+      .finally(() => { iaComputeRef.current = false })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [iaSelectedStops, result])
 
   const handleBuild = async () => {
     setLoading(true)
@@ -201,7 +244,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
               <RoadtripMapLeaflet
                 origin={origin}
                 destination={destination}
-                stops={iaSelectedStops.filter((s) => s.lat != null)}
+                stops={iaSelectedStopsWithDetours.filter((s) => s.lat != null)}
                 polyline={routePolyline}
                 onScrollToCard={scrollToCard}
               />
@@ -234,11 +277,15 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
             </article>
             <article className={styles.metricCard}>
               <p className={styles.metricLabel}>Avec arrêts</p>
-              <p className={styles.metricValue}>{result.route?.with_stops_duration_minutes ?? '–'} min</p>
+              <p className={styles.metricValue}>
+                {(iaRouteResult?.with_stops_duration_minutes ?? result.route?.with_stops_duration_minutes) ?? '–'} min
+              </p>
             </article>
             <article className={`${styles.metricCard} ${styles.metricDetour}`}>
               <p className={styles.metricLabel}>Détour total</p>
-              <p className={styles.metricValue}>+{result.route?.total_detour_minutes ?? '–'} min</p>
+              <p className={styles.metricValue}>
+                +{(iaRouteResult?.total_detour_minutes ?? result.route?.total_detour_minutes) ?? '–'} min
+              </p>
             </article>
           </div>
         )}
@@ -433,7 +480,7 @@ export default function RoadTripPage({ onRestaurantClick, onHotelClick, onSaveIt
                   <div className={styles.selectedSection}>
                     <p className={styles.sectionTitle}>Mes arrêts ({iaSelectedStops.length})</p>
                     <div className={styles.cardList}>
-                      {iaSelectedStops.map((stop) => (
+                      {iaSelectedStopsWithDetours.map((stop) => (
                         <RoadtripPlaceCard
                           key={`${stop.category}-${stop.id}`}
                           stop={stop}
