@@ -125,6 +125,7 @@ export default function App() {
             onHotelClick={handleHotelClick}
             onSaveHotel={handleSave}
             isAnySaved={favorites.isAnySaved}
+            onRoadtrip={() => handleTabChange('roadtrip')}
           />
         ) : selectedHotel ? (
           <HotelDetailPage hotel={selectedHotel} />

@@ -215,13 +215,15 @@ export class RoadtripRouteService {
       });
     }
 
+    const totalDetour = stopDetours.reduce((sum, d) => sum + d.detour_minutes, 0);
+
     return {
       provider: 'google_routes',
       polyline_direct: direct.polyline,
       polyline_with_stops: withStops.polyline,
       direct_duration_minutes: direct.durationMinutes,
-      with_stops_duration_minutes: withStops.durationMinutes,
-      total_detour_minutes: Math.max(0, withStops.durationMinutes - direct.durationMinutes),
+      with_stops_duration_minutes: direct.durationMinutes + totalDetour,
+      total_detour_minutes: totalDetour,
       stop_detours: stopDetours,
     };
   }
