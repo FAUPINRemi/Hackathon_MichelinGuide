@@ -427,8 +427,13 @@ router.post('/compute', async (req, res, next) => {
       return;
     }
 
-    // Enforce detour cap: keep only stops likely within 30 min detour (~40km)
-    const ROUGH_MAX_KM = 40;
+    // Filter stops by proximity to the route corridor (not just endpoints).
+    // Interpolate N points along the A→B segment and keep any stop within
+    // ROUGH_MAX_KM of at least one of them. This correctly handles stops
+    // that are near the middle of a long route but far from both endpoints.
+    const ROUGH_MAX_KM = 45;
+    const CORRIDOR_SAMPLES = 10;
+
     function haversineKm(a: { lat: number; lng: number }, b: { lat: number; lng: number }) {
       const R = 6371;
       const dLat = (b.lat - a.lat) * Math.PI / 180;
@@ -436,11 +441,22 @@ router.post('/compute', async (req, res, next) => {
       const s = Math.sin(dLat / 2) ** 2 + Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) * Math.sin(dLng / 2) ** 2;
       return R * 2 * Math.atan2(Math.sqrt(s), Math.sqrt(1 - s));
     }
-    const validStops = stops.filter((s) => {
-      const dO = haversineKm(origin, s);
-      const dD = haversineKm(destination, s);
-      return Math.min(dO, dD) <= ROUGH_MAX_KM;
-    });
+
+    // Build corridor sample points: origin, destination + evenly-spaced intermediates
+    const corridorPoints: Array<{ lat: number; lng: number }> = [];
+    for (let i = 0; i <= CORRIDOR_SAMPLES; i++) {
+      const t = i / CORRIDOR_SAMPLES;
+      corridorPoints.push({
+        lat: origin.lat + (destination.lat - origin.lat) * t,
+        lng: origin.lng + (destination.lng - origin.lng) * t,
+      });
+    }
+    // Include explicit waypoints in the corridor check too
+    for (const wp of waypoints) corridorPoints.push(wp);
+
+    const validStops = stops.filter((s) =>
+      corridorPoints.some((pt) => haversineKm(pt, s) <= ROUGH_MAX_KM),
+    );
 
     const result = await roadtripRouteService.computeWithStops(origin, destination, validStops, waypoints);
     res.json(result);

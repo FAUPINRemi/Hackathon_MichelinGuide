@@ -1,4 +1,5 @@
 import { useNfc, isMobileDevice } from '../hooks/useNfc'
+import bonhommeSvg from '../assets/svg/bonhomme.svg'
 import styles from './ProfilePage.module.css'
 
 const STATIC_ITEMS = [
@@ -94,17 +95,7 @@ export default function ProfilePage({ onOpenCollection, onOpenItineraries }) {
         <p className={styles.version}>Version build 10.1.3 (7215)</p>
 
         <footer className={styles.footer}>
-          <svg className={styles.bibendum} viewBox="0 0 80 100" xmlns="http://www.w3.org/2000/svg" aria-label="Bibendum">
-            <ellipse cx="40" cy="30" rx="18" ry="18" fill="none" stroke="#1a1a1a" strokeWidth="3"/>
-            <circle cx="34" cy="26" r="2" fill="#1a1a1a"/>
-            <circle cx="46" cy="26" r="2" fill="#1a1a1a"/>
-            <path d="M34 35 Q40 40 46 35" fill="none" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round"/>
-            <ellipse cx="40" cy="52" rx="16" ry="12" fill="none" stroke="#1a1a1a" strokeWidth="3"/>
-            <ellipse cx="40" cy="66" rx="13" ry="9" fill="none" stroke="#1a1a1a" strokeWidth="3"/>
-            <ellipse cx="40" cy="78" rx="10" ry="7" fill="none" stroke="#1a1a1a" strokeWidth="3"/>
-            <path d="M24 54 Q10 52 12 62 Q14 70 24 66" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round"/>
-            <path d="M56 54 Q70 52 68 62 Q66 70 56 66" fill="none" stroke="#1a1a1a" strokeWidth="3" strokeLinecap="round"/>
-          </svg>
+          <img src={bonhommeSvg} className={styles.bibendum} alt="Bibendum" />
           <p className={styles.copyright}>Copyright © 2026 Guide MICHELIN.</p>
         </footer>
       </div>
