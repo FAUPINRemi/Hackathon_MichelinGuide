@@ -111,6 +111,7 @@ export class RoadtripRouteService {
     origin: { latitude: number; longitude: number },
     destination: { latitude: number; longitude: number },
     stops: Array<{ latitude: number; longitude: number }>,
+    trafficAware = true,
   ): Promise<{ durationMinutes: number; polyline: string }> {
     const authHeaders = await this.authHeaders();
 
@@ -119,7 +120,7 @@ export class RoadtripRouteService {
       destination: { location: { latLng: destination } },
       intermediates: stops.map((stop) => ({ location: { latLng: stop } })),
       travelMode: 'DRIVE',
-      routingPreference: 'TRAFFIC_AWARE',
+      routingPreference: trafficAware ? 'TRAFFIC_AWARE' : 'TRAFFIC_UNAWARE',
       computeAlternativeRoutes: false,
       languageCode: 'fr-FR',
       units: 'METRIC',
@@ -205,13 +206,14 @@ export class RoadtripRouteService {
       ? await this.computeRoute(originPt, destPt, [...waypointPts, ...stopPts])
       : direct;
 
+    const directUnaware = await this.computeRoute(originPt, destPt, waypointPts, false);
     const stopDetours: RoadtripRouteResult['stop_detours'] = [];
     for (const stop of stops) {
-      const solo = await this.computeRoute(originPt, destPt, [...waypointPts, { latitude: stop.lat, longitude: stop.lng }]);
+      const solo = await this.computeRoute(originPt, destPt, [...waypointPts, { latitude: stop.lat, longitude: stop.lng }], false);
       stopDetours.push({
         category: stop.category,
         id: stop.id,
-        detour_minutes: Math.max(0, solo.durationMinutes - direct.durationMinutes),
+        detour_minutes: Math.max(0, solo.durationMinutes - directUnaware.durationMinutes),
       });
     }
 
@@ -240,23 +242,26 @@ export class RoadtripRouteService {
     const direct = await this.computeRoute(origin, destination, userWaypoints);
     const withStops = await this.computeRoute(origin, destination, [...userWaypoints, ...stops]);
 
+    const directUnaware = await this.computeRoute(origin, destination, userWaypoints, false);
     const stopDetours: RoadtripRouteResult['stop_detours'] = [];
     for (const stop of orderedStops) {
-      const solo = await this.computeRoute(origin, destination, [...userWaypoints, { latitude: stop.lat, longitude: stop.lng }]);
+      const solo = await this.computeRoute(origin, destination, [...userWaypoints, { latitude: stop.lat, longitude: stop.lng }], false);
       stopDetours.push({
         category: stop.category,
         id: stop.id,
-        detour_minutes: Math.max(0, solo.durationMinutes - direct.durationMinutes),
+        detour_minutes: Math.max(0, solo.durationMinutes - directUnaware.durationMinutes),
       });
     }
+
+    const totalDetour = stopDetours.reduce((sum, d) => sum + d.detour_minutes, 0);
 
     return {
       provider: 'google_routes',
       polyline_direct: direct.polyline,
       polyline_with_stops: withStops.polyline,
       direct_duration_minutes: direct.durationMinutes,
-      with_stops_duration_minutes: withStops.durationMinutes,
-      total_detour_minutes: Math.max(0, withStops.durationMinutes - direct.durationMinutes),
+      with_stops_duration_minutes: direct.durationMinutes + totalDetour,
+      total_detour_minutes: totalDetour,
       stop_detours: stopDetours,
     };
   }
