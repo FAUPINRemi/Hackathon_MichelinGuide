@@ -1,4 +1,6 @@
+import { useState } from 'react'
 import { useNfc, isMobileDevice } from '../hooks/useNfc'
+import { api } from '../api/client'
 import styles from './ProfilePage.module.css'
 
 const STATIC_ITEMS = [
@@ -9,7 +11,6 @@ const STATIC_ITEMS = [
   'Préférences',
   'Commentaires',
   'Conditions générales et confidentialité',
-  'Se déconnecter',
 ]
 
 function NfcIcon() {
@@ -24,20 +25,34 @@ function NfcIcon() {
   )
 }
 
-export default function ProfilePage({ onOpenCollection }) {
+export default function ProfilePage({ onOpenCollection, onLogout, user }) {
   const { scanning, status, error, startScan } = useNfc()
   const mobile = isMobileDevice()
+  const [scanResult, setScanResult] = useState(null)
+  const [scanLoading, setScanLoading] = useState(false)
+
+  async function submitScan(id) {
+    setScanResult(null)
+    setScanLoading(true)
+    try {
+      const res = await api.collection.scan({ id })
+      setScanResult({ ok: true, message: `"${res.restaurant}" ajouté à votre collection !` })
+    } catch (e) {
+      setScanResult({ ok: false, message: e.message || 'Erreur lors de l\'ajout.' })
+    } finally {
+      setScanLoading(false)
+    }
+  }
 
   function handleScan() {
-    startScan((text, serialNumber) => {
-      let msg = `Tag NFC scanné !\n\nNuméro de série : ${serialNumber}\n\nContenu : ${text}`
+    startScan((text) => {
       try {
         const data = JSON.parse(text)
-        msg = `Tag NFC scanné !\n\nNuméro de série : ${serialNumber}\n\n${JSON.stringify(data, null, 2)}`
+        if (data?.id) submitScan(String(data.id))
+        else setScanResult({ ok: false, message: 'Tag invalide : champ "id" manquant.' })
       } catch {
-        // text is not JSON — show raw
+        setScanResult({ ok: false, message: 'Tag invalide : contenu non JSON.' })
       }
-      alert(msg)
     })
   }
 
@@ -45,26 +60,36 @@ export default function ProfilePage({ onOpenCollection }) {
     <div className={styles.page}>
       <div className={styles.inner}>
         <h1 className={styles.title}>Compte</h1>
+        {user?.name && <p className={styles.userName}>Bonjour, {user.name}</p>}
 
         {mobile ? (
           <div className={styles.nfcSection}>
             <button
               className={`${styles.nfcBtn} ${scanning ? styles.nfcBtnScanning : ''}`}
               onClick={handleScan}
+              disabled={scanLoading}
               aria-label={scanning ? 'Arrêter le scan NFC' : 'Scanner un tag NFC'}
             >
               <NfcIcon />
               <span>{scanning ? 'Annuler' : 'Scanner NFC'}</span>
             </button>
+
             {status && <p className={styles.nfcStatus}>{status}</p>}
-            {error && <p className={styles.nfcError}>{error}</p>}
+            {error   && <p className={styles.nfcError}>{error}</p>}
+            {scanResult && (
+              <p className={scanResult.ok ? styles.nfcSuccess : styles.nfcError}>
+                {scanResult.message}
+              </p>
+            )}
           </div>
         ) : (
-          <div className={styles.nfcDesktopBanner}>
-            <NfcIcon />
-            <p className={styles.nfcDesktopText}>
-              Consultez notre site sur téléphone pour scanner directement les plaques Michelin des restaurants.
-            </p>
+          <div className={styles.nfcSection}>
+            <div className={styles.nfcDesktopBanner}>
+              <NfcIcon />
+              <p className={styles.nfcDesktopText}>
+                Consultez notre site sur téléphone pour scanner directement les plaques Michelin des restaurants.
+              </p>
+            </div>
           </div>
         )}
 
@@ -83,6 +108,9 @@ export default function ProfilePage({ onOpenCollection }) {
               </svg>
             </li>
           ))}
+          <li className={`${styles.item} ${styles.itemLogout}`} onClick={onLogout}>
+            <span className={styles.label}>Se déconnecter</span>
+          </li>
         </ul>
 
         <p className={styles.version}>Version build 10.1.3 (7215)</p>

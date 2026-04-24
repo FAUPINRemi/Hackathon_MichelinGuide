@@ -11,9 +11,11 @@ import HotelDetailPage from './pages/HotelDetailPage'
 import RoadTripPage from './pages/RoadTripPage'
 import ProfilePage from './pages/ProfilePage'
 import CollectionPage from './pages/CollectionPage'
+import LoginPage from './pages/LoginPage'
 import { useToast } from './hooks/useToast'
 import { useInstallPrompt } from './hooks/useInstallPrompt'
 import { useFavorites } from './hooks/useFavorites'
+import { useAuth } from './hooks/useAuth'
 import styles from './App.module.css'
 
 export default function App() {
@@ -25,6 +27,7 @@ export default function App() {
   const { message, visible, showToast } = useToast()
   const { showBanner, install, dismiss } = useInstallPrompt()
   const favorites = useFavorites()
+  const { user, login, logout } = useAuth()
 
   const isDetail = !!(selectedRestaurant || selectedHotel)
 
@@ -89,10 +92,12 @@ export default function App() {
           <RestaurantDetailPage restaurant={selectedRestaurant} />
         ) : selectedHotel ? (
           <HotelDetailPage hotel={selectedHotel} />
+        ) : activeTab === 'profile' && !user ? (
+          <LoginPage onLogin={login} />
         ) : activeTab === 'profile' && collectionOpen ? (
           <CollectionPage onClose={() => setCollectionOpen(false)} />
         ) : activeTab === 'profile' ? (
-          <ProfilePage onOpenCollection={() => setCollectionOpen(true)} />
+          <ProfilePage onOpenCollection={() => setCollectionOpen(true)} onLogout={logout} user={user} />
         ) : activeTab === 'roadtrip' ? (
           <RoadTripPage />
         ) : activeTab === 'favorites' ? (
