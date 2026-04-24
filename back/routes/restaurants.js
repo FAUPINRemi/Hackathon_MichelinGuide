@@ -9,7 +9,7 @@ const FILTER_SQL = {
   '1-star':   "distinction_score = 3",
   'bib':      "(distinction->>'slug' = 'bib-gourmand')",
   'green':    "green_star = true",
-  'budget':   "(price_category::text ILIKE '%P01%' OR price_category::text ILIKE '%P02%' OR price_category::text ILIKE '%inexpensive%' OR distinction->>'slug' = 'bib-gourmand')",
+  'budget':   "(price_category::text ILIKE '%P01%' OR price_category::text ILIKE '%P02%' OR price_category::text ILIKE '%inexpensive%' OR price_category::text ILIKE '%moderate%')",
 };
 
 // Haversine distance expression (km) — params $1=lat, $2=lng
