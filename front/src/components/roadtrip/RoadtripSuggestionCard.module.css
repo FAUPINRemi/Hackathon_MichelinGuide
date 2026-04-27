@@ -1,0 +1,122 @@
+.card {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: border-color var(--t), background var(--t);
+}
+
+.cardSelected {
+  border-color: var(--red);
+  background: var(--red-tint);
+}
+
+.cardLoading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.imgArea {
+  flex-shrink: 0;
+}
+
+.imgClickable {
+  cursor: pointer;
+}
+
+.img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  display: block;
+}
+
+.imgPlaceholder {
+  width: 64px;
+  height: 64px;
+  background: var(--green-bg-alt);
+}
+
+.contentClickable {
+  cursor: pointer;
+}
+
+.content {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+}
+
+.type {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--grey-text);
+  margin-bottom: 2px;
+}
+
+.name {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.3;
+}
+
+.city {
+  font-size: 11px;
+  color: var(--grey-text);
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--red);
+  margin-top: 3px;
+}
+
+.addBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--red);
+  background: var(--white);
+  color: var(--red);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-right: 10px;
+  transition: all var(--t);
+  font-family: var(--font);
+}
+
+.addBtn:hover:not(.addBtnSelected) {
+  background: var(--red);
+  color: var(--white);
+}
+
+.addBtnSelected {
+  background: var(--red);
+  color: var(--white);
+  border-color: var(--red);
+  cursor: default;
+  font-size: 14px;
+}

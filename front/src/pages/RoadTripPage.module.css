@@ -1,0 +1,485 @@
+.page {
+  display: grid;
+  gap: 12px;
+  padding: 10px 10px calc(var(--bottomnav-h) + 12px);
+}
+
+/* ── MAP ───────────────────────────────────────────────── */
+.mapPanel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.mapFrame {
+  width: 100%;
+  height: 260px;
+}
+
+.mapSkeleton {
+  width: 100%;
+  height: 100%;
+  background: var(--grey-mid);
+}
+
+.metricsRow {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 10px;
+  background: var(--grey-light);
+  border-top: 1px solid var(--border);
+}
+
+.metricCard {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.metricDetour .metricValue {
+  color: var(--red);
+}
+
+.metricLabel {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--grey-text);
+  margin-bottom: 2px;
+}
+
+.metricValue {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+/* ── PANEL ─────────────────────────────────────────────── */
+.panel {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-card);
+  padding: 12px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+
+/* ── MODE TABS ─────────────────────────────────────────── */
+.modeTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.modeBtn {
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--grey-dark);
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--t);
+  white-space: nowrap;
+}
+
+.modeBtnActive {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+}
+
+/* ── CTA ───────────────────────────────────────────────── */
+.submitBtn {
+  width: 100%;
+  border-radius: 8px;
+  background: var(--red);
+  color: var(--white);
+  font-weight: 700;
+  font-family: var(--font);
+  padding: 13px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background var(--t);
+  border: none;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--red-dark);
+}
+
+.submitBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.submitLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+/* ── ERRORS / EMPTY ────────────────────────────────────── */
+.errorMsg {
+  color: var(--red);
+  font-size: 13px;
+  text-align: center;
+}
+
+.emptyMsg {
+  font-size: 13px;
+  color: var(--grey-text);
+  text-align: center;
+  padding: 8px 0;
+}
+
+/* ── RESULTS (form/prompt) ─────────────────────────────── */
+.results {
+  display: grid;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.resultsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.resultsTitle {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+.resultActions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.saveBtn {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: 1.5px solid var(--red);
+  background: transparent;
+  color: var(--red);
+  cursor: pointer;
+  transition: background var(--t), color var(--t);
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: var(--red);
+  color: var(--white);
+}
+
+.saveBtnDone {
+  border-color: var(--grey-mid);
+  color: var(--grey-text);
+  cursor: default;
+}
+
+.navBtns {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.navBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: opacity var(--t);
+  border: none;
+}
+
+.navBtn:hover {
+  opacity: 0.82;
+}
+
+.navBtnGmaps {
+  background: var(--red);
+  color: var(--white);
+}
+
+.navBtnGmaps:hover {
+  background: var(--red-dark);
+  opacity: 1;
+}
+
+.navBtnWaze {
+  background: var(--red);
+  color: var(--white);
+}
+
+.navBtnWaze:hover {
+  background: var(--red-dark);
+  opacity: 1;
+}
+
+.cardList {
+  display: grid;
+  gap: 8px;
+}
+
+/* ── NOTES ─────────────────────────────────────────────── */
+.notesBox {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.notesTitle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--grey-text);
+  padding: 8px 12px;
+  cursor: pointer;
+  user-select: none;
+  list-style: none;
+}
+
+.notesList {
+  padding: 4px 12px 10px;
+  display: grid;
+  gap: 4px;
+}
+
+.noteItem {
+  font-size: 12px;
+  color: var(--grey-dark);
+  line-height: 1.5;
+}
+
+/* ── PLANNER BROWSING ──────────────────────────────────── */
+.plannerBrowsing {
+  display: grid;
+  gap: 14px;
+}
+
+.plannerHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.plannerRoute {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
+  line-height: 1.3;
+}
+
+.plannerDuration {
+  font-size: 11px;
+  color: var(--grey-text);
+  margin-top: 2px;
+}
+
+.plannerResetBtn {
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--grey-dark);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--t);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.plannerResetBtn:hover {
+  border-color: var(--red);
+  color: var(--red);
+}
+
+@keyframes loadingSlide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(400%);  }
+}
+
+.plannerLoadingBar {
+  height: 3px;
+  background: var(--grey-mid);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.plannerLoadingFill {
+  height: 100%;
+  width: 25%;
+  background: var(--red);
+  border-radius: 2px;
+  animation: loadingSlide 1.2s ease-in-out infinite;
+}
+
+.selectedSection {
+  display: grid;
+  gap: 8px;
+  background: var(--grey-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.sectionTitle {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--grey-text);
+}
+
+.selectedList {
+  display: grid;
+  gap: 4px;
+}
+
+.selectedItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+}
+
+.selectedName {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.selectedDetour {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--red);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.removeBtn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--grey-text);
+  font-size: 15px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--t);
+  font-family: var(--font);
+}
+
+.removeBtn:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: var(--red-tint);
+}
+
+.plannerNavBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 12px;
+  background: var(--red);
+  color: var(--white);
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: background var(--t);
+}
+
+.plannerNavBtn:hover {
+  background: var(--red-dark);
+}
+
+.suggestionsSection {
+  display: grid;
+  gap: 8px;
+}
+
+.suggestionsList {
+  display: grid;
+  gap: 6px;
+}
+
+/* ── DESKTOP ───────────────────────────────────────────── */
+@media (min-width: 768px) {
+  .page {
+    grid-template-columns: 1.1fr 1fr;
+    align-items: start;
+    padding: 16px 16px 16px;
+    gap: 16px;
+    min-height: calc(100dvh - var(--nav-h-desktop));
+  }
+
+  .mapPanel {
+    position: sticky;
+    top: calc(var(--nav-h-desktop) + 16px);
+  }
+
+  .mapFrame {
+    height: calc(100dvh - var(--nav-h-desktop) - 160px);
+    min-height: 400px;
+  }
+
+  .panel {
+    max-height: calc(100dvh - var(--nav-h-desktop) - 32px);
+    overflow-y: auto;
+    padding: 16px;
+  }
+
+}

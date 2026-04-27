@@ -1,0 +1,451 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg);
+  padding-bottom: calc(var(--bottomnav-h) + 24px + env(safe-area-inset-bottom, 0));
+}
+
+.mobileOnly { display: block; }
+.desktopOnly { display: none; }
+
+.pageHead {
+  background: var(--white);
+  padding: 16px 16px 12px;
+}
+.pageTitle {
+  font-size: var(--title-page);
+  font-weight: var(--weight-far);
+  color: var(--black);
+  margin-bottom: 12px;
+}
+
+.mapSection { padding: 20px 0 8px; background: var(--white); margin-top: 8px; }
+.sectionHead {
+  padding: 0 16px 12px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.sectionTitle {
+  font-size: var(--title-section);
+  font-weight: var(--weight-far);
+  color: var(--black);
+  line-height: 1.2;
+}
+.seeAll {
+  font-size: 13px;
+  color: var(--grey-text);
+  text-decoration: underline;
+  flex-shrink: 0;
+}
+.mapWrap {
+  position: relative;
+  margin: 0 16px;
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  height: 220px;
+  background: var(--green-bg-alt);
+}
+.mapFrame {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.editCard {
+  width: 240px;
+  flex-shrink: 0;
+  scroll-snap-align: start;
+  background: var(--white);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  cursor: pointer;
+}
+.editImgWrap { height: 150px; overflow: hidden; background: var(--grey-mid); }
+.editImg { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s; }
+.editCard:hover .editImg { transform: scale(1.04); }
+.editBody { padding: 10px 12px 12px; }
+.editTag {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: var(--weight-far);
+  color: var(--red);
+  margin-bottom: 5px;
+}
+.editTitle {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--black);
+}
+
+/* ── Desktop ── */
+@media (min-width: 768px) {
+  .page { padding-bottom: 0; background: var(--white); }
+  .mobileOnly { display: none; }
+  .desktopOnly { display: block; }
+
+  /* Filter bar */
+  .filterBar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: var(--nav-h-desktop);
+    z-index: 90;
+    box-shadow: 0 1px 8px rgba(0,0,0,0.05);
+  }
+  .filterBarInner {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .filterPills {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .filterPill {
+    padding: 6px 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--grey-dark);
+    background: var(--white);
+    transition: all var(--t);
+    cursor: pointer;
+  }
+  .filterPill:hover { border-color: var(--black); color: var(--black); }
+  .pillActive { border-color: var(--black); color: var(--black); background: var(--grey-light); font-weight: 600; }
+
+  /* Pill Jeune — style accentué */
+  .pillJeune {
+    border-color: #e8a020 !important;
+    color: #9a6000 !important;
+    background: #fff9ee !important;
+    font-weight: 600 !important;
+  }
+  .pillJeune:hover {
+    background: #ffefc8 !important;
+    border-color: #c97d00 !important;
+    color: #7a4d00 !important;
+  }
+  .pillJeune.pillActive {
+    background: #ffd980 !important;
+    border-color: #b36b00 !important;
+    color: #6b3f00 !important;
+  }
+
+  /* Section Budget / Jeune */
+  .deskSectionBudget {
+    background: linear-gradient(135deg, #fffbf0 0%, #fff9ee 100%);
+    border-top: 1px solid #f5e6c0 !important;
+    border-bottom: 1px solid #f5e6c0;
+  }
+  .budgetBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #fff3d0;
+    border: 1.5px solid #e8a020;
+    color: #9a6000;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
+  /* Hero */
+  .deskHero {
+    position: relative;
+    height: 420px;
+    overflow: hidden;
+    background: var(--black-deep);
+  }
+  .deskHeroBg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 40%;
+    opacity: 0.7;
+    transition: transform 6s ease;
+  }
+  .deskHero:hover .deskHeroBg { transform: scale(1.03); }
+  .deskHeroOverlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(196,18,48,0.55) 0%,
+      rgba(0,0,0,0.25) 50%,
+      rgba(0,0,0,0.55) 100%
+    );
+  }
+  .deskHeroContent {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 1280px;
+    padding: 48px 48px 52px;
+  }
+  .deskHeroBadge {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--white);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 12px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+  }
+  .deskHeroTitle {
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--white);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin-bottom: 12px;
+    text-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .deskHeroSub {
+    font-size: 16px;
+    color: rgba(255,255,255,0.82);
+    font-weight: 400;
+    max-width: 480px;
+    line-height: 1.5;
+  }
+
+  /* Sections */
+  .deskSection {
+    padding: 40px 0 8px;
+    background: var(--white);
+  }
+  .deskSection + .deskSection {
+    border-top: 1px solid var(--bg);
+  }
+  .deskSectionHead {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px 20px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+  .deskSectionTitle {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--black);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .deskSectionSub {
+    font-size: 13px;
+    color: var(--grey-text);
+    margin-top: 4px;
+  }
+  .deskSeeAll {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--black);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    flex-shrink: 0;
+    transition: color var(--t);
+    cursor: pointer;
+  }
+  .deskSeeAll:hover { color: var(--red); }
+  .deskHScroll {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 0 24px 24px;
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+  }
+  .deskHScroll::-webkit-scrollbar { display: none; }
+
+  /* Travel cards */
+  .travelCard {
+    width: 220px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    cursor: pointer;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow var(--t), transform var(--t);
+  }
+  .travelCard:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .travelImgWrap {
+    position: relative;
+    aspect-ratio: 3/4;
+    background: var(--grey-mid);
+    overflow: hidden;
+  }
+  .travelImg {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+  }
+  .travelCard:hover .travelImg { transform: scale(1.05); }
+  .travelImgPlaceholder {
+    width: 100%; height: 100%;
+    background: linear-gradient(135deg, var(--grey-mid) 0%, var(--grey-light) 100%);
+  }
+  .travelOverlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.1) 55%, transparent 100%);
+  }
+  .travelInfo {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 16px 14px;
+  }
+  .travelCountry {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 3px;
+  }
+  .travelName {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--white);
+    line-height: 1.25;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Results grid */
+  .desktopContent {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+  .desktopContentHome {
+    padding-top: 40px;
+    border-top: 1px solid var(--bg);
+  }
+  .resultsHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+  .resultsTitle {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--black);
+    letter-spacing: -0.02em;
+  }
+  .resultsCount {
+    font-size: 13px;
+    color: var(--grey-text);
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+  }
+}
+
+/* ── Shared ── */
+.loadingMsg {
+  text-align: center;
+  padding: 32px 16px;
+  font-size: 14px;
+  color: var(--grey-text);
+}
+.errorMsg {
+  text-align: center;
+  padding: 32px 16px;
+  font-size: 14px;
+  color: var(--red);
+}
+.emptyState {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--grey-text);
+  font-size: 15px;
+  line-height: 1.8;
+}
+
+/* ── Site footer links ── */
+.siteFooter {
+  border-top: 1px solid var(--border);
+  padding: 32px 16px 24px;
+  background: var(--bg);
+}
+.siteFooterGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+.siteFooterCol {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.siteFooterTitle {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--black);
+  margin-bottom: 8px;
+}
+.siteFooterTitleGap { margin-top: 20px; }
+.siteFooterLink {
+  font-size: 13px;
+  color: var(--grey-text);
+  padding: 3px 0;
+  transition: color var(--t);
+  text-align: left;
+}
+.siteFooterLink:hover { color: var(--red); }
+.siteFooterDestinations { display: flex; flex-direction: column; }
+.destinationsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 16px;
+}
+.destinationLink {
+  font-size: 13px;
+  color: var(--grey-text);
+  padding: 4px 0;
+  text-align: left;
+  transition: color var(--t);
+}
+.destinationLink:hover { color: var(--red); }
+
+@media (min-width: 768px) {
+  .siteFooter { padding: 40px 32px 32px; background: var(--white); border-top: 1px solid var(--border); }
+  .siteFooterGrid { flex-direction: row; gap: 48px; align-items: flex-start; }
+  .siteFooterCol { flex-shrink: 0; min-width: 160px; }
+  .siteFooterDestinations { flex: 1; }
+  .destinationsGrid { grid-template-columns: repeat(4, 1fr); gap: 4px 20px; }
+}

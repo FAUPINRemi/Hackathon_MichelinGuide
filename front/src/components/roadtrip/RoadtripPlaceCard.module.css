@@ -1,0 +1,204 @@
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  transition: box-shadow var(--t), border-color var(--t), transform var(--t);
+  scroll-margin-top: calc(var(--nav-h-mobile) + 8px);
+}
+
+.highlighted {
+  border-color: var(--red);
+  box-shadow: 0 0 0 2px var(--red-tint), var(--shadow-md);
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+.clickable:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+.cardLoading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* ── IMAGE COLUMN ── */
+.imgCol {
+  position: relative;
+  width: 80px;
+  min-width: 80px;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.imgResto { background: var(--green-bg-alt, #f0faf0); }
+.imgHotel { background: var(--grey-light); }
+
+.img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.imgPlaceholder {
+  width: 100%;
+  height: 100%;
+}
+
+.typeBadge {
+  position: absolute;
+  bottom: 5px;
+  left: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 5px;
+  border-radius: 3px;
+  line-height: 1.3;
+}
+
+.badgeRed  { background: var(--red);       color: var(--white); }
+.badgeDark { background: var(--black-deep); color: var(--white); }
+
+/* ── BODY ── */
+.body {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 11px 9px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.topRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
+  line-height: 1.25;
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.detourBadge {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--white);
+  background: rgba(0,0,0,0.52);
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.removeBtn {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--grey-text);
+  font-size: 14px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--t);
+  font-family: var(--font);
+  padding: 0;
+}
+
+.removeBtn:hover {
+  border-color: var(--red);
+  color: var(--red);
+  background: var(--red-tint);
+}
+
+.city {
+  font-size: 11px;
+  color: var(--grey-text);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.metaRow {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
+  min-height: 16px;
+}
+
+.dist {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--red);
+}
+
+.budget {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--grey-dark);
+  background: var(--grey-light);
+  border: 1px solid var(--border);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.cuisines {
+  font-size: 11px;
+  color: var(--grey-text);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.reason {
+  font-size: 12px;
+  color: var(--grey-dark);
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.seeMore {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--red);
+  margin-top: 2px;
+}

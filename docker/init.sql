@@ -1,0 +1,121 @@
+-- Schéma Michelin Guide
+-- Généré à partir des champs des fichiers all_restaurants.jsonl et all_hotels.jsonl
+CREATE TABLE IF NOT EXISTS restaurants (
+  id SERIAL PRIMARY KEY,
+  identifier TEXT UNIQUE NOT NULL,
+  object_id TEXT UNIQUE,
+  name TEXT,
+  slug TEXT,
+  site_name TEXT,
+  site_slug TEXT,
+  url TEXT,
+  short_link TEXT,
+  lat DOUBLE PRECISION,
+  lng DOUBLE PRECISION,
+  street TEXT,
+  postcode TEXT,
+  area_name TEXT,
+  area_slug TEXT,
+  city JSONB,
+  country JSONB,
+  region TEXT,
+  region_code TEXT,
+  chef TEXT,
+  phone TEXT,
+  website TEXT,
+  distinction JSONB,
+  distinction_score INT,
+  green_star BOOLEAN,
+  good_menu BOOLEAN,
+  new_table BOOLEAN,
+  guide_year INT,
+  price JSONB,
+  price_category JSONB,
+  currency TEXT,
+  currency_symbol TEXT,
+  cuisines JSONB,
+  facilities JSONB,
+  image TEXT,
+  main_image TEXT,
+  images JSONB,
+  main_desc TEXT,
+  hours_of_operation JSONB,
+  meal_times JSONB,
+  days_open JSONB,
+  take_away BOOLEAN,
+  delivery BOOLEAN,
+  online_booking BOOLEAN,
+  booking_id TEXT,
+  booking_provider TEXT,
+  booking_url TEXT,
+  status TEXT,
+  language TEXT,
+  published_date BIGINT,
+  last_updated BIGINT
+);
+CREATE TABLE IF NOT EXISTS hotels (
+  id SERIAL PRIMARY KEY,
+  hotel_id INT UNIQUE,
+  object_id TEXT UNIQUE,
+  name TEXT,
+  slug TEXT,
+  url TEXT,
+  short_link TEXT,
+  michelin_guide_url TEXT,
+  lat DOUBLE PRECISION,
+  lng DOUBLE PRECISION,
+  address TEXT,
+  postal_code TEXT,
+  neighborhood TEXT,
+  state_province TEXT,
+  city JSONB,
+  country JSONB,
+  region JSONB,
+  phone TEXT,
+  content TEXT,
+  check_in_time FLOAT,
+  check_out_time FLOAT,
+  num_rooms INT,
+  num_reviews INT,
+  max_guests INT,
+  loved_count INT,
+  favorite_count INT,
+  is_plus BOOLEAN,
+  new_to_selection BOOLEAN,
+  sustainable_hotel BOOLEAN,
+  bookable BOOLEAN,
+  distinction JSONB,
+  distinction_score INT,
+  currency TEXT,
+  main_image TEXT,
+  images JSONB,
+  criteria JSONB,
+  hotel_amenities JSONB,
+  feedback_stats JSONB,
+  rate JSONB,
+  restaurant_identifiers JSONB,
+  social JSONB,
+  status TEXT,
+  language TEXT
+);
+-- Index géospatiaux pour les recherches par proximité
+CREATE INDEX IF NOT EXISTS idx_restaurants_geo ON restaurants (lat, lng);
+CREATE INDEX IF NOT EXISTS idx_restaurants_country ON restaurants ((country->>'code'));
+CREATE INDEX IF NOT EXISTS idx_restaurants_distinction ON restaurants (distinction_score);
+CREATE INDEX IF NOT EXISTS idx_restaurants_guide_year ON restaurants (guide_year);
+CREATE INDEX IF NOT EXISTS idx_hotels_geo ON hotels (lat, lng);
+CREATE INDEX IF NOT EXISTS idx_hotels_country ON hotels ((country->>'code'));
+CREATE INDEX IF NOT EXISTS idx_hotels_distinction ON hotels (distinction_score);
+CREATE TABLE IF NOT EXISTS clients (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  mail TEXT,
+  password TEXT
+);
+CREATE TABLE IF NOT EXISTS collection (
+  id SERIAL PRIMARY KEY,
+  id_client INT NOT NULL REFERENCES clients(id),
+  id_restaurant INT NOT NULL REFERENCES restaurants(id),
+  UNIQUE (id_client, id_restaurant)
+);
+CREATE INDEX IF NOT EXISTS idx_collection_client ON collection (id_client);

@@ -1,0 +1,135 @@
+.hero {
+  position: relative;
+  background: var(--black);
+  min-height: 420px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #0d0d0d 0%, #1a0508 40%, #2d0a10 70%, #1a0508 100%);
+}
+
+.imgOverlay {
+  position: absolute;
+  inset: 0;
+  background: url('https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=800&q=80') center/cover;
+  opacity: 0.2;
+  mix-blend-mode: luminosity;
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 32px 16px 28px;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.line {
+  flex: 1;
+  height: 1px;
+  background: var(--red);
+  max-width: 40px;
+}
+.eyebrowText {
+  font-size: 10px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-light);
+  font-weight: 600;
+}
+
+.title {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 8px;
+}
+.title em { color: var(--red); font-style: italic; }
+
+.subtitle {
+  font-size: 13px;
+  color: rgba(255,255,255,0.6);
+  margin-bottom: 24px;
+}
+
+/* Search box */
+.searchBox {
+  background: var(--white);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-hover);
+}
+
+.tabs {
+  display: flex;
+  border-bottom: 1px solid var(--grey-mid);
+}
+.tab {
+  flex: 1;
+  padding: 10px 8px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--grey-text);
+  border-bottom: 2px solid transparent;
+  transition: color var(--t), border-color var(--t);
+}
+.tabActive {
+  color: var(--red);
+  border-bottom-color: var(--red);
+}
+
+.fields { display: flex; flex-direction: column; }
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--grey-mid);
+}
+.field:last-child { border-bottom: none; }
+
+.fieldIcon { flex-shrink: 0; width: 20px; display: flex; align-items: center; justify-content: center; }
+
+.input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  color: var(--black);
+  background: transparent;
+}
+.input::placeholder { color: var(--grey-text); font-size: 13px; }
+
+.geoBtn { color: var(--grey-text); padding: 4px; display: flex; align-items: center; }
+
+.submit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 14px;
+  background: var(--red);
+  color: var(--white);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  transition: background var(--t);
+}
+.submit:hover { background: var(--red-dark); }

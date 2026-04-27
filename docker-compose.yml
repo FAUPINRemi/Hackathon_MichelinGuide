@@ -1,0 +1,83 @@
+name: hackathon_michelinguide
+
+services:
+  ui:
+    build:
+      context: .
+      dockerfile: docker/DockerfileUI
+    env_file:
+      - ./env/.env
+    environment:
+      - VITE_API_TARGET=${VITE_API_TARGET:-https://server:3000}
+      - UI_HOST=${UI_HOST:-0.0.0.0}
+      - UI_INTERNAL_PORT=${UI_INTERNAL_PORT:-5173}
+    volumes:
+      - ./credential/certs/key.pem:/app/certs/key.pem:ro
+      - ./credential/certs/cert.pem:/app/certs/cert.pem:ro
+    ports:
+      - "${UI_PORT:-5173}:${UI_INTERNAL_PORT:-5173}"
+    depends_on:
+      - server
+
+  server:
+    build:
+      context: .
+      dockerfile: docker/DockerfileServer
+    env_file:
+      - ./env/.env
+    environment:
+      - DB_HOST=db
+    volumes:
+      - ./env:/app/env:ro
+      - ./credential/certs/key.pem:/app/certs/key.pem:ro
+      - ./credential/certs/cert.pem:/app/certs/cert.pem:ro
+    ports:
+      - "${SERVER_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    build:
+      context: .
+      dockerfile: docker/DockerfileDB
+    restart: unless-stopped
+    env_file:
+      - ./env/.env
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  adminer:
+    image: adminer:latest
+    restart: unless-stopped
+    ports:
+      - "${ADMINER_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  importer:
+    build:
+      context: .
+      dockerfile: docker/DockerfileImporter
+    env_file:
+      - ./env/.env
+    environment:
+      - DB_HOST=db
+    volumes:
+      - ./bdd:/data:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    profiles:
+      - import
+
+volumes:
+  db_data:

@@ -1,0 +1,53 @@
+@import './styles/tokens.css';
+
+/*
+ * Pour utiliser Helvetica Neue depuis des fichiers locaux, placez les fichiers
+ * dans front/public/fonts/ et décommentez les blocs @font-face ci-dessous.
+ *
+ * @font-face {
+ *   font-family: 'Helvetica Neue';
+ *   src: url('/fonts/HelveticaNeue-Regular.woff2') format('woff2');
+ *   font-weight: 400;
+ *   font-style: normal;
+ *   font-display: swap;
+ * }
+ * @font-face {
+ *   font-family: 'Helvetica Neue';
+ *   src: url('/fonts/HelveticaNeue-Medium.woff2') format('woff2');
+ *   font-weight: 500;
+ *   font-style: normal;
+ *   font-display: swap;
+ * }
+ * @font-face {
+ *   font-family: 'Helvetica Neue';
+ *   src: url('/fonts/HelveticaNeue-Bold.woff2') format('woff2');
+ *   font-weight: 700;
+ *   font-style: normal;
+ *   font-display: swap;
+ * }
+ */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--black);
+  font-size: 14px;
+  line-height: 1.5;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+#root { min-height: 100dvh; }
+a { text-decoration: none; color: inherit; }
+ul { list-style: none; }
+img { display: block; max-width: 100%; }
+button { cursor: pointer; border: none; background: none; font-family: inherit; color: inherit; }
+input { font-family: inherit; }
+
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--grey-mid); border-radius: 2px; }

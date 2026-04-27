@@ -1,0 +1,161 @@
+/* ── Desktop ── */
+.desktop {
+  display: none;
+  background: var(--white);
+  height: var(--nav-h-desktop);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04);
+}
+.desktopInner {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 100%;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 16px;
+}
+.desktopLogo {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  flex-shrink: 0;
+  cursor: pointer;
+  justify-self: start;
+}
+.logoM {
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: var(--red);
+}
+.logoG {
+  font-size: 9px;
+  letter-spacing: 0.22em;
+  color: var(--grey-text);
+  text-transform: uppercase;
+}
+.desktopLinks {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+}
+.desktopLink {
+  color: var(--grey-dark);
+  font-size: 13.5px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 24px;
+  transition: background var(--t), color var(--t);
+  position: relative;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.desktopLink:hover {
+  background: var(--grey-light);
+  color: var(--black);
+}
+.desktopLinkActive {
+  color: var(--black);
+  font-weight: 700;
+}
+.desktopLinkActive::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 14px;
+  right: 14px;
+  height: 2px;
+  background: var(--red);
+  border-radius: 1px;
+}
+
+.desktopActions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: flex-end;
+}
+.desktopIconBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--grey-dark);
+  border-radius: 50%;
+  transition: background var(--t), color var(--t);
+}
+.desktopIconBtn:hover {
+  background: var(--grey-light);
+  color: var(--black);
+}
+.desktopAccountBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  width: 34px;
+  color: var(--grey-dark);
+  border: 1.5px solid var(--border);
+  border-radius: 50%;
+  transition: border-color var(--t), color var(--t), background var(--t);
+}
+.desktopAccountBtn:hover {
+  border-color: var(--grey-dark);
+  color: var(--black);
+  background: var(--grey-light);
+}
+
+/* ── Mobile ── */
+.mobile {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--white);
+  height: var(--nav-h-mobile);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--border);
+}
+.mobileLeft, .mobileRight {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 60px;
+}
+.mobileRight { justify-content: flex-end; }
+.placeholder { width: 36px; }
+.backBtn, .mobileIconBtn {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--black);
+  border-radius: 50%;
+  transition: background var(--t);
+}
+.backBtn:active, .mobileIconBtn:active { background: var(--grey-mid); }
+.mobileTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--black);
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 0 4px;
+}
+
+@media (min-width: 768px) {
+  .desktop { display: block; }
+  .mobile  { display: none; }
+}

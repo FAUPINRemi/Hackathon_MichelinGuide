@@ -1,0 +1,235 @@
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+.routeRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.fieldRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--grey-text);
+}
+
+.input {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--black);
+  background: var(--white);
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color var(--t);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--red);
+}
+
+/* ── WAYPOINTS ─────────────────────────────────────────── */
+.waypointWrap {
+  display: grid;
+  gap: 6px;
+  position: relative;
+}
+
+.waypointInputRow {
+  position: relative;
+}
+
+.waypointDropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+  z-index: 200;
+  margin: 0;
+  padding: 4px 0;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.waypointResult {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: background var(--t);
+}
+
+.waypointResult:hover {
+  background: var(--grey-light);
+}
+
+.waypointResultLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--black);
+}
+
+.waypointResultSub {
+  font-size: 11px;
+  color: var(--grey-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.waypointChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.waypointChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--red-tint);
+  border: 1px solid var(--red);
+  color: var(--red);
+  border-radius: 20px;
+  padding: 4px 10px 4px 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.waypointChipRemove {
+  background: none;
+  border: none;
+  color: var(--red);
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  font-family: var(--font);
+  opacity: 0.7;
+  transition: opacity var(--t);
+}
+
+.waypointChipRemove:hover {
+  opacity: 1;
+}
+
+/* ── PILLS ─────────────────────────────────────────────── */
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.pill {
+  border: 1px solid var(--border);
+  background: var(--white);
+  color: var(--grey-dark);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+  transition: all var(--t);
+  white-space: nowrap;
+}
+
+.pillActive {
+  background: var(--red);
+  border-color: var(--red);
+  color: var(--white);
+}
+
+.pillGreenActive {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--white);
+}
+
+/* ── RANGE ─────────────────────────────────────────────── */
+.range {
+  width: 100%;
+  accent-color: var(--red);
+  cursor: pointer;
+}
+
+.rangeLabels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--grey-text);
+  margin-top: -2px;
+}
+
+/* ── SUBMIT ────────────────────────────────────────────── */
+.submitBtn {
+  width: 100%;
+  border-radius: 8px;
+  background: var(--red);
+  color: var(--white);
+  font-weight: 700;
+  font-family: var(--font);
+  padding: 13px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background var(--t);
+  border: none;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--red-dark);
+}
+
+.submitBtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.submitLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  display: inline-block;
+  flex-shrink: 0;
+}

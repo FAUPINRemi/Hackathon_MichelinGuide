@@ -1,0 +1,5 @@
+FROM node:20-alpine
+WORKDIR /app
+RUN npm install pg csv-parse
+COPY docker/import_data.js .
+CMD ["node", "import_data.js"]
